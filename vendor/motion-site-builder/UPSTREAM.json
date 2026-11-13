@@ -1,0 +1,12 @@
+{
+  "repository": "https://github.com/olbboy/motion-site-builder",
+  "commit": "a0e1cad6aeac73283400df791869a5c7443e49c7",
+  "commit_date": "2026-07-21T06:48:41Z",
+  "installed_on": "2026-11-09",
+  "license": "MIT",
+  "server_reported_version": "1.0.0",
+  "archive_sha256": "dd8a7b99da4ef0b1ef4ef80589254e1114e2e5d3aa1d1c92b9dfeee64c93f8b8",
+  "included": ["skills", "prompts", "LICENSE", "README.md", "CHANGELOG.md"],
+  "upstream_files_modified": false,
+  "note": "Only the MCP engine, reference material and prompt corpus are vendored. Upstream skills are retained as reference files, not registered as installed Codex skills."
+}

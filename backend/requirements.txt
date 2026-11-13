@@ -1,0 +1,6 @@
+fastapi==0.162.2
+uvicorn==0.42.0
+python-multipart==0.0.22
+httpx==0.28.1
+jieba==0.42.1
+pypdf==7.0.1

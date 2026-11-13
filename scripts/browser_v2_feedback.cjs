@@ -1,0 +1,140 @@
+/* Isolated browser acceptance of the V2 feedback workflow. Never targets user data. */
+const fs = require('fs');
+const path = require('path');
+const assert = require('assert/strict');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/16620/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const base = 'http://127.0.0.1:8021';
+const out = path.resolve('tmp/v2-feedback-acceptance');
+const checks = [], errors = [], networkErrors = [];
+let expectedFailures=0;
+async function main() {
+  fs.mkdirSync(out, {recursive:true});
+  const browser=await chromium.launch({headless:true,executablePath:'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe'});
+  const page=await browser.newPage({viewport:{width:1440,height:1100},reducedMotion:'reduce'});
+  page.setDefaultTimeout(15000);
+  page.on('pageerror', e=>errors.push(e.message));
+  page.on('response', r=>{if(r.url().startsWith(base+'/api/')&&r.status()>=400){if(r.status()===503&&r.url().includes('/tasks/')&&r.url().endsWith('/status'))expectedFailures++;else networkErrors.push({url:r.url(),status:r.status()})}});
+  const check=(name,ok)=>{assert.ok(ok,name);checks.push(name);console.log('PASS '+name)};
+  const post=async(p,data)=>{const r=await page.request.post(base+'/api'+p,{data});assert.equal(r.status(),200,await r.text());return r.json()};
+  const state=async()=>{const r=await page.request.get(base+'/api/state');return r.json()};
+  const settle=async()=>{await page.locator('.busy-indicator').waitFor({state:'hidden'});await page.waitForTimeout(120)};
+  const nav=async name=>{await page.getByRole('navigation',{name:'主导航'}).getByRole('button',{name,exact:true}).click();await page.getByRole('heading',{level:1,name,exact:true}).waitFor();await settle();};
+  const click=async(name,scope=page)=>{await scope.getByRole('button',{name,exact:true}).click();await settle()};
+  let campaign,plan,baseline,observation,report;
+  try {
+    const start=new Date().toISOString().slice(0,10),end=new Date(Date.now()+7*86400000).toISOString().slice(0,10);
+    campaign=await post('/campaigns',{name:'反馈验收 '+Date.now(),audience:'通勤人群',selling_point:'500 ml',goal:'核验操作与数据范围',budget_limit:600,start_date:start,end_date:end});
+    const [creative]=await post('/campaigns/'+campaign.id+'/generate',{tone:'自然',angle:'场景'});
+    await post('/creatives/'+creative.id+'/approve');
+    plan=await post('/plans',{creative_id:creative.id,name:'异常与观察验收计划',budget:300,start_date:start,end_date:end});
+    await post('/plans/'+plan.id+'/status',{status:'running'});
+    await page.goto(base);
+    await page.getByRole('heading',{level:1,name:'增长工作台'}).waitFor();
+    await page.getByLabel('选择营销活动',{exact:true}).selectOption(campaign.id);await settle();
+    await nav('广告投放');
+    const loadScene=async scenario=>{
+      await click('选择并预览场景');
+      await page.getByLabel('场景关联计划').selectOption(plan.id);
+      await page.getByLabel('预设投放场景').selectOption(scenario);
+      await click('预览场景数据');
+      await page.getByText('独立模拟窗口 · 24 小时（固定场景，非实时流量）',{exact:true}).waitFor();
+      await click('确认载入独立批次');
+      await page.getByRole('heading',{level:1,name:'效果与获客'}).waitFor();
+      const s=await state();return s.batches.filter(b=>b.campaign_id===campaign.id).at(-1);
+    };
+    baseline=await loadScene('no_conversion');
+    check('预览确认后载入独立批次',baseline.metrics.orders===0&&baseline.metrics.spend===120);
+    check('场景没有混入现场订单',(await state()).orders.filter(o=>o.campaign_id===campaign.id).length===0);
+    await page.screenshot({path:path.join(out,'01-batch.png'),fullPage:true});
+    await nav('异常与待办');
+    await page.getByLabel('检查数据批次').selectOption(baseline.id);
+    await click('检查当前活动');
+    const taskCard=page.locator('.feedback-task').filter({has:page.getByRole('heading',{name:'消耗达到观察阈值，尚无成交',exact:true})});
+    await taskCard.waitFor();await click('查看与处理',taskCard);
+    const dialog=page.getByRole('dialog');
+    await dialog.getByRole('heading',{name:'判断依据'}).waitFor();
+    await page.getByLabel('处理状态').selectOption('processing');
+    await page.getByLabel('处理备注 / 复查理由',{exact:true}).fill('核对固定模拟批次，准备调整预算并观察。');
+    let failOnce=true;
+    await page.route('**/api/tasks/*/status',async route=>{if(failOnce){failOnce=false;await route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({detail:'验收模拟暂时失败，请重试。'})})}else await route.continue()});
+    await click('保存处理记录',dialog);
+    check('服务失败在弹窗内显示且保留输入',await dialog.getByRole('alert').isVisible()&&(await page.getByLabel('处理备注 / 复查理由',{exact:true}).inputValue()).includes('核对固定模拟批次'));
+    await click('保存处理记录',dialog);
+    await page.unroute('**/api/tasks/*/status');
+    let s=await state(),task=s.tasks.find(t=>t.campaign_id===campaign.id&&t.rule==='spend-without-order');
+    check('异常证据及处理备注持久保存',task.status==='processing'&&task.evidence.spend===120&&task.history.length===1);
+    await click('检查当前活动');
+    check('重复检查不会重复创建异常',(await state()).tasks.filter(t=>t.campaign_id===campaign.id&&t.rule==='spend-without-order').length===1);
+    await click('查看与处理',taskCard);await click('带着依据去复盘',page.getByRole('dialog'));
+    await page.getByRole('heading',{level:1,name:'AI 优化复盘'}).waitFor();
+    await click('生成本轮复盘');
+    await page.getByRole('heading',{name:'已知事实',exact:true}).waitFor();
+    const insight=(await state()).insights.filter(i=>i.campaign_id===campaign.id).at(-1);
+    check('异常跳转保留批次和计划范围',insight.analytics_snapshot.dataset_id===baseline.id&&insight.analytics_snapshot.metrics.orders===0);
+    await click('创建计划调整草稿');
+    await page.getByLabel('调整后计划预算 / 元',{exact:true}).fill('250');
+    await page.getByLabel('调整理由').fill('固定场景消耗达到观察阈值，缩小测试预算。');
+    await click('核对并创建草稿');await click('确认创建草稿',page.getByRole('dialog'));
+    s=await state();const change=s.adjustments.find(a=>a.insight_id===insight.id);
+    check('采纳仅创建草稿未直接执行',change.status==='draft'&&s.plans.find(p=>p.id===plan.id).budget===300);
+    await click('查看并确认计划调整');
+    if(!(await page.getByRole('button',{name:'确认应用调整',exact:true}).isVisible())){
+      if(await page.getByRole('dialog').count())await page.getByRole('button',{name:'关闭弹窗',exact:true}).click();
+      await click('查看变更');
+    }
+    await click('确认应用调整',page.getByRole('dialog'));
+    s=await state();check('人工确认后计划更新并保留版本',s.plans.find(p=>p.id===plan.id).budget===250&&s.plans.find(p=>p.id===plan.id).config_version===2);
+    await nav('AI 优化复盘');await click('开始观察');
+    await click('检查后续数据');
+    observation=(await state()).observations.find(o=>o.insight_id===insight.id);
+    check('没有后续数据时保持观察中',observation.status==='observing'&&!observation.comparison);
+    await page.screenshot({path:path.join(out,'02-observation-waiting.png'),fullPage:true});
+    await nav('广告投放');const followup=await loadScene('followup_no_change');
+    await nav('AI 优化复盘');
+    await page.getByLabel('后续模拟批次 '+observation.id.slice(-6)).selectOption(followup.id);
+    await page.getByLabel('观察备注 '+observation.id.slice(-6),{exact:true}).fill('同口径模拟窗口未产生新增成交，不声称优化成功。');
+    await click('检查后续数据');
+    observation=(await state()).observations.find(o=>o.id===observation.id);
+    check('后续无改善场景完成描述性复盘',observation.status==='reviewed'&&observation.comparison.orders_delta===0);
+    check('旧批次预算快照未被新配置覆盖',(await state()).batches.find(b=>b.id===baseline.id).plan_snapshot.budget===300);
+    await page.screenshot({path:path.join(out,'03-observation-reviewed.png'),fullPage:true});
+    await nav('活动报告');
+    await page.getByLabel('报告标题',{exact:true}).fill('模拟投放调整复盘验收');
+    await page.getByLabel('运营结论（人工判断）',{exact:true}).fill('本轮仅验证业务动作与数据范围，后续模拟窗口没有改善。');
+    await page.getByLabel('下一步行动',{exact:true}).fill('继续设计可比较的素材测试，保留原始依据。');
+    await click('保存新的报告快照');
+    report=(await state()).reports.filter(r=>r.campaign_id===campaign.id).at(-1);
+    check('报告保存选中批次与配置快照',report.snapshot.analytics.dataset_id===followup.id&&report.snapshot.plans.length===1&&report.snapshot.plans[0].budget===250);
+    await page.reload();await page.getByRole('heading',{level:1,name:'活动报告'}).waitFor();
+    await page.getByRole('article',{name:'活动报告预览'}).waitFor();
+    check('刷新恢复报告快照',await page.getByRole('article',{name:'活动报告预览'}).getByRole('heading',{name:report.title,exact:true}).isVisible());
+    await page.screenshot({path:path.join(out,'04-report.png'),fullPage:true});
+    await page.evaluate(()=>{window.__printCalled=false;window.print=()=>{window.__printCalled=true}});
+    await click('打印 / 另存 PDF');
+    check('打印按钮启用报告专用打印状态',await page.evaluate(()=>window.__printCalled&&document.body.dataset.printReport==='true'));
+    await page.emulateMedia({media:'print'});
+    await page.evaluate(()=>window.scrollTo(0,0));
+    const printLayout=await page.evaluate(()=>({
+      sidebar:getComputedStyle(document.querySelector('.sidebar')).display,
+      topbar:getComputedStyle(document.querySelector('.topbar')).display,
+      paperTop:document.querySelector('.feedback-report-paper').getBoundingClientRect().top,
+    }));
+    check('打印隐藏导航和顶栏且报告顶部无留空',printLayout.sidebar==='none'&&printLayout.topbar==='none'&&Math.abs(printLayout.paperTop)<2);
+    await page.pdf({path:path.join(out,'report.pdf'),format:'A4',printBackground:true});
+    await page.emulateMedia({media:'screen'});
+    check('报告可生成PDF文件',fs.statSync(path.join(out,'report.pdf')).size>10000);
+    await page.evaluate(()=>window.dispatchEvent(new Event('afterprint')));
+    await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});await page.waitForTimeout(150);
+    check('390窄屏报告无页面横向溢出',await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth+1));
+    await page.screenshot({path:path.join(out,'05-mobile-report.png'),fullPage:true});
+    check('减少动画设置无长过渡',await page.locator('.button').first().evaluate(el=>getComputedStyle(el).transitionDuration.split(',').every(v=>parseFloat(v)<.01)));
+    check('无浏览器脚本异常',errors.length===0);
+    check('无业务API失败',networkErrors.length===0);
+    fs.writeFileSync(path.join(out,'result.json'),JSON.stringify({passed:checks.length,checks,errors,networkErrors,expectedFailures,campaignId:campaign.id,planId:plan.id,baseline:baseline.id,report:report.id},null,2));
+  } catch(e) {
+    await page.screenshot({path:path.join(out,'failure.png'),fullPage:true}).catch(()=>{});
+    fs.writeFileSync(path.join(out,'result.json'),JSON.stringify({passed:checks.length,checks,errors,networkErrors,error:e.stack,campaignId:campaign?.id},null,2));
+    throw e;
+  } finally {await browser.close()}
+}
+main().catch(e=>{console.error(e);process.exitCode=1});

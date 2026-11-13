@@ -1,0 +1,10 @@
+import { createRoot } from 'react-dom/client';
+import App from './App';
+import './styles.css';
+import './extras.css';
+import './main-v2.css';
+import './feedback.css';
+import './workspace-v3.css';
+import './creative-studio.css';
+import './features/journey/journey.css';
+createRoot(document.getElementById('root')!).render(<App/>);

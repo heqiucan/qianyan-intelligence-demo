@@ -11,16 +11,17 @@ import './agent.css';
 
 export default function AgentWorkspace({ model, dirtyChanged, openKnowledge, handoff, intent, taskSelected }: {
   model: ModelInfo; dirtyChanged: (value: boolean) => void; openKnowledge: (spaceId?: string) => void;
-  handoff: HandoffContext; intent?: { token: string; taskId: string; scene: Scene; campaignId: string };
+  handoff: HandoffContext; intent?: { token: string; taskId: string; scene: Scene; campaignId: string;liveSessionId?:string;liveItemId?:string };
   taskSelected: (id: string) => void;
 }) {
   const [tasks, setTasks] = useState<AgentTask[]>([]), [spaces, setSpaces] = useState<Space[]>([]);
   const [selected, setSelected] = useState(localStorage.getItem('marketing-agent-task') || ''), [task, setTask] = useState<AgentTask | null>(null);
-  const [scene, setScene] = useState<Scene>('medical'), [goal, setGoal] = useState(presets.medical);
+  const [scene, setScene] = useState<Scene>('live'), [goal, setGoal] = useState(presets.live);
   const [sourceMode, setSourceMode] = useState('demo'), [spaceId, setSpaceId] = useState(''), [channel, setChannel] = useState('internal');
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [source, setSource] = useState<Evidence | null>(null);
   const [formDirty, setFormDirty] = useState(false), [taskDirty, setTaskDirty] = useState(false);
   const [linkedCampaign, setLinkedCampaign] = useState('');
+  const [liveSession,setLiveSession]=useState(''),[liveItem,setLiveItem]=useState('');
   const lock = useRef(false), selectedRef = useRef(selected), dirtyRef = useRef(false);
   selectedRef.current = selected; dirtyRef.current = formDirty || taskDirty || busy;
   const markTaskDirty = useCallback((v: boolean) => setTaskDirty(v), []);
@@ -29,7 +30,9 @@ export default function AgentWorkspace({ model, dirtyChanged, openKnowledge, han
     setFormDirty(false); setTaskDirty(false); setError('');
     if (intent.taskId === 'new') {
       selectedRef.current = ''; setSelected(''); setTask(null); setScene(intent.scene);
-      setGoal(presets[intent.scene]); setSourceMode('demo'); setSpaceId('');
+      const session=handoff.sessions?.find(s=>s.id===intent.liveSessionId),item=session?.items.find(i=>i.id===intent.liveItemId);
+      setLiveSession(intent.liveSessionId||'');setLiveItem(intent.liveItemId||'');
+      setGoal(item?'为'+item.product_snapshot.name+'（'+item.sku_label+'）准备直播讲解稿，分开场、规格展示和收尾。只使用本场已确认货盘中的事实，缺失信息列为待核实。':presets[intent.scene]); setSourceMode(item?'catalog':'demo'); setSpaceId('');
       setLinkedCampaign(intent.scene === 'live' ? intent.campaignId : '');
     } else { selectedRef.current = intent.taskId; setSelected(intent.taskId); }
     const timer = setTimeout(() => document.getElementById('agent-workspace')?.scrollIntoView({ block: 'start' }), 100);
@@ -78,6 +81,7 @@ export default function AgentWorkspace({ model, dirtyChanged, openKnowledge, han
   const create = () => run(async () => {
     const result = await api<{ id: string }>('/agent/tasks', 'POST', {
       request_id: requestId(), scene, goal, source_mode: sourceMode,
+      ...(scene==='live'&&liveSession?{live_session_id:liveSession,live_item_id:liveItem}:{}),
       ...(scene === 'live' && linkedCampaign ? { campaign_id: linkedCampaign } : {}),
       ...(sourceMode === 'knowledge' ? { space_id: spaceId, channel } : { channel: 'internal' }),
     });
@@ -111,11 +115,12 @@ export default function AgentWorkspace({ model, dirtyChanged, openKnowledge, han
         {error && <div className="error-banner" role="alert"><span>{error}</span><Button disabled={busy} onClick={() => selected ? refreshCurrent() : run(refreshLists)}>重新读取</Button></div>}
         {!selected ? <form className="panel agent-composer" onSubmit={e => { e.preventDefault(); create(); }}>
           <div className="panel-header"><div><h3>这次，想让 AI 帮你完成什么？</h3><p className="muted">先选业务场景，再说清希望交付的内容。</p></div><Sparkles size={22}/></div>
-          <div className="agent-scene-options">{(['medical', 'live'] as Scene[]).map(value => <button key={value} type="button" aria-pressed={scene === value} className={scene === value ? 'selected' : ''} disabled={busy} onClick={() => { setScene(value); setGoal(presets[value]); setSpaceId(''); setLinkedCampaign(''); setFormDirty(true); }}><span>{value === 'medical' ? '01' : '02'}</span><strong>{sceneLabels[value]}</strong><small>{value === 'medical' ? '预约沟通与内部 FAQ' : '有依据的直播讲解'}</small><ArrowRight size={16}/></button>)}</div>
+          <div className="agent-scene-options">{(['medical', 'live'] as Scene[]).map(value => <button key={value} type="button" aria-pressed={scene === value} className={scene === value ? 'selected' : ''} disabled={busy} onClick={() => { setScene(value); setGoal(presets[value]); setSpaceId(''); setLinkedCampaign('');setLiveSession('');setLiveItem('');setSourceMode('demo'); setFormDirty(true); }}><span>{value === 'medical' ? '01' : '02'}</span><strong>{sceneLabels[value]}</strong><small>{value === 'medical' ? '预约沟通与内部 FAQ' : '有依据的直播讲解'}</small><ArrowRight size={16}/></button>)}</div>
           <Field label="希望 Agent 完成的任务"><textarea required minLength={4} maxLength={1500} rows={4} disabled={busy} value={goal} onChange={e => { setGoal(e.target.value); setFormDirty(true); }}/></Field>
-          <div className="agent-form-grid"><Field label="使用哪些资料"><select value={sourceMode} disabled={busy} onChange={e => { setSourceMode(e.target.value); setFormDirty(true); }}><option value="demo">预置虚构示例 · 可以直接体验</option><option value="knowledge">选择我的知识库 · 仅使用已审核资料</option></select></Field>{sourceMode === 'knowledge' && <><Field label="资料空间"><select value={spaceId} disabled={busy} required onChange={e => { setSpaceId(e.target.value); setFormDirty(true); }}><option value="">请选择{sceneLabels[scene]}资料空间</option>{eligibleSpaces.map(space => <option key={space.id} value={space.id}>{space.name}{space.is_demo ? '（示例）' : ''}</option>)}</select></Field><Field label="资料渠道范围"><select value={channel} disabled={busy} onChange={e => { setChannel(e.target.value); setFormDirty(true); }}><option value="internal">内部资料</option><option value="douyin">抖音渠道资料</option></select></Field></>}</div>
-          {scene === 'live' && <Field label="关联营销活动（可选）"><select disabled={busy} value={linkedCampaign} onChange={e => { setLinkedCampaign(e.target.value); setFormDirty(true); }}><option value="">独立内容任务，转入时再选择活动</option>{handoff.campaigns.map(c => <option key={c.id} value={c.id}>{c.name} · {c.product_snapshot.name}</option>)}</select></Field>}
-          <div className="agent-scope-note"><BookNote/>{sourceMode === 'demo' ? '为本次场景准备独立的虚构资料空间，所有示例均会明确标记。后续可换成你导入的资料。' : '只检索所选机构 / 品牌和渠道内，已审核且有效的资料。业务事实不足时会请求补充。'}</div>
+          <div className="agent-form-grid"><Field label="使用哪些资料"><select value={sourceMode} disabled={busy} onChange={e => { setSourceMode(e.target.value); setFormDirty(true); }}>{liveSession&&<option value="catalog">本场已确认货盘 · 当前商品资料</option>}<option value="demo">预置虚构示例 · 可以直接体验</option><option value="knowledge">选择我的知识库 · 仅使用已审核资料</option></select></Field>{sourceMode === 'knowledge' && <><Field label="资料空间"><select value={spaceId} disabled={busy} required onChange={e => { setSpaceId(e.target.value); setFormDirty(true); }}><option value="">请选择{sceneLabels[scene]}资料空间</option>{eligibleSpaces.map(space => <option key={space.id} value={space.id}>{space.name}{space.is_demo ? '（示例）' : ''}</option>)}</select></Field><Field label="资料渠道范围"><select value={channel} disabled={busy} onChange={e => { setChannel(e.target.value); setFormDirty(true); }}><option value="internal">内部资料</option><option value="douyin">抖音渠道资料</option></select></Field></>}</div>
+          {scene === 'live' && <Field label="关联营销活动（可选）"><select disabled={busy||!!liveSession} value={linkedCampaign} onChange={e => { setLinkedCampaign(e.target.value); setFormDirty(true); }}><option value="">独立内容任务，转入时再选择活动</option>{handoff.campaigns.map(c => <option key={c.id} value={c.id}>{c.name} · {c.product_snapshot.name}</option>)}</select></Field>}
+          {liveSession&&<p className="notice">已绑定直播场次与货盘条目：{handoff.sessions?.find(s=>s.id===liveSession)?.title}。转入时保留同一商品及货盘版本。</p>}
+          <div className="agent-scope-note"><BookNote/>{sourceMode === 'catalog' ? '仅使用已人工确认的本场商品快照，资料来源可以核对；不是平台审核或库存同步。' : sourceMode === 'demo' ? '为本次场景准备独立的虚构资料空间，所有示例均会明确标记。后续可换成你导入的资料。' : '只检索所选机构 / 品牌和渠道内，已审核且有效的资料。业务事实不足时会请求补充。'}</div>
           <div className="agent-start"><div><strong>{model.mode === 'replay' ? '当前为本地规则演示' : `当前模型：${model.model_name}`}</strong><p>{model.mode === 'replay' ? '展示真实检索与流程，正文为资料摘录；不会伪装成模型生成。' : '模型选择动作与生成内容，后端限定执行范围。最多 7 次模型请求 / 轮。'}</p></div><Submit busy={busy}><Send size={15}/>开始任务</Submit></div>
           <p className="agent-boundary">资料范围由本任务固定，不随上方活动筛选切换。直播稿确认并完成任务后，可以转为关联活动的创意草稿。</p>
         </form> : task ? <TaskDetail key={task.id} task={task} busy={busy} act={act} refresh={refreshCurrent} changed={changed} openSource={setSource} dirtyChanged={markTaskDirty} openKnowledge={() => openKnowledge(task.space_id)} handoff={handoff}/> : !error && <div className="panel" role="status">正在读取已保存的任务…</div>}

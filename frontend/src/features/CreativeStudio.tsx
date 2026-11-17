@@ -181,6 +181,7 @@ export default function CreativeStudio({ creatives, campaign, busy, error, act, 
   const [focusedCreative] = useState(() => { const value = sessionStorage.getItem('focus-creative') || ''; sessionStorage.removeItem('focus-creative'); return value; });
   const [selectedId, setSelectedId] = useState(initialCreativeId || focusedCreative || creatives.at(-1)?.id || '');
   const [pendingCreative, setPendingCreative] = useState<Creative | null>(null);
+  const [recipe,setRecipe]=useState('spec');
   const [tone, setTone] = useState('自然'), [angle, setAngle] = useState('场景'), [filter, setFilter] = useState('latest');
   const [modal, setModal] = useState(''), [target, setTarget] = useState<Creative | null>(null), [compareId, setCompareId] = useState('');
   const [workspaceKey, setWorkspaceKey] = useState(0);
@@ -192,7 +193,8 @@ export default function CreativeStudio({ creatives, campaign, busy, error, act, 
   const familyOf = (creative: Creative): string => creative.family_id || (!creative.parent_id ? creative.id : familyOf(creatives.find(item => item.id === creative.parent_id) || { ...creative, parent_id: undefined }));
   const families = new Map<string, Creative[]>();
   creatives.forEach(creative => { const id = familyOf(creative); families.set(id, [...(families.get(id) || []), creative]); });
-  const displayed = filter === 'latest' ? Array.from(families.values()).map(items => items.slice().sort((a, b) => b.version - a.version)[0]) : creatives.filter(creative => filter === 'all' || creative.status === filter);
+  const candidates = filter === 'latest' ? Array.from(families.values()).map(items => items.slice().sort((a, b) => b.version - a.version)[0]) : creatives.filter(creative => filter === 'all' || creative.status === filter);
+  const seenCopies=new Set<string>();const displayed=filter==='all'?candidates:candidates.filter(c=>{const k=JSON.stringify([c.title,c.body,c.script,c.cta,c.product_snapshot,c.live_context]);if(seenCopies.has(k))return false;seenCopies.add(k);return true});
   const siblings = target ? (families.get(familyOf(target)) || []).slice().sort((a, b) => a.version - b.version) : [];
   const previous = siblings.find(creative => creative.id === compareId) || siblings.filter(creative => creative.version < (target?.version || 0)).at(-1) || target;
   const leaveDraft = () => !dirty.current || window.confirm('当前文案尚未保存，是否放弃修改并继续？');
@@ -205,10 +207,10 @@ export default function CreativeStudio({ creatives, campaign, busy, error, act, 
   const openApproval = (creative: Creative) => { if (!leaveDraft()) return; selectSaved(creative); setTarget(creative); setModal('approve'); };
   return <>
     <section className="panel studio-intro">
-      <div><Badge><Sparkles size={13}/>{modelLabel || '演示回放'} · 人工确认</Badge><h2>让关键商品表述，有据可查。</h2><p>从商品事实出发，核对表达、修订内容，再把确认的素材用于投放。</p><small>受众假设：{campaign?.audience || '待补充'} · 主推卖点：{campaign?.selling_point || '待补充'}</small></div>
-      <div className="v2-creative-options"><Field label="表达语气"><select value={tone} onChange={event => setTone(event.target.value)}><option>自然</option><option>简洁</option></select></Field><Field label="表达角度"><select value={angle} onChange={event => setAngle(event.target.value)}><option>场景</option><option>规格</option></select></Field><Button kind="primary" disabled={busy || !campaign} onClick={() => {
+      <div><Badge><Sparkles size={13}/>{modelLabel || '演示回放'} · 人工确认</Badge><h2>让关键商品表述，有据可查。</h2><p>从商品事实出发，核对表达、修订内容，再把确认的素材用于投放。</p><small>活动默认商品：{campaign?.product_snapshot.name} · 受众假设：{campaign?.audience || '待补充'} · 主推卖点：{campaign?.selling_point || '待补充'}</small></div>
+      <div className="v2-creative-options"><Field label="文案结构"><select value={recipe} onChange={e=>setRecipe(e.target.value)}><option value="spec">规格与价格说明</option><option value="questions">问答与选择提示</option><option value="walkthrough">顺序讲解与收尾</option><option value="classic">原通勤与容量示例</option></select></Field><Field label="表达语气"><select value={tone} onChange={event => setTone(event.target.value)}><option>自然</option><option>简洁</option></select></Field><Field label="表达角度"><select value={angle} onChange={event => setAngle(event.target.value)}><option>场景</option><option>规格</option></select></Field><Button kind="primary" disabled={busy || !campaign} onClick={() => {
         if (!leaveDraft()) return;
-        generate(async () => { const generated = await api<Creative[]>(`/campaigns/${campaign?.id}/generate`, 'POST', { tone, angle, request_id: requestId() }); if (generated[0]) selectSaved(generated[0]); }, '两组创意草稿已生成，下一步核对文案依据');
+        generate(async () => { const generated = await api<Creative[]>(`/campaigns/${campaign?.id}/generate`, 'POST', { tone, angle, recipe, request_id: requestId() }); if (generated[0]) selectSaved(generated[0]); }, '创意已准备，相同回放复用已有素材；下一步核对依据');
       }}><Sparkles size={15}/>生成两组创意</Button></div>
     </section>
     <div className="journey-handoff"><div><strong>也可以从知识资料开始创作</strong><p>让 Agent 检索商品资料、生成直播稿。确认内容并完成任务后，转入本活动，再核对素材。</p></div><Button disabled={busy || !campaign} onClick={() => { if (leaveDraft()) go(`overview?agent=new&scene=live&campaign=${encodeURIComponent(campaign!.id)}&launch=${requestId()}`); }}>让 Agent 准备直播内容<ArrowRight size={14}/></Button></div>
@@ -217,16 +219,18 @@ export default function CreativeStudio({ creatives, campaign, busy, error, act, 
     {selected ? <div ref={workspaceRef} className="studio-workspace-anchor">
       <div className="studio-selection"><Field label="当前工作素材"><select value={selected.id} disabled={busy} onChange={event => { const creative = creatives.find(item => item.id === event.target.value); if (creative) select(creative); }}>{creatives.map(creative => <option value={creative.id} key={creative.id}>{creative.direction} · V{creative.version} · {names[creative.status]} · {creative.title}</option>)}</select></Field><Button kind="ghost" onClick={() => { setTarget(selected); setModal('preview'); }}>预览当前保存版本 / 导出</Button></div>
       <p className="studio-mode-note">当前保存版本来源：{generationSource(selected)}</p>
+      {selected.live_context&&<div className="notice">所属场次：{selected.live_context.session_title} · 货盘 V{selected.live_context.session_version} · {selected.live_context.sku_label}<Button onClick={()=>go('creative?tab=live&live='+selected.live_context!.session_id)}>查看本场货盘</Button></div>}
       <CreativeOrigin creative={selected} go={go}/>
       <FactWorkspace key={`${selected.id}-${workspaceKey}`} creative={selected} busy={busy} openProduct={openProduct} dirtyChanged={trackDirty} save={body => act(async () => { const revised = await api<Creative>(`/creatives/${selected.id}/revise`, 'POST', { ...body, request_id: requestId() }); selectSaved(revised); }, '新版本草稿已保存，下一步核对并确认素材')} approve={() => openApproval(selected)} useCreative={() => useCreative(selected)}/>
     </div> : <section className="panel"><Empty text="先生成两组创意，再在这里编辑、核对依据并保存版本。"/><Button onClick={openProduct}>先查看商品依据<ArrowRight size={14}/></Button></section>}
-    <div className="section-heading studio-library-heading"><h2>活动素材 <span className="subtle">{families.size} 组 · {creatives.length} 个版本</span></h2><Field label="素材筛选"><select value={filter} onChange={event => setFilter(event.target.value)}><option value="latest">每组最新版本</option><option value="all">全部版本</option><option value="draft">待确认草稿</option><option value="approved">已确认素材</option></select></Field></div>
+    <div className="section-heading studio-library-heading"><h2>活动素材 <span className="subtle">{families.size} 组 · {creatives.length} 个版本</span></h2><Field label="素材筛选"><select value={filter} onChange={event => setFilter(event.target.value)}><option value="latest">每组最新版本</option><option value="all">全部版本（含重复历史）</option><option value="draft">待确认草稿</option><option value="approved">已确认素材</option></select></Field></div>
+    {candidates.length>displayed.length&&<p className="muted">已收起 {candidates.length-displayed.length} 份相同内容，历史记录保留；选择“全部版本”查看。</p>}
     <div className="creative-grid studio-library">{displayed.map(creative => <article className={`creative-card ${selected?.id === creative.id ? 'studio-selected-card' : ''}`} id={`creative-${creative.id}`} key={creative.id}>
       <div className="creative-preview"><Poster creative={creative}/><div className="preview-badges"><Badge tone={creative.status === 'approved' ? 'green' : 'amber'}>{names[creative.status]}</Badge><Badge tone="neutral">V{creative.version}</Badge></div></div>
       <div className="creative-content"><div className="creative-meta"><span>{creative.direction}</span><span>资料 V{creative.product_snapshot.version} · {creative.template === 'minimal' ? '极简' : '经典'}模板</span></div><h3>{creative.title}</h3><p>{creative.body}</p>
         <div className="creative-buttons"><Button kind="ghost" disabled={busy} onClick={() => select(creative, true)}>编辑</Button><Button kind="ghost" onClick={() => { setTarget(creative); setModal('preview'); }}>预览 / 导出</Button><Button kind="ghost" onClick={() => { setTarget(creative); setCompareId(''); setModal('compare'); }}><GitCompareArrows size={13}/>版本对比</Button><Button disabled={busy} onClick={() => {
           if (!leaveDraft()) return;
-          generate(async () => { const revised = await api<Creative>(`/creatives/${creative.id}/regenerate`, 'POST', { tone, angle, request_id: requestId() }); selectSaved(revised); }, '已单独生成新草稿，下一步核对当前文案');
+          generate(async () => { const revised = await api<Creative>(`/creatives/${creative.id}/regenerate`, 'POST', { tone, angle, recipe, request_id: requestId() }); selectSaved(revised); }, '已单独生成新草稿，下一步核对当前文案');
         }}><RefreshCw size={13}/>单组重新生成</Button>{creative.status === 'draft' ? <Button disabled={busy} onClick={() => openApproval(creative)}><Check size={14}/>确认素材</Button> : <Button kind="primary" onClick={() => { if (leaveDraft()) { selectSaved(creative); useCreative(creative); } }}>用于投放<ArrowUpRight size={14}/></Button>}</div>
       </div>
     </article>)}</div>

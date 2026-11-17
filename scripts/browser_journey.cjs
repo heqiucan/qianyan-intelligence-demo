@@ -3,7 +3,7 @@ const { chromium } = require('C:/Users/16620/.cache/codex-runtimes/codex-primary
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const base = 'http://127.0.0.1:8031';
+const base = process.env.DEMO_TEST_BASE || 'http://127.0.0.1:8031';
 const out = path.resolve('tmp/journey-acceptance/browser');
 fs.mkdirSync(out, { recursive: true });
 
@@ -39,15 +39,19 @@ async function main() {
     await page.getByRole('button', { name: /跟着示例走一遍.*查看体验路线/ }).click();
     check('体验指南解释六步并提供实际入口', await page.locator('.journey-guide-steps li').count() === 6);
     await click('从新建活动开始');
-    await page.getByLabel('活动名称', { exact: true }).fill('流程验收 · ' + Date.now());
+    const campaignName = '流程验收 · ' + Date.now();
+    await page.getByLabel('活动名称', { exact: true }).fill(campaignName);
     await page.getByLabel('内部观察目标').fill('体验知识内容转入、模拟成交与复盘');
     await page.getByLabel('主推卖点').fill('500 ml，奶油白');
     await click('创建并开始策划');
     await page.getByRole('heading', { name: '营销与创意', exact: true }).waitFor();
+    // The route changes before the post-save state refresh fills the new option.
+    await page.getByLabel('选择营销活动').locator('option:checked').filter({ hasText: campaignName }).waitFor({ state: 'attached' });
     campaignId = await page.getByLabel('选择营销活动').inputValue();
     check('新活动显示下一步生成创意', (await page.locator('.journey-next').innerText()).includes('生成第一份活动创意'));
     await click('让 Agent 准备直播内容');
     await page.locator('.agent-composer').waitFor();
+    await page.getByLabel('关联营销活动（可选）').locator(`option[value="${campaignId}"]:checked`).waitFor({ state: 'attached' });
     check('从创意启动的 Agent 预选同一活动', await page.getByLabel('关联营销活动（可选）').inputValue() === campaignId);
     await click('开始任务'); await status('待你审阅');
     const taskId = await page.evaluate(() => localStorage.getItem('marketing-agent-task'));
@@ -113,7 +117,7 @@ async function main() {
     await click('查看订单来源');
     await page.getByRole('heading', { name: '效果与获客', exact: true }).waitFor();
     check('订单返回自动切到现场数据', await page.getByLabel('数据来源', { exact: true }).inputValue() === 'session');
-    check('数据来源说明解释消耗与 ROI 缺失', (await page.getByRole('region', { name: '统一数据范围' }).innerText()).includes('消耗与 ROI 暂不能计算'));
+    check('数据来源说明解释消耗与 ROI 缺失', (await page.locator('details[aria-label="统一数据范围"]').innerText()).includes('消耗与 ROI 暂不能计算'));
     await click('查看链路');
     check('模拟订单可以追溯至转入素材', (await page.locator('dialog[open]').innerText()).includes('规格展示'));
     await click('关闭弹窗');
@@ -148,6 +152,7 @@ async function main() {
     check('没有浏览器脚本异常', errors.length === 0);
     fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify({ ok: true, checks, errors, campaignId, creativeId }, null, 2));
   } catch (e) {
+    fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify({ ok: false, checks, errors, error: e.message, campaignId, creativeId }, null, 2));
     await page.screenshot({ path: path.join(out, 'failure.png'), fullPage: true });
     fs.writeFileSync(path.join(out, 'failure.json'), JSON.stringify({ error: e.message, checks, errors, url: page.url() }, null, 2));
     throw e;

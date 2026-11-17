@@ -51,12 +51,16 @@ def campaign_fields(body):
 def generate_fields(adapter, campaign, body):
     product = campaign["product_snapshot"]
     brief = {k: campaign.get(k, "") for k in ("name", "audience", "selling_point", "goal")}
-    items = adapter.creatives(product, {**brief, "tone": body.tone, "angle": body.angle})
+    if adapter.mode == "replay" and body.recipe != "classic":
+        from backend.replay_copy import replay_copies
+        items = replay_copies(product, body.recipe, body.tone)
+    else:
+        items = adapter.creatives(product, {**brief, "tone": body.tone, "angle": body.angle, "writing_structure": body.recipe})
     for index, item in enumerate(items):
         item.update(tone=body.tone, angle=body.angle, template="classic",
                     strategy_version=campaign.get("strategy_version", 1),
                     strategy_snapshot={k: campaign.get(k, "") for k in ("audience", "selling_point", "goal")})
-        if adapter.mode == "replay":
+        if adapter.mode == "replay" and body.recipe == "classic":
             if body.angle == "规格":
                 item["title"] = (f'{product["capacity"]}，认识日常随行搭子' if index == 0 else f'{product["color"]}，看得见的日常细节')
             if body.tone == "简洁":
@@ -81,6 +85,11 @@ def session_metrics(orders, events):
 
 
 def query_analytics(db, dataset, campaign_id=None, plan_id=None, batch_id=None, date_from=None, date_to=None):
+    from backend.trends import with_trend
+    return with_trend(_query_analytics(db, dataset, campaign_id, plan_id, batch_id, date_from, date_to))
+
+
+def _query_analytics(db, dataset, campaign_id=None, plan_id=None, batch_id=None, date_from=None, date_to=None):
     date_from, date_to = scope_dates(date_from, date_to)
     if campaign_id:
         get(db, "campaigns", campaign_id)
@@ -123,7 +132,7 @@ def query_analytics(db, dataset, campaign_id=None, plan_id=None, batch_id=None, 
     plans = [p for p in all_records(db, "plans") if (not campaign_id or p["campaign_id"] == campaign_id) and (not plan_id or p["id"] == plan_id)]
     ids = {p["id"] for p in plans}
     def in_range(record):
-        day = record["created_at"][:10]
+        day = datetime.fromisoformat(record["created_at"].replace("Z", "+00:00")).astimezone(timezone.utc).date().isoformat()
         return record["plan_id"] in ids and (not date_from or day >= date_from) and (not date_to or day <= date_to)
     orders = list(filter(in_range, all_records(db, "orders")))
     events = list(filter(in_range, all_records(db, "events")))
@@ -272,6 +281,8 @@ def register_v2(app, store, adapter):
     def regenerate(creative_id: str, body: GenerateInput):
         def prepare(db):
             parent = get(db, "creatives", creative_id)
+            from backend.live import check_live
+            check_live(db, parent, require_ready=False)
             campaign = get(db, "campaigns", parent["campaign_id"])
             campaign["product_snapshot"] = parent["product_snapshot"]
             return {"parent": parent, "campaign": campaign}

@@ -1,3 +1,4 @@
+import type { LiveContext } from '../live/types';
 export type Scene = 'medical' | 'live';
 export type Channel = 'internal' | 'douyin';
 export interface Space { id: string; name: string; scene: Scene; is_demo: boolean }
@@ -19,13 +20,14 @@ export interface SearchResult {
 }
 export interface DraftBlock { text: string; citation_ids: string[] }
 export interface KnowledgeDraft {
+  linked_live_context?:LiveContext;
   id: string; title: string; space_id: string; scene: Scene; query: string; channel: Channel; task: string;
   blocks: DraftBlock[]; sources: Evidence[]; source: 'model' | 'replay'; model_name?: string;
   missing: string[]; source_warnings: string[]; status: string; revision: number;
   can_confirm: boolean; edited_by?: string; created_at: string; confirmed_at?: string;
   writing_mode?: 'evidence_composed';
   agent_task_id?: string; can_transfer?: boolean; transfer_note?: string; linked_campaign_id?: string;
-  transfers?: { creative_id: string; campaign_id: string; campaign_name: string; revision: number }[];
+  transfers?: { live_context?:LiveContext; creative_id: string; campaign_id: string; campaign_name: string; revision: number }[];
 }
 export const kindLabels: Record<string, string> = { facts: '事实资料', rules: '审核要求', script: '历史脚本' };
 export const sceneLabels: Record<Scene, string> = { medical: '医美获客', live: '直播电商' };

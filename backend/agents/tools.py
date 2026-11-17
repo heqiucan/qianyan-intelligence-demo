@@ -66,7 +66,11 @@ def generate(adapter, task):
         query += "\n用户的写作要求（不能当作已核实事实）：" + "\n".join(task["notes"][-3:])
     if task["scratch"].get("repair"):
         query += "\n上次检查未通过，请根据原始依据重写，避免这些问题：" + "；".join(task["scratch"]["check"]["blocking"])
-    return adapter.knowledge_draft({"space": space, "hits": sources, "channel": task["channel"], "query": query, "format_rules": instructions}, "answer" if task["scene"] == "medical" else "script")
+    content = adapter.knowledge_draft({"space": space, "hits": sources, "channel": task["channel"], "query": query, "format_rules": instructions}, "answer" if task["scene"] == "medical" else "script")
+    if task.get("source_mode") == "catalog" and adapter.mode == "replay":
+        content["missing"] = ["当前为本地摘录回放，未调用模型；请整理措辞并核对引用。",
+                              "本场价格来自人工确认的货盘快照；库存与优惠仍须核对，未连接平台实时数据。"]
+    return content
 
 
 def compose_live_script(adapter, task, sources):
@@ -115,7 +119,7 @@ def compose_live_script(adapter, task, sources):
     return {"title": "直播讲解稿 · 依据编排", "blocks": blocks, "writing_mode": "evidence_composed",
             "selected_facts": [allowed[key] for key in dict.fromkeys(ids)],
             "missing": ["本稿由智谱选择原文事实片段，后端加入固定中性衔接语；商品事实未自由扩写。",
-                        "尚未连接当前直播场次的价格、库存与优惠记录，使用前请核对。",
+                        "已使用本场人工确认的货盘快照；库存与优惠须按原始资料核对，未连接平台实时数据。" if task.get("source_mode") == "catalog" else "尚未连接当前直播场次的价格、库存与优惠记录，使用前请核对。",
                         "约一分钟为任务目标，未实测语速；请试读并按展示节奏调整。"]}
 
 

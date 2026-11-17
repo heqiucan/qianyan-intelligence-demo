@@ -27,11 +27,13 @@ export default function TaskDetail({ task, busy, act, refresh, changed, openSour
       <h3>{task.goal}</h3>
       <p className="muted">{task.space_name} · {task.channel === 'internal' ? '内部资料' : '抖音渠道资料'} · {date(task.created_at)}</p>
       <p className="muted">{task.campaign_id ? `关联活动：${task.campaign_name} · 商品：${task.product_name}` : '独立内容任务 · 不随上方活动筛选改变资料范围'}</p>
+      {task.live_context&&<p className="notice">绑定场次：{task.live_context.session_title} · 货盘 V{task.live_context.session_version} · SKU：{task.live_context.sku_label}</p>}
       <div className="agent-provenance">{task.source === 'model' ? `智谱实际执行 · ${task.model_name}` : '规则演示 + 本地摘录回放 · 未调用模型'}{task.source_mode === 'demo' && ' · 全部为虚构示例'}</div>
       <div className={`agent-message ${task.status === 'waiting_input' || task.status === 'failed' ? 'attention' : ''}`} role="status">
         {running ? <LoaderCircle className="agent-spin" size={18}/> : task.status === 'completed' ? <Check size={18}/> : <CircleAlert size={18}/>}<span>{task.message}</span>
       </div>
       {task.completion_stale && <div className="kb-warning" role="alert">本任务确认的是草稿 V{task.completed_revision}。之后正文或依据有变化，当前内容不沿用当时的确认结果。</div>}
+      {task.status==='completed'&&task.draft&&<Button disabled={locked||Boolean(note)} onClick={()=>act('reopen',{expected_revision:task.draft!.revision})}>重新打开审核</Button>}
       <div className="agent-counts"><span>本轮 {task.steps} / {task.limits.steps} 个处理步骤</span><span>本轮模型调用 {task.model_calls} / {task.limits.model_calls}</span><span>累计调用 {task.total_model_calls}</span></div>
       {running && <div className="row-actions"><Button disabled={busy} onClick={() => act('cancel')}><Square size={13}/>取消任务</Button><span className="muted">刷新或离开此页，任务仍由本机服务处理。</span></div>}
     </section>

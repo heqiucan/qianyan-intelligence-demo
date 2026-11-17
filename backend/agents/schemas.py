@@ -10,13 +10,21 @@ LIMITS = {"model_calls": 7, "steps": 12, "searches": 2, "seconds": 240, "attempt
 class CreateTask(Operation):
     scene: Literal["medical", "live"]
     goal: str = Field(min_length=4, max_length=1500)
-    source_mode: Literal["demo", "knowledge"] = "demo"
+    source_mode: Literal["demo", "knowledge", "catalog"] = "demo"
     space_id: str | None = Field(default=None, max_length=80)
     channel: Literal["internal", "douyin"] = "internal"
     campaign_id: str | None = Field(default=None, min_length=1, max_length=100)
+    live_session_id: str | None = None
+    live_item_id: str | None = None
 
     @model_validator(mode="after")
     def has_space(self):
+        if bool(self.live_session_id) != bool(self.live_item_id):
+            raise ValueError("请同时选择直播场次与货盘商品")
+        if self.live_session_id and (self.scene != "live" or not self.campaign_id):
+            raise ValueError("直播场次任务必须关联直播场景与营销活动")
+        if self.source_mode == "catalog" and (not self.live_session_id or self.channel != "internal"):
+            raise ValueError("货盘资料仅供关联场次的内部内容任务使用")
         if self.source_mode == "knowledge" and not self.space_id:
             raise ValueError("使用知识库时请选择资料空间")
         if self.source_mode == "demo" and self.channel != "internal":
@@ -38,6 +46,10 @@ class ControlTask(Operation):
 class FinishTask(ControlTask):
     draft_id: str
     draft_revision: int = Field(ge=1)
+
+
+class ReopenTask(ControlTask):
+    expected_revision: int = Field(ge=1)
 
 
 class Action(Input):

@@ -33,7 +33,7 @@ def write_state(state):
     pending.replace(STATE)
 
 
-def serve():
+def serve(no_access_code=False):
     RUNTIME.mkdir(parents=True, exist_ok=True)
     binary = RUNTIME / "cloudflared.exe"
     if not binary.is_file() or not (ROOT / "frontend/dist/website.html").is_file():
@@ -42,8 +42,8 @@ def serve():
         probe.bind(("127.0.0.1", 0))
         port = probe.getsockname()[1]
     STOP.unlink(missing_ok=True)
-    token = secrets.token_urlsafe(12)
-    state = {"status": "starting", "port": port, "access_code": token, "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    token = "" if no_access_code else secrets.token_urlsafe(12)
+    state = {"status": "starting", "port": port, "access_code": token, "access_mode": "open" if no_access_code else "code", "started_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
     write_state(state)
     # Do not load the user's .env or use their working database in a public session.
     environment = os.environ.copy()
@@ -105,9 +105,12 @@ def serve():
 def main():
     parser = argparse.ArgumentParser(description="Qianyan temporary share controls")
     parser.add_argument("action", choices=["serve", "status", "stop"])
+    parser.add_argument("--no-access-code", action="store_true", help="Open the isolated demo without an access code")
     args = parser.parse_args()
+    if args.no_access_code and args.action != "serve":
+        parser.error("--no-access-code is only valid with serve")
     if args.action == "serve":
-        serve()
+        serve(no_access_code=args.no_access_code)
         return
     state = read_state()
     if args.action == "stop" and state.get("status") not in {None, "stopped", "failed"}:

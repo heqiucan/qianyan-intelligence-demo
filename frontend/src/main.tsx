@@ -7,4 +7,5 @@ import './feedback.css';
 import './workspace-v3.css';
 import './creative-studio.css';
 import './features/journey/journey.css';
+import './features/live/live.css';
 createRoot(document.getElementById('root')!).render(<App/>);

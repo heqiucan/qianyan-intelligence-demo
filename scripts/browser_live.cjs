@@ -1,0 +1,145 @@
+/* Run against an isolated replay service: DEMO_DATA_DIR=tmp/live-acceptance/data, port 8032. */
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/16620/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const base = 'http://127.0.0.1:8032';
+const out = path.resolve('tmp/live-acceptance/browser');
+fs.mkdirSync(out,{recursive:true});
+
+async function main(){
+ const browser=await chromium.launch({channel:'msedge',headless:true});
+ const page=await browser.newPage({viewport:{width:1440,height:1000}});
+ page.setDefaultTimeout(15000);
+ const checks=[],errors=[];
+ page.on('pageerror',e=>errors.push(e.message));
+ page.on('dialog',d=>d.accept());
+ const check=(label,ok)=>{assert.ok(ok,label);checks.push(label);console.log('PASS '+label)};
+ const click=name=>page.getByRole('button',{name,exact:true}).click();
+ const nav=name=>page.getByRole('navigation',{name:'主导航'}).getByRole('button',{name,exact:true}).click();
+ const state=async()=>await (await page.request.get(base+'/api/state')).json();
+ const status=text=>page.locator('.agent-task-heading .badge').filter({hasText:text}).waitFor();
+ let campaignId,sessionId,taskId,creativeId;
+ try{
+  await page.goto(base);await page.locator('.hero').waitFor();
+  assert.equal((await state()).model.mode,'replay','Only isolated replay tests');
+  check('原球体、四张卡片与八个菜单保留',await page.locator('.hero-art').count()===1&&await page.locator('.stat-card').count()===4&&await page.getByRole('navigation',{name:'主导航'}).getByRole('button').count()===8);
+  await click('进入演示模式');await page.getByText('¥1,485.00',{exact:true}).waitFor();
+  check('演示模式显式切到虚构 D0',await page.getByText('历史 D0 · 虚构样例',{exact:true}).isVisible()&&await page.locator('.stat-card').filter({hasText:'4.95'}).count()===1);
+  check('首页筛选默认折叠',!await page.locator('details[aria-label="统一数据范围"]').getAttribute('open'));
+  await page.screenshot({path:path.join(out,'01-demo-home.png')});
+  await page.setViewportSize({width:1366,height:768});
+  const statsBottom=await page.locator('.stats-grid').evaluate(el=>el.getBoundingClientRect().bottom);
+  check('1366px 投影视口四张卡片在首屏',statsBottom<=768);
+  await page.screenshot({path:path.join(out,'02-projector.png')});
+  const contrast=await page.locator('.nav-caption').evaluate(el=>{
+    const cs=getComputedStyle(el),nums=s=>s.match(/[\d.]+/g).map(Number);
+    const fg=nums(cs.color);let node=el,bg;
+    while(node){const c=nums(getComputedStyle(node).backgroundColor);if(c[3]===undefined||c[3]>0.99){bg=c;break}node=node.parentElement}
+    const lum=c=>c.slice(0,3).map(x=>{x/=255;return x<=.04045?x/12.92:Math.pow((x+.055)/1.055,2.4)}).reduce((a,v,i)=>a+v*[.2126,.7152,.0722][i],0);
+    const f=lum(fg),b=lum(bg||[0,0,0]);return {ratio:(Math.max(f,b)+.05)/(Math.min(f,b)+.05),font:parseFloat(cs.fontSize)};
+  });
+  check('导航分组文字达到4.5对比度且不小于12px',contrast.ratio>=4.5&&contrast.font>=12);
+  await page.setViewportSize({width:1440,height:1000});
+  await nav('效果与获客');await page.getByRole('region',{name:'成交与消耗趋势'}).waitFor();
+  check('D0 展示计划对比并说明无时间序列',await page.getByText('同一来源 · 计划金额对比').isVisible()&&await page.locator('.live-trend svg').count()===0);
+  await page.locator('.live-trend').screenshot({path:path.join(out,'03-d0-comparison.png')});
+  await click('返回工作模式');
+  await nav('增长工作台');await click('新建营销活动');
+  const unique=Date.now();
+  await page.getByLabel('活动名称',{exact:true}).fill('直播浏览器验收 '+unique);
+  await click('创建并开始策划');await page.getByRole('heading',{name:'营销与创意',exact:true}).waitFor();
+  await page.waitForFunction(name=>document.querySelector('select[aria-label="选择营销活动"]')?.selectedOptions[0]?.textContent===name,'直播浏览器验收 '+unique);
+  campaignId=await page.getByLabel('选择营销活动').inputValue();
+  await nav('商品与品牌');await click('商品目录与 SKU');await click('新增直播商品');
+  await page.getByLabel('商品名称',{exact:true}).fill('晨光试验杯 '+unique);
+  await page.getByLabel('商品品牌',{exact:true}).fill('虚构晨光品牌');
+  await page.getByLabel('已知商品事实',{exact:true}).fill('虚构验收商品：试验杯，350 ml 或 600 ml 两种规格。');
+  await page.getByLabel('商品资料来源',{exact:true}).fill('虚构浏览器验收设定');
+  for(const [label,value] of [['SKU 1 名称','蓝色350'],['SKU 1 价格','89'],['SKU 1 容量或规格','350 ml'],['SKU 1 颜色','蓝色'],['SKU 1 价格依据','虚构验收价格']])await page.getByLabel(label,{exact:true}).fill(value);
+  await click('增加 SKU');
+  for(const [label,value] of [['SKU 2 名称','白色600'],['SKU 2 价格','129'],['SKU 2 容量或规格','600 ml'],['SKU 2 颜色','白色'],['SKU 2 价格依据','虚构验收价格']])await page.getByLabel(label,{exact:true}).fill(value);
+  await page.route('**/api/live/catalog',route=>route.request().method()==='POST'?route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({detail:'验收模拟：请重试'})}):route.continue());
+  await click('保存商品与规格');await page.getByRole('alert').filter({hasText:'输入已保留'}).waitFor();
+  check('商品保存失败保留 SKU 输入',await page.getByLabel('SKU 2 价格',{exact:true}).inputValue()==='129');
+  await page.unroute('**/api/live/catalog');await click('保存商品与规格');await page.locator('dialog[open]').waitFor({state:'hidden'});
+  check('多 SKU 商品在目录中显示',await page.locator('.live-catalog-grid>article').filter({hasText:'晨光试验杯 '+unique}).getByText('白色600',{exact:true}).isVisible());
+  await page.screenshot({path:path.join(out,'04-catalog.png')});
+  const products=await (await page.request.get(base+'/api/live/catalog')).json();
+  const product=products.find(p=>p.name==='晨光试验杯 '+unique);
+  await nav('营销与创意');await click('直播场次与货盘');await click('新建直播场次');
+  await page.getByLabel('直播场次名称').fill('晨光周末专场 '+unique);
+  await page.getByLabel('主播或负责人').fill('验收主播');
+  for(const sku of product.skus){await page.getByLabel('选择货盘商品与 SKU').selectOption(product.id+'/'+sku.id);await click('加入货盘')}
+  await page.getByRole('button',{name:'前移',exact:true}).nth(1).click();
+  await click('保存场次与货盘');await page.locator('dialog[open]').waitFor({state:'hidden'});
+  sessionId=await page.getByLabel('选择直播场次').inputValue();
+  check('货盘顺序已保存且尚待确认',(await page.locator('.live-lineup>li').first().innerText()).includes('白色600')&&await page.locator('.live-lineup>li').first().getByRole('button',{name:'让 Agent 准备本商品讲解',exact:true}).isDisabled());
+  await click('核对并确认货盘');await page.locator('dialog[open]').getByRole('checkbox').check();await click('确认货盘');
+  await page.locator('dialog[open]').waitFor({state:'hidden'});
+  await page.screenshot({path:path.join(out,'05-lineup.png')});
+  await page.locator('.live-lineup>li').first().getByRole('button',{name:'让 Agent 准备本商品讲解',exact:true}).click();
+  await page.locator('.agent-composer').waitFor();
+  await page.waitForFunction(()=>Array.from(document.querySelectorAll('.agent-composer select')).some(s=>s.value==='catalog'));
+  check('Agent 预选本场商品资料及关联活动',await page.getByLabel('使用哪些资料').inputValue()==='catalog'&&await page.getByLabel('关联营销活动（可选）').inputValue()===campaignId);
+  await click('开始任务');await status('待你审阅');taskId=await page.evaluate(()=>localStorage.getItem('marketing-agent-task'));
+  const editor=page.getByRole('region',{name:'知识草稿编辑器'});
+  await editor.getByRole('checkbox').check();await editor.getByRole('button',{name:'人工确认并保存',exact:true}).click();await page.getByText('人工已确认 · 未发布',{exact:true}).waitFor();
+  await click('标记任务完成');await status('已确认完成');
+  await editor.getByLabel('草稿标题').fill('晨光讲解修订');
+  await click('保存修订版本');await page.getByText(/本任务确认的是草稿/).waitFor();
+  await click('重新打开审核');await status('待你审阅');
+  check('重新审核保留草稿且未自动完成',await clickCheckDisabled(editor,'转为活动创意'));
+  await editor.getByRole('checkbox').check();await click('人工确认并保存');await page.getByText('人工已确认 · 未发布',{exact:true}).waitFor();await click('标记任务完成');await status('已确认完成');
+  const task=await (await page.request.get(base+'/api/agent/tasks/'+taskId)).json();
+  check('重新完成绑定当前版本且未调用模型',task.completed_revision===2&&task.total_model_calls===0&&task.completion_history.length===1);
+  await click('转为活动创意');
+  check('转入弹窗展示正确场次 SKU 与129元快照',(await page.locator('dialog[open]').innerText()).includes('白色600')&&(await page.locator('dialog[open]').innerText()).includes('¥129.00'));
+  await page.getByLabel('转入创意标题').fill('晨光600规格展示');
+  await page.getByLabel('转入广告正文').fill('晨光试验杯，600 ml，白色。记录售价 ¥129。');
+  await page.getByLabel('转入视频脚本').fill('介绍商品名称，展示600 ml规格及白色外观。');
+  await page.locator('dialog[open]').getByRole('checkbox').check();await click('确认转入创意草稿');
+  await page.getByRole('region',{name:'创意知识来源'}).waitFor();creativeId=await page.getByLabel('当前工作素材').inputValue();
+  const creative=(await state()).creatives.find(c=>c.id===creativeId);
+  check('转入来源保留场次货盘引用且仍是草稿',creative.live_context.session_id===sessionId&&creative.product_snapshot.price===129&&creative.status==='draft'&&creative.knowledge_origin.sources.length>0);
+  await page.getByTestId('creative-workspace').getByRole('button',{name:'确认当前素材',exact:true}).click();await click('确认通过素材');
+  await page.getByTestId('creative-workspace').getByRole('button',{name:'用当前素材创建投放',exact:true}).click();
+  await page.getByLabel('计划名称',{exact:true}).fill('晨光场次模拟计划');
+  await click('保存计划草稿');await page.getByText('计划草稿已保存，下一步确认启动',{exact:true}).waitFor();
+  await click('确认启动');await click('确认模拟启动');await click('体验购买');await click('查看商品详情');
+  await page.getByRole('button',{name:/核对订单 ·/}).click();await click('模拟付款并下单');await click('查看订单来源');
+  await click('直播场次复盘');await page.getByLabel('复盘直播场次').selectOption(sessionId);
+  await page.getByRole('region',{name:'成交与消耗趋势'}).waitFor();
+  check('场次订单按对应 SKU 的129元计价',(await page.locator('.live-result-stats').innerText()).includes('¥129.00')&&(await page.locator('.live-result-stats').innerText()).includes('不可计算'));
+  check('现场成交显示单点图和时间依据',await page.locator('.live-trend circle').count()===1&&(await page.locator('.live-trend').innerText()).includes('单点不代表增长趋势'));
+  await click('生成本场复盘');await page.locator('.live-review').waitFor();await click('带入报告草稿');await click('保存本场报告快照');await page.getByText(/报告已保存，编号/).waitFor();
+  await page.screenshot({path:path.join(out,'06-session-results.png')});
+  await click('查看活动报告');await page.locator('.live-reports summary').first().click();
+  check('报告出现在原活动报告入口',await page.getByRole('button',{name:'导出场次报告 Markdown',exact:true}).isVisible());
+  const downloadPromise=page.waitForEvent('download');await click('导出场次报告 Markdown');const download=await downloadPromise;await download.saveAs(path.join(out,'report.md'));
+  check('导出报告带货盘与模拟标识',fs.readFileSync(path.join(out,'report.md'),'utf8').includes('货盘版本')&&fs.readFileSync(path.join(out,'report.md'),'utf8').includes('本地模拟数据'));
+  await nav('营销与创意');await click('活动创意');await click('生成两组创意');await page.waitForFunction(()=>!document.querySelector('.busy-indicator'));
+  let before=(await state()).creatives.length;await click('生成两组创意');await page.waitForFunction(()=>!document.querySelector('.busy-indicator'));
+  check('重复回放没有新增同文素材',(await state()).creatives.length===before);
+  await page.getByLabel('文案结构').selectOption('questions');await click('生成两组创意');await page.waitForFunction(()=>!document.querySelector('.busy-indicator'));
+  check('切换文案结构能产生不同内容',(await state()).creatives.length===before+2);
+  await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});
+  for(const [route,name] of [['creative?tab=live&live='+sessionId,'场次货盘'],['analytics?tab=live&live='+sessionId,'场次复盘'],['product?tab=catalog','商品目录'],['overview','首页']]){
+   await page.goto(base+'/#/'+route);await page.getByRole('navigation',{name:'主导航'}).waitFor();await page.waitForTimeout(250);
+   check('390px '+name+'无页面横向溢出',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  }
+  await page.goto(base+'/#/creative?tab=live&live='+sessionId);await page.locator('.live-lineup').waitFor();
+  check('减少动画设置应用到直播操作',await page.locator('.live-lineup button').first().evaluate(el=>getComputedStyle(el).transitionDuration==='0s'));
+  await page.screenshot({path:path.join(out,'07-mobile-lineup.png'),fullPage:true});
+  await click('编辑本场货盘');
+  check('390px 场次编辑弹窗无横向溢出',await page.locator('dialog[open]').evaluate(el=>el.scrollWidth<=el.clientWidth+1));
+  await page.screenshot({path:path.join(out,'08-mobile-editor.png')});
+  check('无浏览器脚本异常',errors.length===0);
+  await page.goto(base+'/website.html');await page.getByText('Qianyan Intelligence',{exact:false}).first().waitFor();
+  check('独立官网品牌与入口保留',(await page.request.get(base+'/website.html')).status()===200);
+  fs.writeFileSync(path.join(out,'result.json'),JSON.stringify({ok:true,checks,errors,campaignId,sessionId,taskId,creativeId,contrast,statsBottom},null,2));
+ }catch(e){await page.screenshot({path:path.join(out,'failure.png'),fullPage:true});fs.writeFileSync(path.join(out,'failure.json'),JSON.stringify({error:e.message,url:page.url(),checks,errors},null,2));throw e}
+ finally{await browser.close()}
+}
+async function clickCheckDisabled(editor,name){return editor.getByRole('button',{name,exact:true}).isDisabled()}
+main().catch(e=>{console.error(e);process.exit(1)});

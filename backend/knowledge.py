@@ -219,7 +219,7 @@ def draft_view(db, draft):
     task = get(db, "agent_runs", draft["agent_task_id"]) if draft.get("agent_task_id") else {}
     return {**draft, "source_warnings": warnings, "can_confirm": not warnings and draft["status"] == "draft",
             "can_transfer": ready, "transfer_note": note, "transfers": transfers,
-            "linked_campaign_id": task.get("campaign_id")}
+            "linked_campaign_id": task.get("campaign_id"), "linked_live_context": task.get("live_context")}
 
 
 def check_blocks(blocks, sources):

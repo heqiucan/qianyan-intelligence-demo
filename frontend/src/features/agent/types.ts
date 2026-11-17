@@ -1,3 +1,4 @@
+import type { LiveContext } from '../live/types';
 import type { Evidence, KnowledgeDraft, Scene } from '../knowledge/types';
 
 export type TaskStatus = 'queued' | 'running' | 'waiting_input' | 'waiting_review' | 'completed' | 'failed' | 'cancelled' | 'interrupted';
@@ -6,7 +7,7 @@ export interface AgentEvent {
   source_ids?: string[];
 }
 export interface AgentTask {
-  id: string; goal: string; scene: Scene; source_mode: 'demo' | 'knowledge'; space_id: string; space_name: string;
+  id: string; goal: string; scene: Scene; source_mode: 'demo' | 'knowledge' | 'catalog'; live_context?:LiveContext; space_id: string; space_name: string;
   campaign_id?: string | null; campaign_name?: string | null; product_name?: string | null;
   channel: string; source: 'replay' | 'model'; model_name: string | null; status: TaskStatus;
   attempt: number; model_calls: number; total_model_calls: number; steps: number; message: string;
@@ -26,7 +27,7 @@ export const actionLabels: Record<string, string> = {
   read_evidence: '读取原文依据', prepare_generation: '确定生成依据', generate_draft: '撰写内容',
   generated: '收到草稿', check_draft: '核对引用与表达', repair: '按检查结果修订', save_draft: '保存草稿',
   request_input: '请求补充信息', failure: '保留进度', resume: '继续任务', cancel: '取消后续步骤',
-  complete: '完成人工确认', interrupted: '保留中断现场',
+  reopen: '重新打开人工审核', complete: '完成人工确认', interrupted: '保留中断现场',
   review_evidence: '逐段复核事实依据',
 };
 export const presets: Record<Scene, string> = {

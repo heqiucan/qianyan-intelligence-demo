@@ -1,6 +1,6 @@
 from fastapi import HTTPException
 from backend.knowledge import get, put, records, stamp, identifier, draft_view
-from backend.agents.schemas import CreateTask, ContinueTask, ControlTask, FinishTask, ACTIVE, RESUMABLE, LIMITS
+from backend.agents.schemas import CreateTask, ContinueTask, ControlTask, FinishTask, ReopenTask, ACTIVE, RESUMABLE, LIMITS
 from backend.agents.runner import event, AgentRunner
 from backend.agents.tools import ensure_demo_space
 
@@ -46,7 +46,11 @@ def register_agents(app, store, adapter, runner):
         with store.transaction() as db:
             def create():
                 queue_capacity(db)
-                space = ensure_demo_space(db, body.scene) if body.source_mode == "demo" else get(db, "kb_spaces", body.space_id)
+                from backend.live import session_context, check_live, ensure_live_space
+                context = session_context(db, body.live_session_id, body.live_item_id, body.campaign_id) if body.live_session_id else None
+                if context:
+                    check_live(db, {"live_context": context})
+                space = ensure_live_space(db, context) if body.source_mode == "catalog" else ensure_demo_space(db, body.scene) if body.source_mode == "demo" else get(db, "kb_spaces", body.space_id)
                 if space["scene"] != body.scene:
                     raise HTTPException(422, "所选资料空间与业务场景不一致。")
                 campaign = get(db, "campaigns", body.campaign_id) if body.campaign_id else None
@@ -58,7 +62,9 @@ def register_agents(app, store, adapter, runner):
                         "status": "queued", "stage": "decide", "attempt": 1, "steps": 0, "model_calls": 0,
                         "total_model_calls": 0, "scratch": {}, "notes": [], "events": [], "result_ids": [], "draft_id": None,
                         "created_at": stamp(), "updated_at": stamp(), "message": "任务已保存，等待执行。"}
-                event(task, "created", "使用独立虚构示例资料。" if body.source_mode == "demo" else "只使用所选知识库中已审核且有效的资料。")
+                if context:
+                    task.update(live_context=context, product_name=context["product_snapshot"]["name"])
+                event(task, "created", "使用已人工确认的本场货盘快照；不是平台核验。" if body.source_mode == "catalog" else "使用独立虚构示例资料。" if body.source_mode == "demo" else "只使用所选知识库中已审核且有效的资料。")
                 put(db, "agent_runs", task)
                 return {"id": task["id"]}
             result = once(db, "agent-create", body, create)
@@ -109,6 +115,23 @@ def register_agents(app, store, adapter, runner):
                 put(db, "agent_runs", task)
                 return {"id": task_id}
             return once(db, "agent-cancel:" + task_id, body, cancel)
+
+    @app.post("/api/agent/tasks/{task_id}/reopen")
+    def reopen_task(task_id: str, body: ReopenTask):
+        with store.transaction() as db:
+            def reopen():
+                task = get(db, "agent_runs", task_id)
+                if task["status"] != "completed" or task["attempt"] != body.expected_attempt or not task.get("draft_id"):
+                    raise HTTPException(409, "仅已完成的内容任务可以重新打开审核")
+                draft = get(db, "kb_drafts", task["draft_id"])
+                if draft["revision"] != body.expected_revision:
+                    raise HTTPException(409, "草稿版本已变化，请刷新再打开")
+                task.setdefault("completion_history", []).append({"revision": task["completed_revision"], "completed_at": task["completed_at"], "reopened_at": stamp()})
+                task.update(status="waiting_review", message="已重新打开人工审核。请确认当前草稿；引用失效时补充要求重新检索。未调用模型。")
+                event(task, "reopen", task["message"])
+                put(db, "agent_runs", task)
+                return {"id": task_id}
+            return once(db, "agent-reopen:" + task_id, body, reopen)
 
     @app.post("/api/agent/tasks/{task_id}/complete")
     def complete_task(task_id: str, body: FinishTask):

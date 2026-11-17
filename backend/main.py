@@ -84,6 +84,7 @@ class CampaignInput(Idempotent):
 class GenerateInput(Idempotent):
     tone: Literal["自然", "简洁"] = "自然"
     angle: Literal["场景", "规格"] = "场景"
+    recipe: Literal["classic", "spec", "questions", "walkthrough"] = "classic"
 
 
 class ReviseInput(Idempotent):
@@ -252,6 +253,8 @@ def creative_record(campaign, fields, source="replay", parent=None):
     result.setdefault("template", parent.get("template", "classic") if parent else "classic")
     if parent and parent.get("knowledge_origin"):
         result["knowledge_origin"] = parent["knowledge_origin"]
+    from backend.live import context_fields
+    result.update(context_fields(parent or campaign))
     return result
 
 
@@ -367,7 +370,7 @@ def create_app(data_dir=None):
     @app.get("/api/state")
     def state():
         with store.transaction() as db:
-            values = {key: all_records(db, key) for key in ("campaigns", "creatives", "plans", "orders", "events", "logs", "insights", "adjustments", "batches", "tasks", "observations", "reports")}
+            values = {key: all_records(db, key) for key in ("campaigns", "creatives", "plans", "orders", "events", "logs", "insights", "adjustments", "batches", "tasks", "observations", "reports", "live_sessions")}
             return {"product": all_records(db, "product")[0], **values, "model": adapter.info, "buyers": [{"id": k, "name": v} for k, v in BUYERS.items()]}
 
     @app.post("/api/model/check")
@@ -409,7 +412,10 @@ def create_app(data_dir=None):
         def save(db, campaign, content):
             if get(db, "campaigns", campaign_id) != campaign:
                 raise HTTPException(409, "生成期间活动策略已变化，请按新策略重新生成。旧素材未改动。")
-            result = [put(db, "creatives", creative_record(campaign, item, "replay" if adapter.mode == "replay" else "model")) for item in content]
+            result = []
+            for item in content:
+                existing = next((c for c in all_records(db, "creatives") if adapter.mode == "replay" and c["campaign_id"] == campaign_id and not c.get("live_context") and c["source"] == "replay" and c["product_snapshot"] == campaign["product_snapshot"] and all(c.get(k) == item.get(k) for k in ("title", "body", "script", "cta", "strategy_version"))), None)
+                result.append(existing or put(db, "creatives", creative_record(campaign, item, "replay" if adapter.mode == "replay" else "model")))
             log(db, "生成创意", f'{campaign["name"]}：两份草稿，来源 {adapter.info["label"]}，等待人工确认。')
             return result
         return model_operation(store, adapter, "generate:" + campaign_id, body,
@@ -463,7 +469,7 @@ def create_app(data_dir=None):
                 if creative["status"] != "approved":
                     raise HTTPException(409, "请先确认素材，再创建投放计划。")
                 check_origin(db, creative)
-                plan = put(db, "plans", {"id": uid("plan"), "campaign_id": creative["campaign_id"], "creative_id": creative["id"], "creative_snapshot": creative, "name": body.name, "budget": money(body.budget), "start_date": body.start_date.isoformat(), "end_date": body.end_date.isoformat(), "status": "draft", "created_at": now(), "account": "青禾演示账户", "objective": "商品成交", "simulation": True, "config_version": 1, "config_history": []})
+                plan = put(db, "plans", {"id": uid("plan"), "campaign_id": creative["campaign_id"], "creative_id": creative["id"], "creative_snapshot": creative, **context_fields(creative), "name": body.name, "budget": money(body.budget), "start_date": body.start_date.isoformat(), "end_date": body.end_date.isoformat(), "status": "draft", "created_at": now(), "account": "青禾演示账户", "objective": "商品成交", "simulation": True, "config_version": 1, "config_history": []})
                 log(db, "创建计划草稿", f'{plan["name"]} · 预算 ¥{plan["budget"]:g}，等待人工确认模拟启动。')
                 return plan
             return once(db, "plan", body, run)
@@ -498,7 +504,7 @@ def create_app(data_dir=None):
         with store.transaction() as db:
             def run():
                 plan = running_plan(db, body.plan_id)
-                return put(db, "events", {"id": uid("event"), "plan_id": plan["id"], "creative_id": plan["creative_id"], "campaign_id": plan["campaign_id"], "type": body.type, "plan_config_version": plan.get("config_version", 1), "created_at": now(), "source": "本地测试互动"})
+                return put(db, "events", {"id": uid("event"), "plan_id": plan["id"], "creative_id": plan["creative_id"], "campaign_id": plan["campaign_id"], "type": body.type, **context_fields(plan), "plan_config_version": plan.get("config_version", 1), "created_at": now(), "source": "本地测试互动"})
             return once(db, "event", body, run)
 
     @app.post("/api/orders")
@@ -508,7 +514,7 @@ def create_app(data_dir=None):
                 plan = running_plan(db, body.plan_id)
                 previous = any(o["buyer_id"] == body.buyer_id for o in all_records(db, "orders"))
                 buyer_type = "unknown" if body.buyer_id == "unknown-001" else "returning" if body.buyer_id == "old-001" or previous else "new"
-                result = put(db, "orders", {"id": uid("order"), "plan_id": plan["id"], "creative_id": plan["creative_id"], "campaign_id": plan["campaign_id"], "buyer_id": body.buyer_id, "buyer_name": BUYERS[body.buyer_id], "buyer_type": buyer_type, "unit_price": plan["creative_snapshot"]["product_snapshot"]["price"], "quantity": body.quantity, "plan_config_version": plan.get("config_version", 1), "amount": money(Decimal(str(plan["creative_snapshot"]["product_snapshot"]["price"])) * body.quantity), "created_at": now(), "simulation": True, "attribution": "显式绑定当前演示计划，非平台真实归因"})
+                result = put(db, "orders", {"id": uid("order"), "plan_id": plan["id"], "creative_id": plan["creative_id"], "campaign_id": plan["campaign_id"], "buyer_id": body.buyer_id, "buyer_name": BUYERS[body.buyer_id], **context_fields(plan), "buyer_type": buyer_type, "unit_price": plan["creative_snapshot"]["product_snapshot"]["price"], "quantity": body.quantity, "plan_config_version": plan.get("config_version", 1), "amount": money(Decimal(str(plan["creative_snapshot"]["product_snapshot"]["price"])) * body.quantity), "created_at": now(), "simulation": True, "attribution": "显式绑定当前演示计划，非平台真实归因"})
                 log(db, "模拟订单完成", f'{result["id"]} · {BUYERS[body.buyer_id]} · ¥{result["amount"]:g} · {plan["name"]}')
                 return result
             return once(db, "order", body, run)
@@ -611,6 +617,8 @@ def create_app(data_dir=None):
     register_agents(app, store, adapter, runner)
     from backend.creative_handoff import register_handoff
     register_handoff(app, store)
+    from backend.live import register_live, context_fields
+    register_live(app, store, adapter)
 
     @app.api_route("/api", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])

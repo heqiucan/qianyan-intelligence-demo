@@ -13,10 +13,12 @@ import sys
 import time
 from urllib.request import ProxyHandler, build_opener
 import webbrowser
+from datetime import datetime, timezone
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ENV_KEYS = {"MODEL_PROVIDER", "MODEL_BASE_URL", "MODEL_NAME", "MODEL_API_KEY", "DEMO_ACCESS_TOKEN", "DEMO_DATA_DIR"}
+ENV_KEYS = {"MODEL_PROVIDER", "MODEL_BASE_URL", "MODEL_NAME", "MODEL_API_KEY", "DEMO_ACCESS_TOKEN", "DEMO_DATA_DIR",
+            "KB_SEMANTIC_ENABLED", "KB_EMBEDDING_MODEL_PATH", "KB_SEMANTIC_MIN_SCORE", "DEMO_ALLOWED_HOSTS", "DEMO_SHARE_MODE"}
 
 
 def demo_ready(url):
@@ -70,13 +72,22 @@ def main():
     parser.add_argument("--check", action="store_true", help="只检查运行准备情况，不启动服务")
     parser.add_argument("--open-browser", action="store_true", help="服务就绪后自动打开浏览器；已运行时直接打开")
     parser.add_argument("--page", choices=("workspace", "website"), default="workspace", help="打开工作台或 Qianyan Intelligence 官网")
+    parser.add_argument('--fresh-demo', action='store_true', help='新建独立回放演示库，不使用日常资料或模型密钥')
     args = parser.parse_args()
     os.chdir(ROOT)
     candidate = ROOT / ".venv" / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
     if candidate.exists() and Path(sys.executable).resolve() != candidate.resolve():
         return subprocess.call([str(candidate), str(Path(__file__).resolve()), *sys.argv[1:]])
     load_environment()
-    missing = [name for name in ("fastapi", "uvicorn", "httpx", "python_multipart", "jieba", "pypdf") if importlib.util.find_spec(name) is None]
+    if args.fresh_demo:
+        from uuid import uuid4
+        directory = ROOT / 'tmp' / 'fresh-demo' / (datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S') + '-' + uuid4().hex[:6])
+        os.environ.update(DEMO_DATA_DIR=str(directory), MODEL_PROVIDER='replay', MODEL_API_KEY='', KB_SEMANTIC_ENABLED='0')
+    if args.host not in {'127.0.0.1', 'localhost', '::1'}:
+        if not os.getenv('DEMO_ACCESS_TOKEN') or not os.getenv('DEMO_ALLOWED_HOSTS'):
+            print('局域网监听前请设置 DEMO_ACCESS_TOKEN 和 DEMO_ALLOWED_HOSTS（实际访问的 IP 或域名，用逗号分隔，不能用 *）。')
+            return 1
+    missing = [name for name in ("fastapi", "uvicorn", "httpx", "python_multipart", "jieba", "pypdf", "openpyxl", "defusedxml") if importlib.util.find_spec(name) is None]
     if missing:
         print("后端依赖未准备好：" + ", ".join(missing))
         print('请运行：python -m venv .venv')

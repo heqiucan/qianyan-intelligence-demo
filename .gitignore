@@ -15,11 +15,14 @@
 __pycache__/
 *.pyc
 /.venv/
+/.models/
 /data/
 /frontend/node_modules/
 /frontend/dist/
 /.env
 /.pytest_cache/
+/.pytest-demand-repair/
+/backups/
 /tmp/browser-check/
 /.pytest-temp-delivery/
 /tmp/runtime/

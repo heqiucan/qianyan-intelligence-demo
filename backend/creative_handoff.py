@@ -62,7 +62,7 @@ def register_handoff(app, store):
 
     @app.get("/api/creatives/{creative_id}/knowledge-origin")
     def read_origin(creative_id: str):
-        with store.transaction() as db:
+        with store.read() as db:
             return origin_view(db, get(db, "creatives", creative_id))
 
     @app.post("/api/knowledge/drafts/{draft_id}/creative")

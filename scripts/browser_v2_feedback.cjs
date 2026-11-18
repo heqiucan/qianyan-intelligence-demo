@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert/strict');
-const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/16620/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright_runtime.cjs');
 const base = 'http://127.0.0.1:8021';
 const out = path.resolve('tmp/v2-feedback-acceptance');
 const checks = [], errors = [], networkErrors = [];

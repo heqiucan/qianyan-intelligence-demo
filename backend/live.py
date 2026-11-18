@@ -214,7 +214,7 @@ def register_live(app, store, adapter):
 
     @app.get("/api/live/sessions")
     def read_sessions(campaign_id: str | None = None):
-        with store.transaction() as db:
+        with store.read() as db:
             return [s for s in all_records(db, "live_sessions") if not campaign_id or s["campaign_id"] == campaign_id]
 
     def save_session(db, body, session_id=None):
@@ -301,7 +301,7 @@ def register_live(app, store, adapter):
 
     @app.get("/api/live/sessions/{session_id}/analytics")
     def analytics(session_id: str, dataset: Literal["session", "batch"] = "session", batch_id: str | None = None):
-        with store.transaction() as db:
+        with store.read() as db:
             return session_analytics(db, session_id, dataset, batch_id)
 
     @app.post("/api/live/sessions/{session_id}/reviews")
@@ -315,7 +315,7 @@ def register_live(app, store, adapter):
 
     @app.get("/api/live/reports")
     def reports():
-        with store.transaction() as db:
+        with store.read() as db:
             return all_records(db, "live_reports")
 
     @app.post("/api/live/sessions/{session_id}/reports")

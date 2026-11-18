@@ -5,6 +5,7 @@ import { Badge, Button, Details, Empty, Field, Modal } from '../components/ui';
 import { names, type Act } from '../domain';
 import Poster from '../Poster';
 import CreativeOrigin from './journey/CreativeOrigin';
+import '../components/product-basis.css';
 
 type CopyField = 'title' | 'body' | 'cta' | 'script';
 type Copy = Record<CopyField, string>;
@@ -21,6 +22,7 @@ interface CheckResult {
 }
 interface Props {
   creatives: Creative[]; campaign?: Campaign; busy: boolean; error: string; act: Act;
+  latestProduct: Product; useLatestProduct: () => void;
   useCreative: (creative: Creative) => void; openProduct: () => void;
   dirtyChanged: (dirty: boolean) => void; modelLabel: string; go: (route: string) => void; initialCreativeId?: string;
 }
@@ -172,7 +174,9 @@ function FactWorkspace({ creative, busy, openProduct, dirtyChanged, save, approv
   </section>;
 }
 
-export default function CreativeStudio({ creatives, campaign, busy, error, act, useCreative, openProduct, dirtyChanged, modelLabel, go, initialCreativeId }: Props) {
+export default function CreativeStudio({ creatives, campaign, latestProduct, useLatestProduct, busy, error, act, useCreative, openProduct, dirtyChanged, modelLabel, go, initialCreativeId }: Props) {
+  const productChanged = !!campaign && (campaign.product_snapshot.id !== latestProduct.id || campaign.product_snapshot.version !== latestProduct.version);
+  const [chooseProduct, setChooseProduct] = useState(false);
   const [generating, setGenerating] = useState(false);
   const generate = (work: () => Promise<unknown>, message: string) => {
     setGenerating(true);
@@ -205,15 +209,32 @@ export default function CreativeStudio({ creatives, campaign, busy, error, act, 
   };
   const selectSaved = (creative: Creative) => { trackDirty(false); setPendingCreative(creative); setSelectedId(creative.id); setWorkspaceKey(value => value + 1); };
   const openApproval = (creative: Creative) => { if (!leaveDraft()) return; selectSaved(creative); setTarget(creative); setModal('approve'); };
+  const generateForCampaign = () => {
+    if (!leaveDraft()) return;
+    setChooseProduct(false);
+    generate(async () => { const generated = await api<Creative[]>(`/campaigns/${campaign!.id}/generate`, 'POST', { tone, angle, recipe, request_id: requestId() }); if (generated[0]) selectSaved(generated[0]); }, '创意已准备，下一步核对商品依据');
+  };
+  const startLatestProduct = () => { if (!leaveDraft()) return; trackDirty(false); setChooseProduct(false); useLatestProduct(); };
   return <>
+    {productChanged && <section className="notice product-basis-notice" role="status" aria-label="生成商品与最新资料不同">
+      <strong>当前活动使用的是另一版商品资料</strong>
+      <p>本活动生成商品：{campaign!.product_snapshot.name} · V{campaign!.product_snapshot.version} · {money(campaign!.product_snapshot.price)}</p>
+      <p>最新保存商品：{latestProduct.name} · V{latestProduct.version} · {money(latestProduct.price)}</p>
+      <p>保存商品资料后，旧活动仍保留原商品。要生成最新商品，请先创建对应的新活动。</p>
+      <Button kind="primary" disabled={busy} onClick={startLatestProduct}>使用最新商品创建活动<ArrowRight size={15}/></Button>
+    </section>}
     <section className="panel studio-intro">
-      <div><Badge><Sparkles size={13}/>{modelLabel || '演示回放'} · 人工确认</Badge><h2>让关键商品表述，有据可查。</h2><p>从商品事实出发，核对表达、修订内容，再把确认的素材用于投放。</p><small>活动默认商品：{campaign?.product_snapshot.name} · 受众假设：{campaign?.audience || '待补充'} · 主推卖点：{campaign?.selling_point || '待补充'}</small></div>
+      <div><Badge><Sparkles size={13}/>{modelLabel || '演示回放'} · 人工确认</Badge><h2>让关键商品表述，有据可查。</h2><p>从商品事实出发，核对表达、修订内容，再把确认的素材用于投放。</p><small>本次生成商品：{campaign?.product_snapshot.name} · 资料 V{campaign?.product_snapshot.version} · 受众假设：{campaign?.audience || '待补充'} · 主推卖点：{campaign?.selling_point || '待补充'}</small></div>
       <div className="v2-creative-options"><Field label="文案结构"><select value={recipe} onChange={e=>setRecipe(e.target.value)}><option value="spec">规格与价格说明</option><option value="questions">问答与选择提示</option><option value="walkthrough">顺序讲解与收尾</option><option value="classic">原通勤与容量示例</option></select></Field><Field label="表达语气"><select value={tone} onChange={event => setTone(event.target.value)}><option>自然</option><option>简洁</option></select></Field><Field label="表达角度"><select value={angle} onChange={event => setAngle(event.target.value)}><option>场景</option><option>规格</option></select></Field><Button kind="primary" disabled={busy || !campaign} onClick={() => {
-        if (!leaveDraft()) return;
-        generate(async () => { const generated = await api<Creative[]>(`/campaigns/${campaign?.id}/generate`, 'POST', { tone, angle, recipe, request_id: requestId() }); if (generated[0]) selectSaved(generated[0]); }, '创意已准备，相同回放复用已有素材；下一步核对依据');
+        if (productChanged) setChooseProduct(true); else generateForCampaign();
       }}><Sparkles size={15}/>生成两组创意</Button></div>
     </section>
     <div className="journey-handoff"><div><strong>也可以从知识资料开始创作</strong><p>让 Agent 检索商品资料、生成直播稿。确认内容并完成任务后，转入本活动，再核对素材。</p></div><Button disabled={busy || !campaign} onClick={() => { if (leaveDraft()) go(`overview?agent=new&scene=live&campaign=${encodeURIComponent(campaign!.id)}&launch=${requestId()}`); }}>让 Agent 准备直播内容<ArrowRight size={14}/></Button></div>
+    {chooseProduct && campaign && <Modal title="选择本次生成的商品" busy={busy} onClose={() => setChooseProduct(false)}>
+      <p>当前活动仍绑定 <strong>{campaign.product_snapshot.name} · V{campaign.product_snapshot.version}</strong>。</p>
+      <p>你最新保存的是 <strong>{latestProduct.name} · V{latestProduct.version}</strong>，可以为它创建新活动，再生成创意。</p>
+      <div className="modal-footer"><Button disabled={busy} onClick={generateForCampaign}>继续使用活动原商品生成</Button><Button kind="primary" disabled={busy} onClick={startLatestProduct}>使用最新商品创建活动</Button></div>
+    </Modal>}
     {generating && <p className="notice" role="status">{modelLabel.includes('智谱') ? '正在等待智谱免费模型生成文案。返回后会校验字段并保存为草稿；繁忙时可能需要较长时间，请勿重复点击。' : '正在读取演示回放并创建草稿。'}</p>}
     <p className="studio-mode-note">{modelLabel.includes('回放') || !modelLabel ? '生成内容采用有限模板回放；下方事实核对由服务端规则实际执行。' : '生成来源以素材记录为准；下方事实核对由服务端规则实际执行。'} 不保证全面合规或平台过审。</p>
     {selected ? <div ref={workspaceRef} className="studio-workspace-anchor">

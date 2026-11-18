@@ -2,8 +2,8 @@ import { ArrowRight, BookOpen, Sparkles } from 'lucide-react';
 import { Badge, Button, Modal } from '../../components/ui';
 import type { Scene } from '../knowledge/types';
 
-export default function JourneyGuide({ scene, close, agent, campaign, knowledge }: {
-  scene: Scene; close: () => void; agent: () => void; campaign: () => void; knowledge: () => void;
+export default function JourneyGuide({ scene, close, agent, campaign, knowledge, demand }: {
+  scene: Scene; close: () => void; agent: () => void; campaign: () => void; knowledge: () => void; demand: () => void;
 }) {
   const medical = scene === 'medical';
   const steps = medical ? [
@@ -20,7 +20,7 @@ export default function JourneyGuide({ scene, close, agent, campaign, knowledge 
   ];
   return <Modal title="第一次体验，从这里开始" wide onClose={close}>
     <p className="journey-guide-intro"><Badge>{medical ? '医美内容路线' : '直播电商演示路线'}</Badge>没有正式资料，也可以用预置虚构示例。点击入口只是打开表单，由你确认后开始。</p>
-    <ol className="journey-guide-steps">{steps.map(([title, detail], i) => <li key={title}><span>{String(i + 1).padStart(2, '0')}</span><div><strong>{title}</strong><p>{detail}</p></div></li>)}</ol>
+    <section className="notice"><h3>从真实问题开始：需求素材主线</h3><p>导入词表或问题记录 → 核对逐条原文与来源 → 配置筛选并预览 → 人工分类、分组、确认 → 转为选题 / FAQ → 检索已审核事实 → 核对引用、确认并导出草稿。</p><p>需求记录回答“用户在问什么”，事实资料提供回答依据；已确认短词可另存为可复用筛选词库。</p><Button kind="primary" onClick={demand}>从需求素材开始<ArrowRight size={14}/></Button></section><ol className="journey-guide-steps">{steps.map(([title, detail], i) => <li key={title}><span>{String(i + 1).padStart(2, '0')}</span><div><strong>{title}</strong><p>{detail}</p></div></li>)}</ol>
     <div className="notice">{medical ? '本路线产出内部沟通草稿，不创建商品计划。' : '一个活动可以有多份素材和多个计划。知识草稿确认、素材确认、计划启动分别进行。'} 演示不会产生真实广告花费或付款。</div>
     <div className="row-actions"><Button kind="primary" onClick={agent}><Sparkles size={15}/>从示例 Agent 开始</Button>{!medical && <Button onClick={campaign}>从新建活动开始<ArrowRight size={14}/></Button>}<Button kind="ghost" onClick={knowledge}><BookOpen size={14}/>我先准备知识资料</Button></div>
   </Modal>;

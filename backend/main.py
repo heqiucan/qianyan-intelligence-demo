@@ -20,6 +20,7 @@ from uuid import uuid4
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import FileResponse, JSONResponse
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 
 from backend.model_adapter import ModelAdapter, ModelFailure
@@ -51,6 +52,15 @@ class Idempotent(Input):
     request_id: str = Field(default_factory=lambda: uuid4().hex, min_length=1, max_length=128)
 
 
+class ClaimEvidenceInput(Input):
+    id: str = Field(min_length=1, max_length=80)
+    category: Literal['shipping', 'performance']
+    claim: str = Field(min_length=1, max_length=400)
+    source: str = Field(min_length=1, max_length=300)
+    conditions: str = Field(default='', max_length=300)
+    confirmed: Literal[True]
+
+
 class ProductInput(Input):
     name: str = Field(min_length=1, max_length=100)
     price: float = Field(ge=0.01, le=1000000, allow_inf_nan=False)
@@ -62,6 +72,7 @@ class ProductInput(Input):
     image_url: str = Field(default="/assets/product.svg", max_length=300)
     video_url: str = Field(default="", max_length=300)
     evidence: str = Field(default="", max_length=4000)
+    claim_evidence: list[ClaimEvidenceInput] = Field(default_factory=list, max_length=20)
 
     @field_validator("image_url", "video_url")
     @classmethod
@@ -73,6 +84,7 @@ class ProductInput(Input):
 
 class CampaignInput(Idempotent):
     name: str = Field(min_length=1, max_length=120)
+    expected_product_version: int | None = Field(default=None, ge=1)
     audience: str = Field(default="", max_length=1000)
     selling_point: str = Field(default="", max_length=2000)
     goal: str = Field(default="", max_length=1000)
@@ -147,6 +159,19 @@ class Store:
         self.path = self.directory / "demo.sqlite3"
 
     @contextmanager
+    def read(self):
+        """Read snapshots never claim the single SQLite writer slot."""
+        connection = sqlite3.connect(self.path, timeout=15)
+        connection.row_factory = sqlite3.Row
+        try:
+            connection.execute('PRAGMA query_only=ON')
+            connection.execute('BEGIN')
+            yield connection
+        finally:
+            connection.rollback()
+            connection.close()
+
+    @contextmanager
     def transaction(self):
         connection = sqlite3.connect(self.path, timeout=15)
         connection.row_factory = sqlite3.Row
@@ -167,6 +192,11 @@ class Store:
         with self.transaction() as db:
             db.execute("CREATE TABLE IF NOT EXISTS records (collection TEXT NOT NULL, id TEXT NOT NULL, data TEXT NOT NULL, PRIMARY KEY(collection,id))")
             db.execute("CREATE TABLE IF NOT EXISTS requests (scope TEXT NOT NULL, request_id TEXT NOT NULL, fingerprint TEXT NOT NULL, result TEXT NOT NULL, PRIMARY KEY(scope,request_id))")
+            db.execute('CREATE TABLE IF NOT EXISTS schema_migrations(version INTEGER PRIMARY KEY, applied_at TEXT NOT NULL)')
+            if not db.execute('SELECT 1 FROM schema_migrations WHERE version=1').fetchone():
+                db.execute("CREATE INDEX IF NOT EXISTS records_scope_idx ON records(collection,json_extract(data,'$.space_id'),json_extract(data,'$.status'),json_extract(data,'$.channel'))")
+                db.execute("CREATE INDEX IF NOT EXISTS records_task_idx ON records(collection,json_extract(data,'$.task_id'))")
+                db.execute('INSERT INTO schema_migrations VALUES(1,?)', (now(),))
             if not db.execute("SELECT 1 FROM records WHERE collection='product'").fetchone():
                 seed(db)
             from backend.v2 import migrate_defaults
@@ -198,6 +228,10 @@ def log(db, action, detail):
 def request_fingerprint(payload):
     data = payload.model_dump(mode="json")
     key = data.pop("request_id")
+    # Preserve successful request fingerprints created before this optional
+    # concurrency guard existed. Explicit expected versions remain fingerprinted.
+    if isinstance(payload, CampaignInput) and data.get('expected_product_version') is None:
+        data.pop('expected_product_version', None)
     fingerprint = hashlib.sha256(json.dumps(data, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
     return key, fingerprint
 
@@ -240,11 +274,24 @@ def model_operation(store, adapter, scope, payload, prepare, produce, save):
             if previous is not None:
                 return previous
             context = prepare(db)
+        adapter.operation_started(scope)
         content = produce(context)
         with store.transaction() as db:
-            return once(db, scope, payload, lambda: save(db, context, content))
+            result = once(db, scope, payload, lambda: save(db, context, content))
+        adapter.operation_finished(success=True)
+        return result
+    except HTTPException:
+        adapter.operation_finished(error_kind='conflict')
+        raise
+    except ModelFailure:
+        adapter.operation_finished(error_kind='validation')
+        raise
     finally:
-        adapter.operation_lock.release()
+        try:
+            if adapter.current_operation:
+                adapter.operation_finished()
+        finally:
+            adapter.operation_lock.release()
 
 
 def creative_record(campaign, fields, source="replay", parent=None):
@@ -280,7 +327,7 @@ def seed(db):
         creative = creative_record(campaign, fields)
         creative.update(id=f"creative-{suffix}", status="approved", approved_at=now())
         put(db, "creatives", creative)
-        put(db, "plans", {"id": f"plan-{suffix}", "campaign_id": campaign["id"], "creative_id": creative["id"], "creative_snapshot": creative, "name": f'现场演示 · {fields["direction"]}', "budget": 200.0 if index == 0 else 300.0, "start_date": date.today().isoformat(), "end_date": (date.today() + timedelta(days=7)).isoformat(), "status": "running", "created_at": now(), "account": "青禾演示账户", "objective": "商品成交", "simulation": True})
+        put(db, "plans", {"id": f"plan-{suffix}", "campaign_id": campaign["id"], "creative_id": creative["id"], "creative_snapshot": creative, "name": f'现场演示 · {fields["direction"]}', "budget": 200.0 if index == 0 else 300.0, "start_date": datetime.now(timezone.utc).date().isoformat(), "end_date": (datetime.now(timezone.utc).date() + timedelta(days=7)).isoformat(), "status": "running", "created_at": now(), "account": "青禾演示账户", "objective": "商品成交", "simulation": True})
     history = {"id": "D0", "campaign_id": campaign["id"], "source": "固定虚构历史样例", "window": "D0 固定历史演示窗口（与现场互动独立）", "rows": [
         {"name": "历史 A · 通勤携带", "creative_id": "creative-commute", "plan_id": "history-A", "impressions": 4000, "clicks": 120, "spend": 120.0, "orders": 9, "buyers": 9, "new_customers": 5, "unknown_buyers": 0, "revenue": 891.0},
         {"name": "历史 B · 容量展示", "creative_id": "creative-capacity", "plan_id": "history-B", "impressions": 6000, "clicks": 180, "spend": 180.0, "orders": 6, "buyers": 6, "new_customers": 4, "unknown_buyers": 0, "revenue": 594.0},
@@ -317,31 +364,52 @@ def create_app(data_dir=None):
     adapter = ModelAdapter()
     from backend.agents.runner import AgentRunner
     runner = AgentRunner(store, adapter)
+    from backend.demand_tasks import DemandRunner
+    demand_runner = DemandRunner(store)
 
     @asynccontextmanager
     async def lifespan(app):
-        store.initialize()
-        runner.start()
+        from backend.runtime import InstanceLease
+        lease = InstanceLease(store.directory)
+        lease.acquire()
         try:
-            yield
+            store.initialize()
+            adapter.bind_store(store)
+            runner.start()
+            demand_runner.start()
+            try:
+                yield
+            finally:
+                demand_runner.stop()
+                runner.stop()
         finally:
-            runner.stop()
+            lease.release()
 
-    app = FastAPI(title="浙衍 AI · 演示 API", version="1.0.0", lifespan=lifespan)
+    public_demo = os.getenv('DEMO_SHARE_MODE') == '1'
+    app = FastAPI(title="浙衍 AI · 演示 API", version="1.0.0", lifespan=lifespan,
+                 docs_url=None if public_demo else '/docs', redoc_url=None if public_demo else '/redoc',
+                 openapi_url=None if public_demo else '/openapi.json')
+    hosts = ['localhost', '127.0.0.1', '::1', '[::1]', 'testserver']
+    hosts.extend(h.strip() for h in os.getenv('DEMO_ALLOWED_HOSTS', '').split(',') if h.strip() and h.strip() != '*')
+    if public_demo:
+        hosts.append('*.trycloudflare.com')
+    app.add_middleware(TrustedHostMiddleware, allowed_hosts=hosts, www_redirect=False)
     app.state.store = store
     app.state.model_adapter = adapter
     app.state.agent_runner = runner
+    app.state.demand_runner = demand_runner
 
     @app.middleware("http")
     async def access_gate(request: Request, call_next):
         token = os.getenv("DEMO_ACCESS_TOKEN", "")
-        if token and request.url.path.startswith("/api/") and request.url.path != "/api/health":
+        if token and (request.url.path.startswith("/api/") or request.url.path in {'/docs', '/redoc', '/openapi.json'}) and request.url.path != "/api/health":
             supplied = request.headers.get("X-Demo-Token", "")
             if not hmac.compare_digest(supplied.encode(), token.encode()):
                 return JSONResponse({"detail": "请输入演示访问码。"}, status_code=401)
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "same-origin"
+        response.headers['Content-Security-Policy'] = "object-src 'none'; base-uri 'self'; frame-ancestors 'none'"
         if request.url.path.startswith("/api/"):
             response.headers["Cache-Control"] = "no-store"
         return response
@@ -352,16 +420,16 @@ def create_app(data_dir=None):
 
     @app.exception_handler(RequestValidationError)
     async def invalid_input(request, exc):
-        if request.url.path.startswith(("/api/knowledge/", "/api/agent/")):
+        if request.url.path.startswith(("/api/knowledge/", "/api/agent/", "/api/demand/")):
             problems = []
             for error in exc.errors():
                 field = ".".join(str(x) for x in error["loc"][1:]) or "资料"
                 reason = str(error.get("ctx", {}).get("error", "")) if error["type"] == "value_error" else "请检查必填内容、类型和长度限制"
                 problems.append(f"{field}：{reason}")
-            label = "Agent 任务" if request.url.path.startswith("/api/agent/") else "知识库"
+            label = "需求工作台" if request.url.path.startswith("/api/demand/") else ("Agent 任务" if request.url.path.startswith("/api/agent/") else "知识库")
             return JSONResponse({"detail": label + "输入不正确。" + "；".join(problems)}, status_code=422)
         fields = ", ".join(".".join(str(x) for x in error["loc"][1:]) for error in exc.errors())
-        return JSONResponse({"detail": f"输入格式不正确，请检查：{fields}。必填内容不能为空，金额至少为 0.01。"}, status_code=422)
+        return JSONResponse({"detail": f"输入格式不正确，请检查：{fields}。请核对必填内容、类型和取值范围。"}, status_code=422)
 
     @app.get("/api/health")
     def health():
@@ -369,18 +437,29 @@ def create_app(data_dir=None):
 
     @app.get("/api/state")
     def state():
-        with store.transaction() as db:
+        with store.read() as db:
             values = {key: all_records(db, key) for key in ("campaigns", "creatives", "plans", "orders", "events", "logs", "insights", "adjustments", "batches", "tasks", "observations", "reports", "live_sessions")}
             return {"product": all_records(db, "product")[0], **values, "model": adapter.info, "buyers": [{"id": k, "name": v} for k, v in BUYERS.items()]}
+
+    @app.get("/api/model/status")
+    def model_status():
+        return adapter.info
 
     @app.post("/api/model/check")
     def model_check():
         if not adapter.operation_lock.acquire(blocking=False):
             raise HTTPException(409, "已有 AI 任务正在生成，请等待完成后再测试连接。")
         try:
-            return adapter.check_connection()
+            adapter.operation_started('model-check')
+            adapter.check_connection()
+            adapter.operation_finished(success=True)
+            return adapter.info
         finally:
-            adapter.operation_lock.release()
+            try:
+                if adapter.current_operation:
+                    adapter.operation_finished()
+            finally:
+                adapter.operation_lock.release()
 
     @app.put("/api/product")
     def update_product(body: ProductInput):
@@ -401,7 +480,10 @@ def create_app(data_dir=None):
         with store.transaction() as db:
             def run():
                 fields = campaign_fields(body)
-                campaign = put(db, "campaigns", {"id": uid("campaign"), **fields, "product_snapshot": all_records(db, "product")[0], "created_at": now(), "strategy_version": 1, "strategy_history": []})
+                product = all_records(db, "product")[0]
+                if body.expected_product_version is not None and product['version'] != body.expected_product_version:
+                    raise HTTPException(409, f'商品资料已更新为 V{product["version"]}，请重新核对最新商品资料后再创建活动。')
+                campaign = put(db, "campaigns", {"id": uid("campaign"), **fields, "product_snapshot": product, "created_at": now(), "strategy_version": 1, "strategy_history": []})
                 log(db, "创建营销活动", campaign["name"])
                 return campaign
             return once(db, "campaign", body, run)
@@ -483,7 +565,7 @@ def create_app(data_dir=None):
             transitions = {"draft": {"running", "ended"}, "running": {"paused", "ended"}, "paused": {"running", "ended"}, "ended": set()}
             if body.status not in transitions[plan["status"]]:
                 raise HTTPException(409, "当前计划状态不允许该操作；已结束计划不能重新启动。")
-            if body.status == "running" and not plan["start_date"] <= date.today().isoformat() <= plan["end_date"]:
+            if body.status == "running" and not plan["start_date"] <= datetime.now(timezone.utc).date().isoformat() <= plan["end_date"]:
                 raise HTTPException(409, "当前日期不在计划周期内，请先调整周期。日期不会自动启动计划。")
             if body.status == "running":
                 check_origin(db, plan["creative_snapshot"])
@@ -521,7 +603,7 @@ def create_app(data_dir=None):
 
     @app.get("/api/analytics")
     def get_analytics(dataset: Literal["history", "session", "batch"] = "history", campaign_id: str | None = None, plan_id: str | None = None, batch_id: str | None = None, date_from: date | None = None, date_to: date | None = None):
-        with store.transaction() as db:
+        with store.read() as db:
             return analytics(db, dataset, campaign_id, plan_id, batch_id, date_from, date_to)
 
     @app.post("/api/insights")
@@ -537,7 +619,7 @@ def create_app(data_dir=None):
 
     @app.get("/api/insights")
     def list_insights():
-        with store.transaction() as db:
+        with store.read() as db:
             return all_records(db, "insights")
 
     @app.post("/api/insights/{insight_id}/accept")
@@ -619,6 +701,12 @@ def create_app(data_dir=None):
     register_handoff(app, store)
     from backend.live import register_live, context_fields
     register_live(app, store, adapter)
+    from backend.demand_assets import register_demand_assets
+    from backend.demand_tasks import register_demand_tasks
+    from backend.demand_content import register_demand_content
+    register_demand_assets(app, store)
+    register_demand_tasks(app, store, demand_runner)
+    register_demand_content(app, store, adapter)
 
     @app.api_route("/api", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])

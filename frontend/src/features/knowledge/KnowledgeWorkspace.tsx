@@ -4,7 +4,7 @@ import { api, requestId, date, type ModelInfo } from '../../api';
 import { Badge, Button, Empty, Field, Modal, Submit } from '../../components/ui';
 import DocumentEditor from './DocumentEditor';
 import DraftEditor from './DraftEditor';
-import { kindLabels, sceneLabels, type Channel, type Document, type Evidence, type KnowledgeDraft, type Scene, type SearchResult, type Space } from './types';
+import { kindLabels, sceneLabels, type Channel, type Document, type Evidence, type KnowledgeDraft, type RetrievalMode, type Scene, type SearchResult, type Space } from './types';
 import './knowledge.css';
 import type { HandoffContext } from '../journey/CreativeHandoff';
 
@@ -17,6 +17,7 @@ export default function KnowledgeWorkspace({ model, dirtyChanged, initialTab = '
   const [tab, setTab] = useState<'library' | 'search' | 'drafts'>(initialTab);
   const [busy, setBusy] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState('');
   const [query, setQuery] = useState(''), [channel, setChannel] = useState<Channel>('internal'), [task, setTask] = useState('answer');
+  const [mode, setMode] = useState<RetrievalMode>('hybrid');
   const [result, setResult] = useState<SearchResult | null>(null), [draft, setDraft] = useState<KnowledgeDraft | null>(null);
   const [editing, setEditing] = useState<Document | null | undefined>(undefined), [detail, setDetail] = useState<Document | null>(null);
   const [source, setSource] = useState<Evidence | null>(null), [newSpace, setNewSpace] = useState(false);
@@ -59,19 +60,21 @@ export default function KnowledgeWorkspace({ model, dirtyChanged, initialTab = '
     await api('/knowledge/documents/' + detail.id + '/review', 'POST', { request_id: requestId(), expected_version: detail.version, status });
     setDetail(null); setResult(null); await load(spaceId); setNotice(status === 'approved' ? '资料已标记为可用。下一步：检索并核对命中原文。' : '资料已归档，不再进入检索；已有草稿保留引用快照。');
   });
-  const search = () => run('正在分词并检索本机资料', async () => {
+  const search = (searchQuery = query) => run(mode === 'hybrid' ? '正在检索本机资料，首次语义检索可能需要稍等' : '正在分词并检索本机资料', async () => {
+    setQuery(searchQuery);
     setResult(null);
-    setResult(await api<SearchResult>('/knowledge/search', 'POST', { space_id: spaceId, query, channel }));
+    setResult(await api<SearchResult>('/knowledge/search', 'POST', { space_id: spaceId, query: searchQuery, channel, mode }));
   });
   const generate = () => run(model.mode === 'replay' ? '正在整理检索依据' : '已找到依据，正在等待智谱生成', async () => {
     if (!result) return;
-    const item = await api<KnowledgeDraft>('/knowledge/drafts', 'POST', { space_id: spaceId, query: result.query, channel: result.channel, task, signature: result.signature, request_id: requestId() });
+    const item = await api<KnowledgeDraft>('/knowledge/drafts', 'POST', { space_id: spaceId, query: result.query, channel: result.channel, mode: result.mode, task, signature: result.signature, request_id: requestId() });
     await load(spaceId); setDraft(item); setTab('drafts');
     setNotice('草稿已保存。下一步：逐段查看引用，核对后人工确认。');
   });
   const changedDraft = (item: KnowledgeDraft) => { setDraft(item); setDrafts(list => list.map(d => d.id === item.id ? item : d)); };
-  const currentResult = result && result.query === query.trim() && result.channel === channel && result.space.id === spaceId;
+  const currentResult = result && result.query === query.trim() && result.channel === channel && result.mode === mode && result.space.id === spaceId;
   const available = docs.filter(d => d.availability === '可检索').length;
+  const demandAvailable = docs.filter(d => d.kind === 'demand' && d.availability === '需求素材可用（非事实依据）').length;
   return <div className="kb-workspace">
     <section className="panel kb-intro">
       <div className="kb-intro-copy"><span className="eyebrow">KNOWLEDGE · EVIDENCE · CREATION</span><h2>先找到依据，再开始表达。</h2><p>让机构资料、品牌说明和审核要求，成为每一份草稿可查看的来源。</p></div>
@@ -90,7 +93,7 @@ export default function KnowledgeWorkspace({ model, dirtyChanged, initialTab = '
     {busy && <div className="kb-progress" role="status"><RefreshCw size={16}/>{busy}…{busy.includes('智谱') && <span>免费接口可能需要等待，失败后可手动重试。</span>}</div>}
     {!loaded && !error && <p className="muted" role="status">正在读取资料空间…</p>}
     {loaded && tab === 'library' && <>
-      <div className="kb-library-head"><div><h3>{space?.name}</h3><p className="muted">{available} 份当前可检索 · {docs.length - available} 份待审核或已失效</p></div><div className="row-actions">{space?.is_demo && <Button disabled={!!busy} onClick={() => run('载入虚构示例', async () => { await api('/knowledge/spaces/' + spaceId + '/samples', 'POST'); await load(spaceId); setNotice('虚构演示资料已载入，请逐份查看并标记为可用。重复载入不会覆盖已有资料。'); })}>载入本场景示例</Button>}<Button kind="primary" disabled={!!busy} onClick={() => setEditing(null)}><Plus size={15}/>导入资料</Button></div></div>
+      <div className="kb-library-head"><div><h3>{space?.name}</h3><p className="muted">{available} 份事实/规则/脚本可检索 · {demandAvailable} 份需求素材可用 · {docs.length - available - demandAvailable} 份待审核或已失效</p></div><div className="row-actions">{space?.is_demo && <Button disabled={!!busy} onClick={() => run('载入虚构示例', async () => { await api('/knowledge/spaces/' + spaceId + '/samples', 'POST'); await load(spaceId); setNotice('虚构演示资料已载入，请逐份查看并标记为可用。重复载入不会覆盖已有资料。'); })}>载入本场景示例</Button>}<Button kind="primary" disabled={!!busy} onClick={() => setEditing(null)}><Plus size={15}/>导入资料</Button></div></div>
       {!docs.length ? <div className="panel kb-empty"><BookOpen size={36}/><h3>把你的第一份资料放进来</h3><p>支持文本型 PDF、TXT、Markdown 和直接粘贴。可以先载入虚构示例，体验完整流程。</p></div> : <div className="kb-doc-grid">{docs.map(doc => <article className="panel kb-doc-card" key={doc.id}>
         <div className="kb-doc-top"><span className="kb-file-icon"><FileText size={21}/></span><Badge tone={doc.availability === '可检索' ? 'green' : 'neutral'}>{doc.availability}</Badge></div>
         <h3>{doc.title}</h3><div className="kb-tags"><span>{kindLabels[doc.kind]}</span><span>V{doc.version} · {doc.chunk_count} 个片段</span>{doc.is_demo && <span>虚构演示</span>}</div>
@@ -101,13 +104,34 @@ export default function KnowledgeWorkspace({ model, dirtyChanged, initialTab = '
     </>}
     {loaded && tab === 'search' && <>
       <section className="panel kb-search-panel"><form onSubmit={e => { e.preventDefault(); search(); }}>
-        <Field label="输入关键词或任务"><textarea rows={3} maxLength={500} required value={query} placeholder={space?.scene === 'medical' ? '例如：咨询预约流程和审核要求' : '例如：保温杯规格和直播讲解要求'} onChange={e => setQuery(e.target.value)}/></Field>
-        <div className="kb-search-controls"><Field label="检索范围"><select value={channel} onChange={e => setChannel(e.target.value as Channel)}><option value="internal">内部参考</option><option value="douyin">抖音渠道参考</option></select></Field><Field label="生成用途"><select value={task} onChange={e => setTask(e.target.value)}><option value="answer">内部资料问答</option><option value="script">内部脚本草稿</option></select></Field><Submit busy={!!busy}><Search size={15}/>检索资料</Submit></div>
-      </form><p className="muted">先在本机检索，不消耗模型额度。只有当前空间、适用范围内已审核且有效的资料会参与。</p></section>
-      {result && <section className="kb-results"><div className="kb-library-head"><div><h3>找到 {result.hits.length} 个相关片段</h3><p className="muted">命中词：{result.terms.join(' · ') || '无有效关键词'}。排序不代表事实置信度。</p></div><Badge tone="neutral">中文分词 + BM25</Badge></div>
-        {!currentResult && <div className="kb-warning">任务或范围已修改，请重新检索。</div>}
-        {!result.hits.length ? <div className="panel kb-empty"><Search size={30}/><h3>暂无可用依据</h3><p>可以换用项目名、商品名或具体关键词；也请检查资料是否审核、过期或属于其他范围。没有依据时不会调用模型。</p></div> : <div className="kb-hit-list">{result.hits.map((hit, i) => <article className="panel kb-hit" key={hit.id}><div className="kb-hit-index">{String(i + 1).padStart(2, '0')}</div><div><div className="kb-hit-title"><h3>{hit.title}</h3><Badge tone="neutral">{kindLabels[hit.kind]}</Badge></div><p className="muted">V{hit.version} · {hit.locator} · {hit.filename}</p><p className="kb-excerpt">{hit.text}</p><div className="kb-tags">{hit.matched_terms.map(t => <span key={t}>{t}</span>)}</div><Button onClick={() => setSource(hit)}>查看引用原文</Button></div></article>)}</div>}
-        {result.hits.length > 0 && <div className="panel kb-generate"><div><h3>用这些依据生成草稿</h3><p>{model.mode === 'replay' ? '当前为演示回放：整理真实检索到的原文，不调用模型。' : `当前使用 ${model.label}。任务与命中片段将发送至已配置的智谱接口；不会上传整份文件。`}</p><p className="muted">历史脚本仅供结构参考。生成结果保留引用，等待逐段人工核对。</p></div><Button kind="primary" disabled={!!busy || !currentResult || !result.can_generate} onClick={generate}><Sparkles size={16}/>{model.mode === 'replay' ? '整理依据草稿（回放）' : '基于依据生成草稿'}</Button>{!result.can_generate && <p className="kb-warning">只有历史脚本，缺少可用于事实核对的资料。</p>}</div>}
+        <Field label="输入关键词或任务"><textarea rows={3} maxLength={500} required disabled={!!busy} value={query} placeholder={space?.scene === 'medical' ? '例如：咨询预约流程和审核要求' : '例如：保温杯规格和直播讲解要求'} onChange={e => setQuery(e.target.value)}/></Field>
+        <div className="kb-search-controls">
+          <Field label="检索方式"><select disabled={!!busy} value={mode} onChange={e => setMode(e.target.value as RetrievalMode)}><option value="hybrid">混合检索（关键词 + 语义）</option><option value="keyword">关键词检索（含同义词扩展）</option></select></Field>
+          <Field label="检索范围"><select disabled={!!busy} value={channel} onChange={e => setChannel(e.target.value as Channel)}><option value="internal">内部参考</option><option value="douyin">抖音渠道参考</option></select></Field>
+          <Field label="生成用途"><select disabled={!!busy} value={task} onChange={e => setTask(e.target.value)}><option value="answer">内部资料问答</option><option value="script">内部脚本草稿</option></select></Field>
+          <Submit busy={!!busy}><Search size={15}/>检索资料</Submit>
+        </div>
+      </form><p className="muted">关键词检索可补充当前业务场景的同义词；混合检索还会按表达含义寻找原文。检索在本机完成，不消耗在线模型额度，仅限当前空间、适用范围内已审核且有效的资料。</p></section>
+      {result && <section className="kb-results" aria-label="资料检索结果">
+        <div className="kb-library-head"><div><h3>找到 {result.hits.length} 个相关片段</h3><p className="muted">检索词：{result.terms.join(' · ') || '无有效关键词'}。排序不代表事实置信度。</p></div><Badge tone="neutral">{result.retrieval.used_mode === 'hybrid' ? '关键词 + 语义' : '关键词检索'}</Badge></div>
+        {!currentResult && <div className="kb-warning">任务、范围或检索方式已修改，请重新检索。</div>}
+        <div className={result.retrieval.semantic_status === 'unavailable' ? 'kb-warning' : 'kb-retrieval-note'} role="status">
+          <p>{result.retrieval.message}</p>
+          <p>{result.note}</p>
+        </div>
+        {result.expanded_terms.length > 0 && <div className="kb-query-expansion"><strong>本次扩展词</strong><div className="kb-tags">{result.expanded_terms.map(term => <span key={term}>{term}</span>)}</div><p>按当前业务场景补充相关表达，原始问题保持不变。</p></div>}
+        {result.corrections.length > 0 && <div className="kb-corrections"><strong>你是否想查这些词？</strong><p>以下仅是拼写建议。点击后会使用建议重新检索。</p><div className="row-actions">{result.corrections.map(correction => <Button key={correction.query} disabled={!!busy || !currentResult} title={correction.query} onClick={() => search(correction.query)}>{correction.original} → {correction.suggestion} · 重新检索</Button>)}</div></div>}
+        {!result.hits.length ? <div className="panel kb-empty"><Search size={30}/><h3>暂无可用依据</h3><p>可以换用项目名、商品名或更具体的问题；也请检查资料是否审核、过期或属于其他范围。没有依据时不会调用生成模型。</p></div> : <div className="kb-hit-list">{result.hits.map((hit, i) => <article className="panel kb-hit" key={hit.id}>
+          <div className="kb-hit-index">{String(i + 1).padStart(2, '0')}</div>
+          <div><div className="kb-hit-title"><h3>{hit.title}</h3><Badge tone="neutral">{kindLabels[hit.kind]}</Badge>{result.evidence_ids.includes(hit.id) && <Badge>用于生成</Badge>}</div>
+            <p className="muted">V{hit.version} · {hit.locator} · {hit.filename}</p>
+            <div className="kb-hit-methods">{hit.retrieval_methods?.includes('keyword') && <span>关键词匹配</span>}{hit.retrieval_methods?.includes('semantic') && <span>语义相关</span>}</div>
+            <p className="kb-excerpt">{hit.text}</p>
+            {hit.matched_terms.length > 0 && <div className="kb-tags" aria-label="该片段及标题的命中词"><small>命中词</small>{hit.matched_terms.map(t => <span key={t}>{t}</span>)}</div>}
+            <Button disabled={!!busy} onClick={() => setSource(hit)}>查看引用原文</Button>
+          </div>
+        </article>)}</div>}
+        {result.hits.length > 0 && <div className="panel kb-generate"><div><h3>用选取的依据生成草稿</h3><p>本次展示 {result.hits.length} 个候选片段，选取其中 {result.evidence_ids.length} 个用于生成（最多 6 个）；已在上方标记。</p><p>{model.mode === 'replay' ? '当前为演示回放：整理选取的原文，不调用生成模型。' : `当前使用 ${model.label}。任务与选取的依据片段将发送至已配置的智谱接口；不会上传整份文件。`}</p><p className="muted">历史脚本仅供结构参考。生成结果保留引用，等待逐段人工核对。</p></div><Button kind="primary" disabled={!!busy || !currentResult || !result.can_generate} onClick={generate}><Sparkles size={16}/>{model.mode === 'replay' ? '整理依据草稿（回放）' : '基于依据生成草稿'}</Button>{!result.can_generate && <p className="kb-warning">缺少可用于事实核对的资料；历史脚本不能单独作为事实依据。</p>}</div>}
       </section>}
     </>}
     {loaded && tab === 'drafts' && <div className={'kb-drafts-layout' + (draft ? ' has-editor' : '')}><section className="panel kb-draft-list"><div className="panel-header"><h3>已保存的知识草稿</h3><Layers size={18}/></div>{!drafts.length ? <><Empty text="还没有草稿，先检索一份可用依据。"/><Button onClick={() => setTab('search')}>去检索资料</Button></> : drafts.map(d => <button key={d.id} className={'kb-draft-item' + (draft?.id === d.id ? ' active' : '')} onClick={() => { if (canLeave()) { setDraftDirty(false); setDraft(d); } }}><strong>{d.title}</strong><span>{d.status === 'confirmed' ? '人工已确认' : '待核对'} · V{d.revision} · {date(d.created_at)}</span><small>{d.source === 'replay' ? '本地摘录回放' : '智谱生成'}{d.source_warnings.length > 0 ? ' · 引用已变化' : ''}</small></button>)}</section>{draft && <DraftEditor key={draft.id} draft={draft} changed={changedDraft} dirtyChanged={markDraftDirty} openSource={setSource} handoff={handoff}/>}</div>}

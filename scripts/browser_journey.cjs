@@ -1,5 +1,5 @@
 /* Use only the isolated replay server started with tmp/journey-acceptance/data. */
-const { chromium } = require('C:/Users/16620/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright_runtime.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');

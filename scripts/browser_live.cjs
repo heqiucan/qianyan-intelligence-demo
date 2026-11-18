@@ -1,5 +1,5 @@
 /* Run against an isolated replay service: DEMO_DATA_DIR=tmp/live-acceptance/data, port 8032. */
-const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'C:/Users/16620/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const { chromium } = require('./playwright_runtime.cjs');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');

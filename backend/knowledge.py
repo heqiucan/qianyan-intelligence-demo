@@ -17,6 +17,11 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from backend.knowledge_text import MAX_CHARS, MAX_UPLOAD, extract_text, indexed, split_pages, terms
 from backend.knowledge_samples import SAMPLES
+from backend.knowledge_query import expand_query
+from backend.knowledge_embeddings import rank_semantic
+
+SEARCH_LIMIT = 12
+EVIDENCE_LIMIT = 6
 
 
 def stamp():
@@ -68,7 +73,7 @@ class Page(Input):
 class DocumentInput(Operation):
     space_id: str = Field(min_length=1, max_length=80)
     title: str = Field(min_length=1, max_length=120)
-    kind: Literal["facts", "rules", "script"] = "facts"
+    kind: Literal["facts", "rules", "script", "demand"] = "facts"
     channel: Literal["internal", "douyin"] = "internal"
     valid_from: date | None = None
     valid_until: date | None = None
@@ -95,6 +100,7 @@ class SearchInput(Input):
     space_id: str = Field(min_length=1, max_length=80)
     query: str = Field(min_length=1, max_length=500)
     channel: Literal["internal", "douyin"] = "internal"
+    mode: Literal["hybrid", "keyword"] = "hybrid"
 
 
 class GenerateInput(SearchInput, Operation):
@@ -131,6 +137,8 @@ def availability(doc):
         return "尚未生效"
     if doc.get("valid_until") and doc["valid_until"] < today():
         return "已过期"
+    if doc.get("kind") == "demand":
+        return "需求素材可用（非事实依据）"
     return "可检索"
 
 
@@ -163,52 +171,124 @@ def save_document(db, body, old=None, is_demo=False):
     return put(db, "kb_documents", item)
 
 
-def search(db, body):
+def capture_search(db, body):
+    """Snapshot eligibility before ranking. Only approved, effective scoped text leaves SQLite."""
     space = get(db, "kb_spaces", body.space_id)
-    tokens = terms(body.query)[:32]
-    hits = []
+    docs = [json.loads(row[0]) for row in db.execute("""SELECT data FROM records
+        WHERE collection='kb_documents' AND json_extract(data,'$.space_id')=?
+        AND json_extract(data,'$.status')='approved' AND json_extract(data,'$.channel')=?
+        AND json_extract(data,'$.kind') IN ('facts','rules','script')
+        AND (json_extract(data,'$.valid_from') IS NULL OR json_extract(data,'$.valid_from')<=?)
+        AND (json_extract(data,'$.valid_until') IS NULL OR json_extract(data,'$.valid_until')>=?)
+        ORDER BY id""", (body.space_id, body.channel, today(), today()))]
+    chunks = {}
+    vocabulary = set()
+    for doc in docs:
+        for chunk in doc['chunks']:
+            if re.fullmatch(r"(?:【[^\n]+】|#{1,6}[^\n]+)", chunk['text']):
+                continue
+            chunks[chunk['id']] = (doc, chunk)
+            vocabulary.update(terms(doc['title'] + ' ' + chunk['text']))
+    query = expand_query(body.query, space['scene'], vocabulary)
+    tokens = list(dict.fromkeys(query['terms'] + query['expanded_terms']))
+    keyword_ids = []
     if tokens:
         match = " OR ".join('"' + t + '"' for t in tokens)
         # Apply the content scope and effective status BEFORE LIMIT, not after it.
-        rows = db.execute("""SELECT f.chunk_id, r.data, bm25(kb_fts,0,0,3,1) AS score
+        rows = db.execute("""SELECT f.chunk_id, bm25(kb_fts,0,0,3,1) AS score
           FROM kb_fts AS f JOIN records AS r ON r.collection='kb_documents' AND r.id=f.doc_id
           WHERE kb_fts MATCH ? AND json_extract(r.data,'$.space_id')=?
           AND json_extract(r.data,'$.status')='approved'
           AND json_extract(r.data,'$.channel')=?
+          AND json_extract(r.data,'$.kind') IN ('facts','rules','script')
           AND (json_extract(r.data,'$.valid_from') IS NULL OR json_extract(r.data,'$.valid_from')<=?)
           AND (json_extract(r.data,'$.valid_until') IS NULL OR json_extract(r.data,'$.valid_until')>=?)
-          ORDER BY score, f.chunk_id LIMIT 40""", (match, body.space_id, body.channel, today(), today())).fetchall()
-        count = {}
-        for row in rows:
-            doc = json.loads(row["data"])
-            if count.get(doc["id"], 0) >= 2:
-                continue
-            chunk = next(c for c in doc["chunks"] if c["id"] == row["chunk_id"])
-            # Title-only matches are allowed and explicitly highlighted as such.
-            matched = [t for t in tokens if t in set(terms(doc["title"] + " " + chunk["text"]))]
-            hits.append({"id": chunk["id"], "document_id": doc["id"], "title": doc["title"], "version": doc["version"],
-                         "kind": doc["kind"], "channel": doc["channel"], "filename": doc["filename"],
-                         "text": chunk["text"], "locator": chunk["locator"], "matched_terms": matched,
-                         "valid_until": doc.get("valid_until"), "is_demo": doc.get("is_demo", False)})
-            count[doc["id"]] = count.get(doc["id"], 0) + 1
-            if len(hits) == 6:
-                break
-    fingerprint = json.dumps({"space": space["id"], "query": body.query, "channel": body.channel, "hits": hits}, ensure_ascii=False, sort_keys=True)
-    return {"space": space, "query": body.query, "channel": body.channel, "terms": tokens, "hits": hits,
+          ORDER BY score, f.chunk_id LIMIT 64""", (match, body.space_id, body.channel, today(), today())).fetchall()
+        keyword_ids = [row['chunk_id'] for row in rows if row['chunk_id'] in chunks]
+    fingerprint = json.dumps({'space': space, 'docs': docs, 'query': body.query, 'channel': body.channel,
+                              'mode': body.mode, 'expansion': query}, ensure_ascii=False, sort_keys=True)
+    return {'space': space, 'chunks': chunks, 'query_info': query, 'keyword_ids': keyword_ids,
+            'scope_signature': hashlib.sha256(fingerprint.encode()).hexdigest()}
+
+
+def choose_evidence(hits):
+    """At most six original chunks; prefer factual material and softly diversify documents."""
+    chosen = []
+    for is_script in (False, True):
+        pending = [h for h in hits if (h['kind'] == 'script') == is_script]
+        while pending and len(chosen) < EVIDENCE_LIMIT:
+            seen = set()
+            rest = []
+            for hit in pending:
+                if hit['document_id'] in seen or len(chosen) >= EVIDENCE_LIMIT:
+                    rest.append(hit)
+                else:
+                    chosen.append(hit)
+                    seen.add(hit['document_id'])
+            pending = rest
+    return chosen
+
+
+def rank_search(snapshot, body):
+    chunks, query = snapshot['chunks'], snapshot['query_info']
+    semantic = {'scores': {}, 'status': 'disabled', 'model': '', 'message': '使用关键词和受控同义词检索，未启用语义模型。'}
+    if body.mode == 'hybrid' and re.search(r'[a-zA-Z0-9\u3400-\u9fff]', body.query):
+        semantic = rank_semantic(body.query, [{'id': key, 'title': doc['title'], 'text': chunk['text']}
+                                            for key, (doc, chunk) in chunks.items()])
+    keyword_ids = snapshot['keyword_ids']
+    # Reciprocal Rank Fusion combines ranks, never incompatible BM25 and cosine magnitudes.
+    semantic_ids = sorted((key for key in semantic['scores'] if key in chunks),
+                          key=lambda key: (-semantic['scores'][key], key))[:64]
+    fused = {}
+    for ranking in (keyword_ids, semantic_ids):
+        for rank, key in enumerate(ranking, 1):
+            fused[key] = fused.get(key, 0) + 1 / (60 + rank)
+    ordered = sorted(fused, key=lambda key: (-fused[key], key))[:SEARCH_LIMIT]
+    tokens = query['terms'] + query['expanded_terms']
+    hits = []
+    for key in ordered:
+        doc, chunk = chunks[key]
+        matched = [t for t in tokens if t in set(terms(doc['title'] + ' ' + chunk['text']))]
+        hit = {"id": key, "document_id": doc["id"], "title": doc["title"], "version": doc["version"],
+               "kind": doc["kind"], "channel": doc["channel"], "filename": doc["filename"],
+               "text": chunk["text"], "locator": chunk["locator"], "matched_terms": matched,
+               "valid_until": doc.get("valid_until"), "is_demo": doc.get("is_demo", False),
+               "retrieval_methods": (['keyword'] if key in keyword_ids else []) + (['semantic'] if key in semantic_ids else [])}
+        if key in semantic_ids:
+            hit['semantic_score'] = round(float(semantic['scores'][key]), 6)
+        hits.append(hit)
+    evidence = choose_evidence(hits)
+    evidence_ids = [h['id'] for h in evidence]
+    fingerprint = json.dumps({'scope': snapshot['scope_signature'], 'hits': hits, 'evidence_ids': evidence_ids},
+                             ensure_ascii=False, sort_keys=True)
+    return {"space": snapshot['space'], "query": body.query, "channel": body.channel, 'mode': body.mode,
+            **query, "hits": hits, 'evidence_ids': evidence_ids, 'scope_signature': snapshot['scope_signature'],
             "signature": hashlib.sha256(fingerprint.encode()).hexdigest(),
-            "can_generate": any(hit["kind"] != "script" for hit in hits),
-            "note": "按关键词相关性排序，不是事实置信度；仅检索当前空间、渠道下已审核且有效的资料。"}
+            "can_generate": any(hit["kind"] in {"facts", "rules"} for hit in evidence),
+            'retrieval': {'requested_mode': body.mode, 'used_mode': 'hybrid' if semantic['status'] == 'ready' else 'keyword',
+                          'semantic_status': semantic['status'], 'model': semantic['model'], 'message': semantic['message']},
+            "note": "按相关性排序，不是事实置信度；仅检索当前空间、渠道下已审核且有效的资料。最多展示12个候选，生成选取最多6个原文片段。"}
+
+
+def search(db, body):
+    """Compatibility entry point for local callers; HTTP routes rank outside transactions."""
+    return rank_search(capture_search(db, body), body)
 
 
 def source_warnings(db, draft):
     warnings = []
+    if draft.get('evidence_missing'):
+        warnings.append('此组仍有问题缺少直接依据；请补充事实后回到原任务重新生成，不能把部分答复确认为完整结果。')
     for source in draft["sources"]:
         doc = get(db, "kb_documents", source["document_id"])
         if doc["version"] != source["version"] or availability(doc) != "可检索":
             text = f"{source['title']} V{source['version']} 已更新或不可用（当前 V{doc['version']}，{availability(doc)}）"
             if text not in warnings:
                 warnings.append(text)
-    return warnings
+    if draft.get('demand_origin'):
+        from backend.demand_content import demand_origin_warnings
+        warnings.extend(demand_origin_warnings(db, draft['demand_origin']))
+    return list(dict.fromkeys(warnings))
 
 
 def draft_view(db, draft):
@@ -226,8 +306,8 @@ def check_blocks(blocks, sources):
     allowed = {source["id"]: source for source in sources}
     for block in blocks:
         refs = block["citation_ids"]
-        if any(key not in allowed for key in refs) or not any(allowed[key]["kind"] != "script" for key in refs):
-            raise HTTPException(422, "每段内容必须引用本次检索的有效资料，不能只用历史脚本作事实依据。")
+        if any(key not in allowed or allowed[key]['kind'] == 'demand' for key in refs) or not any(allowed[key]["kind"] in {"facts", "rules"} for key in refs):
+            raise HTTPException(422, "每段内容必须引用本次检索的有效资料，不能用需求素材或只用历史脚本作事实依据。")
 
 
 def register_knowledge(app, store, adapter):
@@ -235,7 +315,7 @@ def register_knowledge(app, store, adapter):
 
     @app.get("/api/knowledge/spaces")
     def spaces():
-        with store.transaction() as db:
+        with store.read() as db:
             return records(db, "kb_spaces")
 
     @app.post("/api/knowledge/spaces")
@@ -245,13 +325,13 @@ def register_knowledge(app, store, adapter):
 
     @app.get("/api/knowledge/documents")
     def documents(space_id: str):
-        with store.transaction() as db:
+        with store.read() as db:
             get(db, "kb_spaces", space_id)
             return [summary(d) for d in records(db, "kb_documents") if d["space_id"] == space_id]
 
     @app.get("/api/knowledge/documents/{doc_id}")
     def document(doc_id: str):
-        with store.transaction() as db:
+        with store.read() as db:
             doc = get(db, "kb_documents", doc_id)
             return {**doc, "availability": availability(doc)}
 
@@ -307,21 +387,31 @@ def register_knowledge(app, store, adapter):
 
     @app.post("/api/knowledge/search")
     def retrieve(body: SearchInput):
-        with store.transaction() as db:
-            return search(db, body)
+        with store.read() as db:
+            snapshot = capture_search(db, body)
+        # First CPU model load/indexing may be slow. Do not hold SQLite's writer lock.
+        result = rank_search(snapshot, body)
+        with store.read() as db:
+            if capture_search(db, body)['scope_signature'] != snapshot['scope_signature']:
+                raise HTTPException(409, "检索期间资料发生变化，请重新检索并核对来源。")
+        return result
 
     @app.post("/api/knowledge/drafts")
     def generate(body: GenerateInput):
+        result = retrieve(body)
+
         def prepare(db):
-            result = search(db, body)
             if body.signature != result["signature"]:
                 raise HTTPException(409, "资料、渠道或关键词已变化，请重新检索并核对来源。")
+            if capture_search(db, body)['scope_signature'] != result['scope_signature']:
+                raise HTTPException(409, "检索期间资料发生变化，请重新检索并核对来源。")
             if not result["can_generate"]:
                 raise HTTPException(422, "没有找到可作为依据的资料。请补充事实或审核要求并重新检索；未调用模型。")
-            return result
+            by_id = {hit['id']: hit for hit in result['hits']}
+            return {**result, 'hits': [by_id[key] for key in result['evidence_ids']]}
 
         def save(db, context, content):
-            if search(db, body)["signature"] != context["signature"]:
+            if capture_search(db, body)['scope_signature'] != context['scope_signature']:
                 raise HTTPException(409, "生成期间资料发生变化，请重新检索；未保存过时草稿。")
             check_blocks(content["blocks"], context["hits"])
             used = {key for block in content["blocks"] for key in block["citation_ids"]}
@@ -337,7 +427,7 @@ def register_knowledge(app, store, adapter):
 
     @app.get("/api/knowledge/drafts")
     def drafts(space_id: str):
-        with store.transaction() as db:
+        with store.read() as db:
             get(db, "kb_spaces", space_id)
             return [draft_view(db, d) for d in reversed(records(db, "kb_drafts")) if d["space_id"] == space_id]
 

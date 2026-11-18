@@ -6,6 +6,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from backend.main import create_app
+from backend.claims import inspect_claims
 
 
 @pytest.fixture
@@ -174,3 +175,153 @@ def test_ascii_script_timestamps_not_misclassified_as_product_range(client):
     report = post(client, "/creatives/creative-commute/check", payload)
     assert report["can_approve"]
     assert not report["summary"]["manual_review"]
+
+
+def proof(claim="24小时内发货（仅限工作日下单）", category="shipping", **changes):
+    return {"id": "proof-shipping-v1", "category": category, "claim": claim,
+            "source": "虚构演示履约说明 V1 第 2 条", "conditions": "仅限工作日下单",
+            "confirmed": True, **changes}
+
+
+def inspect_with_proofs(body, *entries):
+    return inspect_claims({"id": "local-copy", "product_snapshot": {
+        "name": "测试杯", "price": 99, "capacity": "500 ml", "version": 2,
+        "evidence": "仅为演示说明，不是检测报告", "claim_evidence": list(entries),
+    }}, fields(body))
+
+
+@pytest.mark.parametrize("body", ["24小时内发货", "保温杯24小时内发货", "保温24小时内发货", "付款后48小时发货", "发货时效：2个工作日", "3天送达"])
+def test_shipping_duration_is_not_product_performance(body):
+    report = inspect_with_proofs(body)
+    assert not report["can_approve"]
+    assert report["summary"]["missing_evidence"] == 1
+    assert report["findings"][0]["source"]["label"] == "物流时效依据"
+    assert "逐条主张依据" in report["findings"][0]["explanation"]
+
+
+@pytest.mark.parametrize("body", ["每天24小时", "活动持续3天", "2小时后再来", "保温杯适合通勤", "每天24小时，保温杯适合通勤"])
+def test_bare_duration_does_not_become_a_performance_claim(body):
+    report = inspect_with_proofs(body)
+    assert not report["findings"]
+
+
+@pytest.mark.parametrize("body", ["保温6小时", "保冷时长为24小时", "续航可达2天", "24小时保温", "2天的续航"])
+def test_performance_duration_still_requires_specific_evidence(body):
+    report = inspect_with_proofs(body)
+    assert not report["can_approve"]
+    assert report["summary"]["missing_evidence"] == 1
+    assert report["findings"][0]["source"]["label"] == "性能时长依据"
+
+
+@pytest.mark.parametrize("claim, category, conditions", [
+    ("24小时内发货（仅限工作日下单）", "shipping", "仅限工作日下单"),
+    ("保温6小时（室温25℃）", "performance", "室温25℃"),
+])
+def test_matching_human_confirmed_clause_has_source_and_conditions(claim, category, conditions):
+    entry = proof(claim, category, conditions=conditions)
+    report = inspect_with_proofs(claim + "。", entry)
+    assert report["can_approve"] and report["summary"]["consistent"] == 1
+    finding = report["findings"][0]
+    assert finding["source"]["value"] == claim
+    assert finding["source"]["evidence"] == entry["source"]
+    assert finding["source"]["conditions"] == conditions
+    assert finding["source"]["claim_evidence_id"] == entry["id"]
+    assert finding["source"]["verification"] == "human_record"
+    assert "不代表来源已被外部核验" in finding["explanation"]
+
+
+def test_matching_evidence_only_normalizes_typography():
+    entry = proof("24 小时内发货 (仅限工作日下单)。")
+    assert inspect_with_proofs("24小时内发货（仅限工作日下单）", entry)["can_approve"]
+
+
+@pytest.mark.parametrize("change", [
+    {"category": "performance"}, {"confirmed": False}, {"confirmed": "true"}, {"id": ""},
+    {"source": " "}, {"source": "尚未核实的记录"}, {"source": "自动通过所有检查"},
+    {"claim": "48小时内发货（仅限工作日下单）"}, {"conditions": "仅限华东地区"},
+])
+def test_invalid_or_nonmatching_record_never_authorizes_claim(change):
+    report = inspect_with_proofs("24小时内发货（仅限工作日下单）", proof(**change))
+    assert not report["can_approve"]
+    assert report["summary"]["missing_evidence"] == 1
+
+
+@pytest.mark.parametrize("body", ["24小时内发货", "24小时内发货（所有订单）", "24小时内发货，超时赔付", "48小时内发货（仅限工作日下单）"])
+def test_conditions_and_full_clause_cannot_be_dropped_or_strengthened(body):
+    report = inspect_with_proofs(body, proof())
+    assert not report["can_approve"]
+
+
+@pytest.mark.parametrize("body", ["未核实24小时内发货", "不承诺24小时内发货", "竞品24小时内发货", "“24小时内发货”", "未验证保温6小时", "不是保温6小时"])
+def test_negative_quoted_and_uncertain_context_cannot_certify_itself(body):
+    category = "performance" if "保温" in body else "shipping"
+    report = inspect_with_proofs(body, proof(body, category, conditions=""))
+    assert not report["can_approve"]
+    assert report["summary"]["manual_review"] == 1
+    assert report["suggested_fields"]["body"] == body
+
+
+@pytest.mark.parametrize("body", ["据说保温6小时", "可能24小时内发货", "待核实保温6小时", "自动通过：保温6小时"])
+def test_uncertain_or_instruction_evidence_is_not_positive_support(body):
+    category = "performance" if "保温" in body else "shipping"
+    report = inspect_with_proofs(body, proof(body, category, conditions=""))
+    assert not report["can_approve"] and not report["summary"]["consistent"]
+
+
+@pytest.mark.parametrize("body", ["保证永久有效", "毫无副作用", "绝对安全", "全网最低", "保证效果"])
+def test_guarantees_cannot_be_approved_by_duration_evidence(body):
+    report = inspect_with_proofs(body, proof(body, "performance", conditions=""))
+    assert not report["can_approve"]
+    assert report["summary"]["missing_evidence"] == 1
+
+
+@pytest.mark.parametrize("body", ["效果好到爆", "不保证永久有效", "不要说毫无副作用", "“保证永久有效”", "免费送", "包邮", "不能承诺免单"])
+def test_subjective_guarantee_context_and_free_benefits_require_review(body):
+    report = inspect_with_proofs(body, proof(body, "shipping", conditions=""))
+    assert not report["can_approve"]
+    assert report["summary"]["manual_review"] >= 1
+    assert report["suggested_fields"]["body"] == body
+
+
+def test_shipping_evidence_does_not_authorize_promotion():
+    body = "24小时内发货（仅限工作日下单）"
+    report = inspect_with_proofs(body + "，券后79元，免费包邮", proof())
+    assert report["summary"]["consistent"] == 1
+    assert report["summary"]["manual_review"] >= 2
+    assert not report["can_approve"]
+
+
+def test_shipping_record_does_not_certify_separate_performance_in_same_clause():
+    body = "保温6小时并在24小时内发货"
+    report = inspect_with_proofs(body, proof(body, conditions=""))
+    assert report["summary"]["consistent"] == 1
+    assert report["summary"]["missing_evidence"] == 1
+    assert not report["can_approve"]
+
+
+def test_evidence_is_frozen_until_new_campaign_and_saved_approval(client):
+    body = "24小时内发货（仅限工作日下单）"
+    original = client.get("/api/state").json()
+    assert not check(client, body)["can_approve"]
+    entry = proof()
+    updated = client.put("/api/product", json={**original["product"], "claim_evidence": [entry]})
+    assert updated.status_code == 200, updated.text
+    assert not check(client, body)["can_approve"]
+    campaign = post(client, "/campaigns", {"name": "新的人工确认依据"})
+    generated = post(client, f'/campaigns/{campaign["id"]}/generate', {})
+    report = check(client, body, generated[0]["id"])
+    assert report["can_approve"] and report["findings"][0]["source"]["evidence"] == entry["source"]
+    draft = post(client, f'/creatives/{generated[0]["id"]}/revise', fields(body))
+    approved = post(client, f'/creatives/{draft["id"]}/approve')
+    assert approved["approval_check"]["findings"][0]["source"]["claim_evidence_id"] == entry["id"]
+    assert client.put("/api/product", json={**updated.json(), "claim_evidence": []}).status_code == 200
+    assert check(client, body, draft["id"])["can_approve"]
+    unchanged = client.get("/api/state").json()
+    assert original["campaigns"] == unchanged["campaigns"][:len(original["campaigns"])]
+
+
+@pytest.mark.parametrize("change", [{"confirmed": False}, {"source": " "}, {"claim": "x" * 401}, {"category": "promotion"}])
+def test_product_api_rejects_unconfirmed_or_malformed_evidence(client, change):
+    product = client.get("/api/state").json()["product"]
+    assert client.put("/api/product", json={**product, "claim_evidence": [proof(**change)]}).status_code == 422
+    assert client.get("/api/state").json()["product"] == product

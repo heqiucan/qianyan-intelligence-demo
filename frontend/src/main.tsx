@@ -1,5 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import ErrorBoundary from './components/ErrorBoundary';
 import './styles.css';
 import './extras.css';
 import './main-v2.css';
@@ -8,4 +9,4 @@ import './workspace-v3.css';
 import './creative-studio.css';
 import './features/journey/journey.css';
 import './features/live/live.css';
-createRoot(document.getElementById('root')!).render(<App/>);
+createRoot(document.getElementById('root')!).render(<ErrorBoundary><App/></ErrorBoundary>);

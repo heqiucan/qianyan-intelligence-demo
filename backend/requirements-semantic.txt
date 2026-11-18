@@ -1,0 +1,8 @@
+# Optional local CPU semantic retrieval. The normal app supports keyword fallback.
+# BGE weights are downloaded separately by scripts/setup_knowledge_embeddings.py.
+sentence-transformers==6.3.0
+torch==2.15.0
+transformers==5.23.0
+numpy==2.5.5
+huggingface-hub==2.4.0
+tokenizers==0.23.3

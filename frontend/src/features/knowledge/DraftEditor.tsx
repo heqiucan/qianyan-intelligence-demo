@@ -30,6 +30,7 @@ export default function DraftEditor({ draft, changed, dirtyChanged, openSource, 
     const text = [`# ${draft.title}`, `状态：${draft.status === 'confirmed' ? '人工已确认（未发布）' : '待核对草稿'}`, `来源：${sourceLabel}`, '',
       ...draft.blocks.flatMap(b => [b.text, '引用：' + b.citation_ids.map(id => { const s = draft.sources.find(s => s.id === id); return s ? `${s.title} V${s.version} / ${s.locator}` : id; }).join('；'), '']),
       '## 待核实事项', ...draft.missing.map(x => '- ' + x), ...draft.source_warnings.map(x => '- 来源变化：' + x), '',
+      ...(draft.demand_origin ? ['## 需求来源与任务链', `原始问题：${draft.demand_origin.original}`, `内容任务：${draft.demand_origin.task_id}；结果：${draft.demand_origin.result_id}；确认版本：V${draft.demand_origin.result_revision}`, `上游任务：${draft.demand_origin.parent_task_id || '无'}`, ...draft.demand_origin.upstream.map(item => `- V${item.revision} · ${item.original}（${item.id}）`), '### 完整需求来源快照', '```json', JSON.stringify(draft.demand_origin, null, 2), '```', '需求记录提供问题方向，正文事实依据见下方独立审核的引用快照。', ''] : []),
       '## 引用快照', ...draft.sources.flatMap(s => [`### ${s.title} V${s.version} · ${s.locator}`, s.text, '']),
       '引用存在不等于结论已获验证；人工确认不代表广告审查通过。',
     ].join('\n');
@@ -39,6 +40,7 @@ export default function DraftEditor({ draft, changed, dirtyChanged, openSource, 
   return <section className="panel kb-draft-editor" aria-label="知识草稿编辑器">
     <div className="panel-header"><div><h3>核对草稿与引用</h3><p className="muted">{sourceLabel} · 版本 {draft.revision}</p></div><Badge tone={draft.status === 'confirmed' ? 'green' : 'purple'}>{draft.status === 'confirmed' ? '人工已确认 · 未发布' : '待人工核对'}</Badge></div>
     {error && <div className="error-banner" role="alert">{error}</div>}
+    {draft.demand_origin && <div className="notice"><strong>需求来源与任务链</strong><p>原始问题：{draft.demand_origin.original}</p><p>结果版本 V{draft.demand_origin.result_revision} · {draft.demand_origin.upstream.length} 条上游确认记录。需求只提供问题方向，以下正文引用独立审核的事实资料。</p><a href={`#/creative?tab=demand&space=${encodeURIComponent(draft.space_id)}&task=${encodeURIComponent(draft.demand_origin.task_id)}`}>回到来源内容任务</a></div>}
     {draft.source_warnings.length > 0 && <div className="kb-warning" role="alert"><strong>引用资料已变化，请重新检索生成</strong>{draft.source_warnings.map(x => <p key={x}>{x}</p>)}<p>以下保留生成时的引用快照。</p></div>}
     <Field label="草稿标题"><input value={title} maxLength={160} onChange={e => setTitle(e.target.value)}/></Field>
     {blocks.map((b, i) => <div className="kb-draft-block" key={i}>

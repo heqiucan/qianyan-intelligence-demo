@@ -9,7 +9,7 @@ from threading import Event, Thread
 import logging
 
 from fastapi import HTTPException
-from backend.knowledge import get, put, records, stamp, identifier
+from backend.knowledge import get, put, records, stamp, identifier, SearchInput, capture_search, rank_search
 from backend.model_adapter import ModelFailure
 from backend.agents.schemas import ACTIVE, LIMITS
 from backend.agents.policy import choose_action
@@ -104,13 +104,25 @@ class AgentRunner:
                     task["model_calls"] += 1; task["total_model_calls"] += 1
                 event(task, label, "正在调用智谱，等待响应。" if self.adapter.mode != "replay" else "正在执行明确标注的规则演示。", "running")
             snapshot = self.change(task_id, attempt, before)
+            self.adapter.operation_started(label)
             value = fn(snapshot)
             def after(db, task):
                 self.close_running(task, "done")
             self.change(task_id, attempt, after)
+            self.adapter.operation_finished(success=True)
             return value
+        except Aborted:
+            self.adapter.operation_finished(error_kind='cancelled')
+            raise
+        except (ModelFailure, HTTPException):
+            self.adapter.operation_finished(error_kind='validation')
+            raise
         finally:
-            self.adapter.operation_lock.release()
+            try:
+                if self.adapter.current_operation:
+                    self.adapter.operation_finished()
+            finally:
+                self.adapter.operation_lock.release()
 
     def execute(self, task_id, attempt):
         try:
@@ -166,6 +178,17 @@ class AgentRunner:
                     self.change(task_id, attempt, saved)
                     return
                 action = self.model_call(task_id, attempt, "choose_action", lambda t: choose_action(self.adapter, t))
+                retrieval = None
+                if action.action == "search_knowledge":
+                    with self.store.transaction() as db:
+                        current = self.current(db, task_id, attempt)
+                        queries = current['scratch'].get('queries', [])
+                        request = SearchInput(space_id=current['space_id'], channel=current['channel'], query=action.query)
+                        snapshot = capture_search(db, request) if len(queries) < LIMITS['searches'] and action.query not in queries else None
+                    if snapshot is not None:
+                        # CPU embedding work may be slow on a first query. Keep cancellation,
+                        # document review and other SQLite writes available during inference.
+                        retrieval = rank_search(snapshot, request)
                 def apply(db, t):
                     t["steps"] += 1
                     scratch = t["scratch"]
@@ -175,7 +198,9 @@ class AgentRunner:
                             t.update(status="waiting_input", message="已达到检索次数上限或重复了相同关键词。请补充相关资料或调整任务后继续。")
                             event(t, "request_input", t["message"], "attention")
                             return
-                        result = tools.retrieve(db, t, action.query)
+                        if retrieval is None or capture_search(db, request)['scope_signature'] != retrieval['scope_signature']:
+                            raise HTTPException(409, "检索期间资料发生变化，请核对资料后继续任务。")
+                        result = retrieval
                         queries.append(action.query)
                         merged = {s["id"]: s for s in scratch.get("candidates", [])}
                         # Prefer newly retrieved snippets; keep the union bounded.
@@ -183,7 +208,7 @@ class AgentRunner:
                         candidates.update({k: v for k, v in merged.items() if k not in candidates})
                         scratch["candidates"] = list(candidates.values())[:8]
                         scratch.pop("sources", None)
-                        event(t, "search_knowledge", f"检索“{action.query}”，命中 {len(result['hits'])} 个片段。", query=action.query, source_ids=[s["id"] for s in result["hits"]])
+                        event(t, "search_knowledge", f"检索“{action.query}”，命中 {len(result['hits'])} 个片段。" + result['retrieval']['message'], query=action.query, source_ids=[s["id"] for s in result["hits"]], retrieval_mode=result['retrieval']['used_mode'])
                     elif action.action == "read_evidence":
                         previous = {s["id"]: s for s in scratch.get("sources", [])}
                         if all(key in previous for key in action.source_ids):

@@ -30,13 +30,13 @@ def register_agents(app, store, adapter, runner):
 
     @app.get("/api/agent/tasks")
     def list_tasks():
-        with store.transaction() as db:
+        with store.read() as db:
             tasks = sorted(records(db, "agent_runs"), key=lambda t: t["created_at"], reverse=True)
             return [public_task(db, t, False) for t in tasks[:100]]
 
     @app.get("/api/agent/tasks/{task_id}")
     def read_task(task_id: str):
-        with store.transaction() as db:
+        with store.read() as db:
             return public_task(db, get(db, "agent_runs", task_id))
 
     @app.post("/api/agent/tasks", status_code=202)

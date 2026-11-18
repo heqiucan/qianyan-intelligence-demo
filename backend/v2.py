@@ -42,7 +42,7 @@ def migrate_defaults(db):
 
 
 def campaign_fields(body):
-    data = body.model_dump(mode="json", exclude={"request_id"})
+    data = body.model_dump(mode="json", exclude={"request_id", "expected_product_version"})
     if data["start_date"] and data["end_date"] and data["end_date"] < data["start_date"]:
         raise HTTPException(422, "活动结束日期不能早于开始日期。")
     return data
@@ -367,7 +367,7 @@ def register_v2(app, store, adapter):
                     raise HTTPException(409, "计划已结束，无法确认调整。")
                 if plan.get("config_version", 1) != change["before"]["config_version"]:
                     raise HTTPException(409, "计划配置已变化，请重新创建调整草稿并核对。")
-                if plan["status"] == "running" and not change["after"]["start_date"] <= date.today().isoformat() <= change["after"]["end_date"]:
+                if plan["status"] == "running" and not change["after"]["start_date"] <= datetime.now(timezone.utc).date().isoformat() <= change["after"]["end_date"]:
                     raise HTTPException(409, "运行计划的新周期必须包含当前日期。")
                 history = plan.get("config_history", []) + [{**plan_before(plan), "recorded_at": now(), "adjustment_id": adjustment_id}]
                 plan.update(**change["after"], config_version=plan.get("config_version", 1)+1, config_history=history, updated_at=now())

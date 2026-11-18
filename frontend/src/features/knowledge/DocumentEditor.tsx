@@ -44,7 +44,7 @@ export default function DocumentEditor({ spaceId, document, saved, close }: {
   };
   return <Modal title={document ? `更新资料 · V${document.version + 1}` : '导入知识资料'} wide onClose={closeEditor} busy={busy} error={error}>
     <form onSubmit={e => { e.preventDefault(); save(); }}>
-      <div className="kb-import-note"><FileText size={20}/><p>保存后先进入待审核。核对内容并标记为可用后，资料才会进入检索。</p></div>
+      <div className="kb-import-note"><FileText size={20}/><p>事实资料审核后进入知识检索。关键词、评论和问题请选“需求素材”，在需求素材与词库中分析，不作为事实依据。</p></div>
       <div className="form-grid">
         <Field label="资料标题" full><input required maxLength={120} value={title} onChange={e => { setTitle(e.target.value); mark(); }}/></Field>
         <Field label="资料类型"><select value={kind} onChange={e => { setKind(e.target.value as Document['kind']); mark(); }}>{Object.entries(kindLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}</select></Field>
@@ -58,6 +58,7 @@ export default function DocumentEditor({ spaceId, document, saved, close }: {
       <div className="kb-page-editor">{pages.map((p, i) => <Field label={p.page ? `第 ${p.page} 页解析预览` : '正文（可直接粘贴）'} key={i}>
         <textarea rows={Math.min(10, Math.max(4, p.text.split('\n').length))} maxLength={120000} value={p.text} onChange={e => { setPages(list => list.map((x, n) => n === i ? { ...x, text: e.target.value } : x)); mark(); }}/>
       </Field>)}</div>
+      {kind === 'demand' && <div className="notice">此版本不进入事实检索。保存后可在“商品与品牌 → 需求素材与词库”选择“复制为需求素材”，保留原文和版本定位。若之前用它生成过草稿，旧草稿会提示来源已变化。</div>}
       <div className="notice">历史脚本只作表达结构参考；资料标记为可用不代表广告审核通过。更新后旧草稿仍保留原引用，新版本需要重新审核。</div>
       <div className="modal-footer"><Button onClick={closeEditor} disabled={busy}>取消</Button><Submit busy={busy}>保存资料，进入审核</Submit></div>
     </form>

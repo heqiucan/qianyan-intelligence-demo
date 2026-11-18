@@ -1,0 +1,133 @@
+/* Only run against the isolated replay service on port 8034; no daily data. */
+const { chromium } = require('./playwright_runtime.cjs');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const base = 'http://127.0.0.1:8034';
+const out = path.resolve('tmp/retrieval-acceptance/browser');
+fs.mkdirSync(out, { recursive: true });
+
+async function main() {
+  const browser = await chromium.launch({ channel: 'msedge', headless: true });
+  const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  page.setDefaultTimeout(20000);
+  const checks = [], errors = [], queries = [];
+  const check = (name, value) => { assert.ok(value, name); checks.push(name); console.log('PASS ' + name); };
+  page.on('pageerror', e => errors.push(e.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  page.on('dialog', dialog => dialog.accept());
+  const click = name => page.getByRole('button', { name, exact: true }).click();
+  const post = async (route, data) => {
+    const response = await page.request.post(base + '/api' + route, { data });
+    assert.equal(response.status(), 200, await response.text()); return response.json();
+  };
+  const search = async (query, mode = 'keyword') => {
+    await page.getByLabel('检索方式', { exact: true }).selectOption(mode);
+    await page.getByLabel('输入关键词或任务', { exact: true }).fill(query);
+    const response = page.waitForResponse(r => r.url() === base + '/api/knowledge/search' && r.request().method() === 'POST', { timeout: 120000 });
+    await click('检索资料');
+    const result = await response;
+    assert.equal(result.status(), 200, await result.text());
+    const body = await result.json(); queries.push({ query, mode, retrieval: body.retrieval, count: body.hits.length });
+    await page.getByRole('heading', { name: `找到 ${body.hits.length} 个相关片段`, exact: true }).waitFor();
+    await page.locator('.kb-progress').waitFor({ state: 'hidden' });
+    return body;
+  };
+  let spaceId, docId, draftId;
+  try {
+    await page.goto(base); await page.locator('.hero').waitFor();
+    const state = await (await page.request.get(base + '/api/state')).json();
+    assert.equal(state.model.mode, 'replay', 'The browser test must use an isolated replay service');
+    check('首页球体、四张指标卡和八个主菜单保留', await page.locator('.hero-art').count() === 1 && await page.locator('.stat-card').count() === 4 && await page.getByRole('navigation', { name: '主导航' }).getByRole('button').count() === 8);
+    const space = await post('/knowledge/spaces', { name: '检索浏览器验收 ' + Date.now(), scene: 'medical' }); spaceId = space.id;
+    await page.goto(base + '/#/product?tab=knowledge&space=' + spaceId);
+    await page.getByRole('heading', { name: space.name, exact: true }).waitFor();
+    await click('导入资料');
+    await page.locator('input[type="file"]').setInputFiles({ name: '预约流程验收.txt', mimeType: 'text/plain', buffer: Buffer.from(Array.from({ length: 14 }, (_, i) => `预约流程第${i + 1}项：客服与来访者核对预约时间，记录联系信息和本次咨询诉求。这是虚构的浏览器验收内容。`).join('\n\n')) });
+    await page.getByLabel('资料标题', { exact: true }).fill('预约流程验收');
+    await page.getByLabel('正文（可直接粘贴）', { exact: true }).filter({ hasText: /预约流程/ }).waitFor();
+    await click('保存资料，进入审核'); await page.locator('dialog[open]').waitFor({ state: 'hidden' });
+    const documents = await (await page.request.get(base + '/api/knowledge/documents?space_id=' + spaceId)).json();
+    assert.equal(documents.length, 1); docId = documents[0].id;
+    check('真实TXT导入后14个片段处于待人工审核', documents[0].chunk_count === 14 && documents[0].status === 'draft');
+    await click('检索与生成');
+    const unreviewed = await search('预约');
+    check('未审核文件不能检索或生成', unreviewed.hits.length === 0 && !unreviewed.can_generate && await page.getByRole('heading', { name: '暂无可用依据' }).isVisible());
+    await page.getByRole('navigation', { name: '知识库功能' }).getByRole('button', { name: /资料库/ }).click();
+    await click('查看资料与审核');
+    check('审核确认在勾选前不可点击', await page.getByRole('button', { name: '确认资料可用', exact: true }).isDisabled());
+    await page.getByLabel('我已核对这份资料的内容、类型、范围与有效期。', { exact: true }).check();
+    await click('确认资料可用'); await page.locator('dialog[open]').waitFor({ state: 'hidden' });
+    await page.locator('.kb-progress').waitFor({ state: 'hidden' });
+    await page.locator('.kb-doc-card').getByText('可检索', { exact: true }).waitFor();
+    check('人工审核后资料卡显示可检索', await page.locator('.kb-doc-card').getByText('可检索', { exact: true }).isVisible());
+    await click('检索与生成');
+    const keyword = await search('预约');
+    check('同一文件展示12候选，只有6个标记用于生成', keyword.hits.length === 12 && keyword.evidence_ids.length === 6 && new Set(keyword.hits.map(h => h.document_id)).size === 1 && await page.locator('.kb-hit').count() === 12 && await page.locator('.kb-hit').getByText('用于生成', { exact: true }).count() === 6);
+    check('关键词模式真实禁用语义且查询词标签准确', keyword.retrieval.semantic_status === 'disabled' && keyword.retrieval.used_mode === 'keyword' && await page.getByText('检索词：预约。排序不代表事实置信度。', { exact: true }).isVisible());
+    await page.getByRole('button', { name: '查看引用原文', exact: true }).first().click();
+    check('引用弹窗展示原始版本、定位和正文', await page.locator('dialog[open]').getByText('引用原文快照', { exact: true }).isVisible() && (await page.locator('dialog[open] blockquote').textContent()) === keyword.hits[0].text && (await page.locator('dialog[open]').textContent()).includes('版本 V1'));
+    await click('关闭弹窗');
+    await page.getByLabel('检索方式', { exact: true }).selectOption('hybrid');
+    check('仅切换检索方式使旧结果不能生成', await page.getByRole('button', { name: '整理依据草稿（回放）', exact: true }).isDisabled());
+    const hybrid = await search('客服与来访者核对预约时间', 'hybrid');
+    check('混合检索真实使用本地语义模型', hybrid.retrieval.semantic_status === 'ready' && hybrid.retrieval.used_mode === 'hybrid' && hybrid.hits.some(h => h.retrieval_methods.includes('semantic')) && await page.locator('.kb-library-head').getByText('关键词 + 语义', { exact: true }).isVisible());
+    await page.locator('.kb-results .kb-library-head').evaluate(el => window.scrollTo(0, window.scrollY + el.getBoundingClientRect().top - 90));
+    await page.screenshot({ path: path.join(out, '01-hybrid-results.png') });
+    const synonyms = await search('约个时间');
+    check('同义表达扩展可见且原问题保持不变', synonyms.expanded_terms.includes('预约') && synonyms.hits.length === 12 && await page.getByLabel('输入关键词或任务', { exact: true }).inputValue() === '约个时间' && await page.getByText('本次扩展词', { exact: true }).isVisible());
+    const typo = await search('预跃');
+    check('纠错仅提供建议，未自动改写或查询预约', typo.query === '预跃' && typo.hits.length === 0 && typo.corrections.some(c => c.suggestion === '预约') && await page.getByLabel('输入关键词或任务', { exact: true }).inputValue() === '预跃');
+    await page.locator('.kb-corrections').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(out, '02-spelling-suggestion.png') });
+    const correctedResponse = page.waitForResponse(r => r.url() === base + '/api/knowledge/search' && r.request().method() === 'POST');
+    await click('预跃 → 预约 · 重新检索');
+    const corrected = await (await correctedResponse).json();
+    await page.getByRole('heading', { name: '找到 12 个相关片段', exact: true }).waitFor();
+    check('显式点击建议后按预约重新检索', corrected.query === '预约' && corrected.hits.length === 12 && await page.getByLabel('输入关键词或任务', { exact: true }).inputValue() === '预约');
+    await page.locator('.kb-progress').waitFor({ state: 'hidden' });
+    const generation = page.waitForResponse(r => r.url() === base + '/api/knowledge/drafts' && r.request().method() === 'POST');
+    await click('整理依据草稿（回放）');
+    const generatedResponse = await generation; assert.equal(generatedResponse.status(), 200, await generatedResponse.text());
+    const draft = await generatedResponse.json(); draftId = draft.id;
+    await page.getByRole('region', { name: '知识草稿编辑器', exact: true }).waitFor();
+    check('回放生成保留本次6片段预算内的真实引用', draft.source === 'replay' && draft.sources.length > 0 && draft.sources.length <= 6 && draft.sources.every(s => corrected.evidence_ids.includes(s.id) && corrected.hits.find(h => h.id === s.id).text === s.text) && draft.blocks.every(b => b.citation_ids.length > 0));
+    await page.locator('.kb-citations button').first().click();
+    check('已保存草稿引用弹窗可打开', await page.locator('dialog[open]').getByText('引用原文快照', { exact: true }).isVisible());
+    await click('关闭弹窗');
+    await page.screenshot({ path: path.join(out, '03-draft-citations.png') });
+    await click('检索与生成');
+    await search('客服与来访者核对预约时间', 'hybrid');
+    await page.setViewportSize({ width: 390, height: 844 }); await page.emulateMedia({ reducedMotion: 'reduce' });
+    check('390px检索结果页无横向溢出', await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1));
+    check('减少动画设置应用到知识库操作', await page.locator('.kb-tabs button').first().evaluate(el => getComputedStyle(el).transitionDuration === '0s'));
+    await page.locator('.kb-search-panel').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(out, '04-mobile-search.png') });
+    await page.locator('.kb-hit').first().scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(out, '05-mobile-result.png') });
+    await page.getByRole('button', { name: '查看引用原文', exact: true }).first().click();
+    check('390px引用弹窗无横向溢出', await page.locator('dialog[open]').evaluate(el => el.scrollWidth <= el.clientWidth + 1));
+    await page.screenshot({ path: path.join(out, '06-mobile-source.png') });
+    await click('关闭弹窗');
+    // Simulate an unavailable embedding engine only to verify its UI warning.
+    // Successful hybrid model participation above was tested without interception.
+    await page.route('**/api/knowledge/search', async route => {
+      const response = await route.fetch({ postData: JSON.stringify({ ...route.request().postDataJSON(), mode: 'keyword' }) }); const body = await response.json();
+      body.mode = 'hybrid';
+      body.retrieval = { ...body.retrieval, requested_mode: 'hybrid', used_mode: 'keyword', semantic_status: 'unavailable', message: '验收模拟：语义模型暂不可用，本次已使用关键词检索。' };
+      await route.fulfill({ response, json: body });
+    });
+    await search('预约', 'hybrid');
+    check('语义不可用时明确显示降级原因和实际关键词模式（模拟故障）', await page.locator('.kb-warning').getByText('验收模拟：语义模型暂不可用，本次已使用关键词检索。', { exact: true }).isVisible() && await page.locator('.kb-library-head').getByText('关键词检索', { exact: true }).isVisible());
+    await page.unroute('**/api/knowledge/search');
+    await search('黑洞宇宙物理', 'keyword');
+    check('没有依据时不显示可执行的生成操作', await page.getByRole('heading', { name: '暂无可用依据', exact: true }).isVisible() && await page.getByRole('button', { name: '整理依据草稿（回放）', exact: true }).count() === 0);
+    check('全程无浏览器脚本异常或控制台错误', errors.length === 0);
+    fs.writeFileSync(path.join(out, 'result.json'), JSON.stringify({ ok: true, checks, errors, queries, spaceId, docId, draftId }, null, 2));
+  } catch (e) {
+    await page.screenshot({ path: path.join(out, 'failure.png'), fullPage: true });
+    fs.writeFileSync(path.join(out, 'failure.json'), JSON.stringify({ error: e.message, url: page.url(), checks, errors, queries }, null, 2));
+    throw e;
+  } finally { await browser.close(); }
+}
+main().catch(e => { console.error(e); process.exit(1); });

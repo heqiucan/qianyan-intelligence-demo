@@ -47,7 +47,7 @@ def serve(no_access_code=False):
     write_state(state)
     # Do not load the user's .env or use their working database in a public session.
     environment = os.environ.copy()
-    environment.update({"MODEL_PROVIDER": "replay", "MODEL_API_KEY": "", "MODEL_BASE_URL": "", "MODEL_NAME": "", "DEMO_ACCESS_TOKEN": token, "DEMO_DATA_DIR": str(RUNTIME / "demo-data"), "PYTHONIOENCODING": "utf-8"})
+    environment.update({"MODEL_PROVIDER": "replay", "MODEL_API_KEY": "", "MODEL_BASE_URL": "", "MODEL_NAME": "", "DEMO_ACCESS_TOKEN": token, "DEMO_DATA_DIR": str(RUNTIME / "demo-data"), "PYTHONIOENCODING": "utf-8", "DEMO_SHARE_MODE": "1", "DEMO_ALLOWED_HOSTS": "", "KB_SEMANTIC_ENABLED": "0"})
     children = []
     hidden = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {}
     opener = build_opener(ProxyHandler({}))
@@ -106,10 +106,13 @@ def main():
     parser = argparse.ArgumentParser(description="Qianyan temporary share controls")
     parser.add_argument("action", choices=["serve", "status", "stop"])
     parser.add_argument("--no-access-code", action="store_true", help="Open the isolated demo without an access code")
+    parser.add_argument('--acknowledge-open-demo', action='store_true', help='Explicitly acknowledge anonymous writes to the isolated replay demo')
     args = parser.parse_args()
     if args.no_access_code and args.action != "serve":
         parser.error("--no-access-code is only valid with serve")
     if args.action == "serve":
+        if args.no_access_code and not args.acknowledge_open_demo:
+            parser.error('--no-access-code requires --acknowledge-open-demo; anonymous visitors can write this isolated replay demo')
         serve(no_access_code=args.no_access_code)
         return
     state = read_state()

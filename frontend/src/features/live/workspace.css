@@ -1,0 +1,10 @@
+.live-console {display:grid;gap:20px;min-width:0}
+.live-console-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.live-console .panel {min-width:0;overflow-wrap:anywhere}
+.live-console .row-actions {display:flex;flex-wrap:wrap;gap:12px}
+.live-console input,.live-console textarea {max-width:100%;box-sizing:border-box}
+.live-console-feed {list-style:none;padding:0;max-height:440px;overflow:auto}
+.live-console-feed li {border-bottom:1px solid #393344;padding:12px 0}
+.live-console-feed p {margin:6px 0}
+@media(max-width:760px){.live-console-grid{grid-template-columns:1fr}.live-console .form-grid{grid-template-columns:1fr}.live-console .panel-header{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.live-console *{animation:none!important;transition:none!important}}

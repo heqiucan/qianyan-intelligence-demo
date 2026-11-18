@@ -701,6 +701,8 @@ def create_app(data_dir=None):
     register_handoff(app, store)
     from backend.live import register_live, context_fields
     register_live(app, store, adapter)
+    from backend.live_workspace import register_workspace
+    register_workspace(app, store)
     from backend.demand_assets import register_demand_assets
     from backend.demand_tasks import register_demand_tasks
     from backend.demand_content import register_demand_content

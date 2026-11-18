@@ -69,8 +69,8 @@ def main():
             WEB_CONCURRENCY='1')
         environment.setdefault('PLAYWRIGHT_CHANNEL', 'msedge' if os.name == 'nt' else 'chromium')
         with log_path.open('w', encoding='utf-8') as log:
-            server = subprocess.Popen([sys.executable, '-m', 'uvicorn', 'backend.main:app',
-                '--host', '127.0.0.1', '--port', base.rsplit(':', 1)[1], '--workers', '1'],
+            server = subprocess.Popen([sys.executable, str(ROOT / 'scripts/isolated_test_server.py'),
+                base.rsplit(':', 1)[1]], stdin=subprocess.PIPE,
                 cwd=ROOT, env=environment, stdout=log, stderr=subprocess.STDOUT, **hidden)
             try:
                 deadline = time.monotonic() + 30
@@ -83,7 +83,7 @@ def main():
                     return 1
                 print(f'隔离 replay 验收：{base}；使用临时数据库，结束后清理。', flush=True)
                 try:
-                    for script in ('browser_demand_workflow.cjs', 'browser_demand_regressions.cjs', 'browser_product_evidence.cjs', 'browser_campaign_product.cjs'):
+                    for script in ('browser_live_workspace.cjs', 'browser_demand_workflow.cjs', 'browser_demand_regressions.cjs', 'browser_product_evidence.cjs', 'browser_campaign_product.cjs'):
                         result = subprocess.run([node, str(ROOT / 'scripts' / script)],
                             cwd=ROOT, env=environment, timeout=args.timeout, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, text=True, encoding='utf-8', **hidden)
@@ -97,7 +97,20 @@ def main():
                     return 1
             finally:
                 if server.poll() is None:
-                    server.terminate()
+                    try:
+                        server.stdin.write(b'stop\n')
+                        server.stdin.close()
+                        server.wait(timeout=10)
+                    except (OSError, subprocess.TimeoutExpired):
+                        pass
+                if server.poll() is None:
+                    if os.name == 'nt':
+                        # Windows venv launchers can spawn a child Python. Stop
+                        # only the process tree we created before deleting its DB.
+                        subprocess.run(['taskkill', '/PID', str(server.pid), '/T', '/F'],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **hidden)
+                    else:
+                        server.terminate()
                     try:
                         server.wait(timeout=8)
                     except subprocess.TimeoutExpired:

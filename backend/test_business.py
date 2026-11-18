@@ -1,5 +1,6 @@
 """Acceptance tests exercise business boundaries using isolated databases."""
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timezone, timedelta
 
 import pytest
 from fastapi.testclient import TestClient
@@ -108,7 +109,7 @@ def test_conflicting_claims_cannot_be_approved(client, body):
 
 def test_plan_requires_confirmation_and_valid_budget_dates(client):
     draft = revise(client)
-    payload = {"creative_id": draft["id"], "name": "验证计划", "budget": 200, "start_date": "2026-11-10", "end_date": "2026-11-17", "request_id": "plan"}
+    payload = {"creative_id": draft["id"], "name": "验证计划", "budget": 200, "start_date": (datetime.now(timezone.utc).date()-timedelta(days=1)).isoformat(), "end_date": (datetime.now(timezone.utc).date()+timedelta(days=7)).isoformat(), "request_id": "plan"}
     assert client.post("/api/plans", json=payload).status_code == 409
     post(client, f'/api/creatives/{draft["id"]}/approve')
     assert client.post("/api/plans", json={**payload, "budget": 0}).status_code == 422

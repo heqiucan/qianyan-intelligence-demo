@@ -1,43 +1,65 @@
-import {useEffect, useState, useRef} from 'react';
-import {api, date, requestId, type Campaign} from '../../api';
 import {Badge, Button, Field} from '../../components/ui';
+import type {Campaign} from '../../api';
 import type {Act} from '../../domain';
-import type {LiveSession} from './types';
+import {statusLabels, type LiveSession} from './types';
 import LiveSessions from './LiveSessions';
+import LiveRuntimePanel from './LiveRuntimePanel';
+import {liveModules} from './modules';
 import './workspace.css';
 
-interface Runtime {revision:number;account:string;room:string;status:'idle'|'running'|'paused'|'stopped';session_version:number;stale_products?:string[];needs_restart?:boolean;events:{id:string;kind:string;viewer:string;text:string;created_at:string}[];logs:{id:string;text:string;created_at:string}[]}
-const labels={idle:'尚未启动',running:'模拟运行中',paused:'已暂停模拟',stopped:'已停止模拟'};
-export default function LiveWorkspace(props:{sessions:LiveSession[];campaign?:Campaign;busy:boolean;act:Act;go:(s:string)=>void;selectedId?:string;dirtyChanged:(v:boolean)=>void}){
+interface Props {
+ sessions:LiveSession[];campaign?:Campaign;busy:boolean;act:Act;go:(route:string)=>void;
+ selectedId?:string;moduleId?:string;featureId?:string;pane?:string;dirtyChanged:(value:boolean)=>void;
+}
+export default function LiveWorkspace(props:Props){
  const list=props.sessions.filter(s=>s.campaign_id===props.campaign?.id);
  const session=list.find(s=>s.id===props.selectedId)||list.at(-1);
- const navigate=(route:string)=>props.go(route.startsWith('creative?tab=live')?route.replace('creative?tab=live','overview?tab=live'):route);
- return <div className="live-console"><section className="panel"><Badge>抖音场景 · 本地模拟</Badge><h2>直播工作台</h2><p>先准备场次和货盘，再保存模拟账号并启动测试。这里不会登录抖音、推流或发送真实公屏消息。</p><div className="row-actions"><Button onClick={()=>props.go('product?tab=catalog')}>管理商品与 SKU</Button><Button onClick={()=>props.go('product')}>查看最新商品资料</Button></div></section>
- <LiveSessions {...props} go={navigate}/>
- {session&&<RuntimePanel key={session.id} session={session} outerBusy={props.busy} dirtyChanged={props.dirtyChanged}/>}
+ const module=liveModules.find(m=>m.id===props.moduleId)||liveModules[0];
+ const feature=module.features.find(f=>f.id===props.featureId)||module.features[0];
+ const pane=['control','session','logs'].includes(props.pane||'')?props.pane!:'control';
+ const activePane=session?pane:'session';
+ const route=(moduleId=module.id,featureId=feature.id,nextPane='control',id=session?.id)=>{
+  const query=new URLSearchParams({tab:'live',module:moduleId,feature:featureId,pane:nextPane});
+  if(id)query.set('live',id);
+  return 'overview?'+query;
+ };
+ const navigate=(target:string)=>{
+  if(target.startsWith('creative?tab=live')){
+   const id=new URLSearchParams(target.split('?')[1]).get('live')||session?.id;
+   props.go(route('ai','console','session',id));
+  }else props.go(target);
+ };
+ const choose=(moduleId:string,featureId:string)=>props.go(route(moduleId,featureId));
+ return <div className="live-console">
+  <section className="panel live-workspace-header" aria-label="直播工作台顶部">
+   <div><Badge>抖音场景 · 本地模拟</Badge><h2>直播工作台</h2><p>选择功能模块，围绕同一场直播准备和测试。</p></div>
+   <div className="live-credit"><strong>算力余额：未接入</strong><details><summary>充值说明</summary><p>卡密充值暂未开放。当前没有算力余额或扣费账本，请勿在此输入卡密。</p></details></div>
+  </section>
+  <section className="panel live-shared-context" aria-label="当前直播场次">
+   <div><span className="muted">所属营销活动</span><p>{props.campaign?.name||'尚未选择营销活动'}</p>{session&&<Badge>{statusLabels[session.status]} · V{session.version}</Badge>}</div>
+   {list.length?<Field label="当前直播场次"><select value={session?.id||''} disabled={props.busy} onChange={e=>props.go(route(module.id,feature.id,pane,e.target.value))}>{list.map(s=><option key={s.id} value={s.id}>{s.title}</option>)}</select></Field>:<p>尚无直播场次，请先在直播控制台创建。</p>}
+   <Button disabled={props.busy} onClick={()=>props.go(route('ai','console','session'))}>管理场次与货盘</Button>
+  </section>
+  <div className="live-module-layout">
+   <nav className="panel live-module-nav" aria-label="直播功能模块">
+    <h3>功能模块</h3>
+    <div className="live-module-choices">{liveModules.map(m=><button key={m.id} type="button" className="live-module-button" aria-expanded={module.id===m.id} aria-controls={'live-group-'+m.id} onClick={()=>choose(m.id,m.features[0].id)}>{m.name}</button>)}</div>
+    <p className="live-subnav-caption">{module.name} · 子功能</p>
+    <div className="live-subnav-scroll">{liveModules.map(m=><div key={m.id} id={'live-group-'+m.id} hidden={module.id!==m.id}>{m.features.map(f=><button type="button" className="live-feature-button" aria-current={module.id===m.id&&feature.id===f.id?'page':undefined} key={f.id} onClick={()=>choose(m.id,f.id)}><span>{f.name}</span><small>{f.available?'可用':'待开发'}</small></button>)}</div>)}</div>
+   </nav>
+   <div className="panel live-mobile-navigation">
+    <Field label="功能模块"><select value={module.id} onChange={e=>{const m=liveModules.find(m=>m.id===e.target.value)!;choose(m.id,m.features[0].id)}}>{liveModules.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select></Field>
+    <Field label="子功能"><select value={feature.id} onChange={e=>choose(module.id,e.target.value)}>{module.features.map(f=><option key={f.id} value={f.id}>{f.name} · {f.available?'可用':'待开发'}</option>)}</select></Field>
+   </div>
+   <section className="live-feature-content" aria-label="直播子功能内容">
+    <header className="live-feature-heading"><p className="muted">{module.name} / {feature.name}</p><div className="panel-header"><h3>{feature.name}</h3><Badge tone={feature.available?'green':'neutral'}>{feature.available?'本地模拟可用':'待开发'}</Badge></div><p>{feature.description}</p></header>
+    {!feature.available?<section className="panel live-planned-feature"><h4>该功能尚未开放</h4><p>计划在第 {feature.stage} 阶段实施。目前可以查看功能说明，尚不执行生成、播放、发送或平台操作。</p>{module.id==='video'&&<p>这里规划音视频处理工具，不承诺平台原创或去重判定结果。</p>}<Button onClick={()=>choose('ai','console')}>返回直播控制台</Button></section>:<>
+     {feature.id==='console'&&<nav className="live-console-tabs" aria-label="直播控制台分区">{[{id:'control',label:'运行控制'},{id:'session',label:'场次与货盘'},{id:'logs',label:'运行日志'}].map(p=><button key={p.id} type="button" aria-pressed={activePane===p.id} disabled={!session&&p.id!=='session'} onClick={()=>props.go(route('ai','console',p.id))}>{p.label}</button>)}</nav>}
+     {feature.id==='console'&&activePane==='session'&&<><div className="row-actions"><Button onClick={()=>props.go('product?tab=catalog')}>管理商品与 SKU</Button><Button onClick={()=>props.go('product')}>查看最新商品资料</Button></div><LiveSessions {...props} embedded go={navigate}/></>}
+     {feature.id==='simulation'&&<Button onClick={()=>choose('ai','console')}>前往运行控制</Button>}
+     {session&&(feature.id==='simulation'||activePane!=='session')?<LiveRuntimePanel key={[session.id,feature.id,activePane].join(':')} session={session} outerBusy={props.busy} dirtyChanged={props.dirtyChanged} view={feature.id==='simulation'?'simulation':activePane==='logs'?'logs':'control'}/>:feature.id==='simulation'&&<section className="panel"><p>请先创建场次、确认货盘，并在运行控制中启动模拟。</p><Button onClick={()=>props.go(route('ai','console','session'))}>创建直播场次</Button></section>}
+    </>}
+   </section>
+  </div>
  </div>;
-}
-function RuntimePanel({session,outerBusy,dirtyChanged}:{session:LiveSession;outerBusy:boolean;dirtyChanged:(v:boolean)=>void}){
- const [runtime,setRuntime]=useState<Runtime>(),[error,setError]=useState(''),[pending,setPending]=useState(false),[viewer,setViewer]=useState('模拟观众'),[text,setText]=useState(''),[account,setAccount]=useState(''),[room,setRoom]=useState('');
- const initialized=useRef(false);
- useEffect(()=>()=>dirtyChanged(false),[dirtyChanged]);
- const endpoint='/live/workspace/'+encodeURIComponent(session.id);
- const refresh=async()=>{const r=await api<Runtime>(endpoint);setRuntime(r);return r};
- useEffect(()=>{let active=true;api<Runtime>(endpoint).then(r=>{if(active){setRuntime(r);if(!initialized.current){setAccount(r.account);setRoom(r.room);initialized.current=true}}}).catch(e=>{if(active)setError(e.message)});return()=>{active=false}},[endpoint,session.version,session.status,dirtyChanged]);
- const send=async(action:string,extra:Record<string,string>={})=>{if(!runtime||pending)return;setPending(true);setError('');try{await api(endpoint,'POST',{action,expected_revision:runtime.revision,request_id:requestId(),...extra});if(action==='configure')dirtyChanged(false);if(action==='event')setText('');await refresh()}catch(e){setError((e as Error).message);try{await refresh()}catch{/* Keep the original actionable error. */}}finally{setPending(false)}};
- if(!runtime)return <section className="panel"><p role={error?'alert':'status'}>{error||'正在读取模拟控制台…'}</p>{error&&<Button onClick={()=>refresh().catch(e=>setError(e.message))}>重新读取</Button>}</section>;
- const locked=runtime.status==='running'||runtime.status==='paused';
- const stale=Boolean(runtime.stale_products?.length);
- const canStart=session.status==='ready'&&!stale&&Boolean(runtime.account&&runtime.room)&&account.trim()===runtime.account&&room.trim()===runtime.room&&runtime.status!=='running';
- return <><section className="panel"><div className="panel-header"><h3>模拟控制台 · {session.title}</h3><Badge>{labels[runtime.status]}</Badge></div>
- {error&&<p role="alert" className="notice">{error}</p>}
- {stale&&<p role="alert" className="notice">商品资料已更新：{runtime.stale_products?.join('、')}。请编辑本场货盘并保存，再重新核对；已有快照保留。</p>}
- {runtime.needs_restart&&locked&&<p className="notice">场次版本已变化，请停止模拟并重新启动。</p>}
- <form onSubmit={e=>{e.preventDefault();void send('configure',{account,room})}} onChange={()=>dirtyChanged(true)}><div className="form-grid"><Field label="模拟账号名称"><input value={account} onChange={e=>setAccount(e.target.value)} required maxLength={80} disabled={locked||pending||outerBusy}/></Field><Field label="模拟直播间名称"><input value={room} onChange={e=>setRoom(e.target.value)} required maxLength={120} disabled={locked||pending||outerBusy}/></Field></div><button className="button secondary" type="submit" disabled={locked||pending||outerBusy}>保存模拟账号与直播间</button></form>
- <p className="muted">仅记录测试名称，无需抖音密码。场次 V{session.version}；运行绑定 V{runtime.session_version||'—'}。刷新后保留模拟状态，不会自动执行任务。</p>
- <div className="row-actions"><Button kind="primary" disabled={pending||!canStart} onClick={()=>send('start')}>{runtime.status==='paused'?'恢复模拟':'启动模拟'}</Button><Button disabled={pending||runtime.status!=='running'} onClick={()=>send('pause')}>暂停模拟</Button><Button disabled={pending||!locked} onClick={()=>send('stop')}>停止模拟</Button><Button disabled={pending} onClick={()=>refresh().catch(e=>setError(e.message))}>刷新状态</Button></div>
- {session.status!=='ready'&&<p>请先在上方核对并确认货盘，再启动模拟。</p>}</section>
- <div className="live-console-grid"><section className="panel"><h3>本地互动测试</h3><p>手动产生测试事件；本阶段只记录，不自动回复或播报。</p><Field label="模拟观众昵称"><input value={viewer} maxLength={60} onChange={e=>setViewer(e.target.value)}/></Field><Field label="模拟弹幕内容"><textarea value={text} maxLength={500} onChange={e=>setText(e.target.value)}/></Field><div className="row-actions">{(['comment','enter','follow'] as const).map(kind=><Button key={kind} disabled={pending||runtime.status!=='running'||session.status!=='ready'||stale||runtime.needs_restart||!viewer.trim()||(kind==='comment'&&!text.trim())} onClick={()=>send('event',{kind,viewer,text})}>模拟{{comment:'弹幕',enter:'进场',follow:'关注'}[kind]}</Button>)}</div><p className="muted">在线人数：未接入，不根据测试事件推算。</p>
- <ol className="live-console-feed" aria-label="模拟互动记录">{[...runtime.events].reverse().map(e=><li key={e.id}><strong>{e.viewer} · {{comment:'弹幕',enter:'进场',follow:'关注'}[e.kind]}</strong><p>{e.text||'模拟事件'}</p><small>{date(e.created_at)}</small></li>)}</ol>{!runtime.events.length&&<p>尚无模拟事件。</p>}</section>
- <section className="panel"><h3>运行日志</h3><p className="muted">每场分别保存最近 200 条事件和操作日志。</p><ol className="live-console-feed" aria-label="模拟运行日志">{[...runtime.logs].reverse().map(l=><li key={l.id}><p>{l.text}</p><small>{date(l.created_at)}</small></li>)}</ol>{!runtime.logs.length&&<p>保存配置或操作模拟后会出现日志。</p>}</section></div></>;
 }

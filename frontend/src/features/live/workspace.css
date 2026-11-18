@@ -6,5 +6,43 @@
 .live-console-feed {list-style:none;padding:0;max-height:440px;overflow:auto}
 .live-console-feed li {border-bottom:1px solid #393344;padding:12px 0}
 .live-console-feed p {margin:6px 0}
+.live-workspace-header {display:flex;justify-content:space-between;align-items:flex-start;gap:24px;flex-wrap:wrap}
+.live-workspace-header h2 {margin:10px 0}
+.live-workspace-header p {margin:8px 0;color:#c9c1d6}
+.live-credit {border:1px solid #393344;border-radius:12px;padding:16px;max-width:300px;min-width:210px}
+.live-credit summary {cursor:pointer;margin-top:10px;color:#dac4ff;min-height:32px}
+.live-shared-context {display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+.live-shared-context>div {flex:1;min-width:180px}
+.live-shared-context>.field {flex:2;min-width:200px;margin:0}
+.live-shared-context p {margin:6px 0}
+.live-module-layout {display:grid;grid-template-columns:244px minmax(0,1fr);gap:24px;align-items:start}
+.live-module-nav {padding:16px!important;position:sticky;top:90px;max-height:calc(100vh - 110px);display:flex;flex-direction:column;overflow:hidden}
+.live-module-nav h3 {margin:0 0 16px}
+.live-module-choices {display:grid;grid-template-columns:1fr 1fr;gap:6px;flex-shrink:0}
+.live-subnav-caption {border-top:1px solid #393344;padding-top:16px;color:#c9c1d6;font-size:13px;flex-shrink:0}
+.live-subnav-scroll {overflow:auto;min-height:120px;scrollbar-width:thin}
+.live-module-button,.live-feature-button,.live-console-tabs button {font:inherit;color:inherit;cursor:pointer;border:1px solid transparent;background:transparent;border-radius:8px;min-height:44px;transition:transform 120ms ease-out,background-color 120ms ease-out}
+.live-module-button {display:flex;justify-content:center;align-items:center;width:100%;padding:10px 4px;font-size:14px;text-align:center;font-weight:600;background:#17131e;border-color:#393344}
+.live-module-button[aria-expanded=true] {color:#dac4ff;background:#32233f;border-color:#79569b}
+.live-feature-button {display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;padding:10px;text-align:left;margin:3px 0;font-size:14px}
+.live-feature-button span {min-width:0;overflow-wrap:anywhere}
+.live-feature-button small {flex-shrink:0;font-size:11px;color:#c9c1d6}
+.live-feature-button[aria-current=page],.live-console-tabs button[aria-pressed=true] {background:#32233f;border-color:#79569b;color:#f3eaff}
+.live-feature-content {min-width:0;display:grid;gap:20px}
+.live-feature-heading {border-bottom:1px solid #393344;padding:0 0 16px}
+.live-feature-heading h3 {font-size:22px;margin:0}
+.live-feature-heading p {margin:0 0 12px;color:#c9c1d6;line-height:1.7}
+.live-feature-heading .panel-header {margin-bottom:12px}
+.live-console-tabs {display:flex;gap:8px;flex-wrap:wrap}
+.live-console-tabs button {padding:10px 16px;background:#17131e;border-color:#393344}
+.live-console-tabs button:disabled {opacity:.5;cursor:not-allowed}
+.live-console .live-planned-feature {min-height:220px}
+.live-planned-feature p {line-height:1.8;color:#c9c1d6}
+.live-mobile-navigation {display:none}
+.live-module-button:focus-visible,.live-feature-button:focus-visible,.live-console-tabs button:focus-visible,.live-credit summary:focus-visible {outline:2px solid #c4a7ff;outline-offset:3px}
+.live-module-button:active,.live-feature-button:active,.live-console-tabs button:not(:disabled):active {transform:scale(.98)}
+@media(hover:hover) and (pointer:fine){.live-module-button:hover,.live-feature-button:hover,.live-console-tabs button:not(:disabled):hover {background:#282030}}
+@media(max-width:1100px){.live-module-layout{grid-template-columns:minmax(0,1fr)}.live-module-nav{display:none}.live-mobile-navigation{display:grid;grid-template-columns:1fr 1fr;gap:16px}.live-mobile-navigation .field{margin:0}}
+@media(max-width:600px){.live-mobile-navigation{grid-template-columns:1fr}.live-credit{width:100%;max-width:none;min-width:0}.live-shared-context>.field{min-width:0;flex-basis:100%}.live-console-tabs button{padding:10px 12px}.live-feature-heading .panel-header{gap:10px}}
 @media(max-width:760px){.live-console-grid{grid-template-columns:1fr}.live-console .form-grid{grid-template-columns:1fr}.live-console .panel-header{flex-wrap:wrap}}
 @media(prefers-reduced-motion:reduce){.live-console *{animation:none!important;transition:none!important}}

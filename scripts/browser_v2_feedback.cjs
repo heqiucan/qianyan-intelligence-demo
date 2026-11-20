@@ -31,7 +31,7 @@ async function main() {
     await page.goto(base);
     await page.getByRole('heading',{level:1,name:'增长工作台'}).waitFor();
     await page.getByLabel('选择营销活动',{exact:true}).selectOption(campaign.id);await settle();
-    await nav('广告投放');
+    await nav('广告的投放');
     const loadScene=async scenario=>{
       await click('选择并预览场景');
       await page.getByLabel('场景关联计划').selectOption(plan.id);
@@ -66,7 +66,7 @@ async function main() {
     await click('检查当前活动');
     check('重复检查不会重复创建异常',(await state()).tasks.filter(t=>t.campaign_id===campaign.id&&t.rule==='spend-without-order').length===1);
     await click('查看与处理',taskCard);await click('带着依据去复盘',page.getByRole('dialog'));
-    await page.getByRole('heading',{level:1,name:'AI 优化复盘'}).waitFor();
+    await page.getByRole('heading',{level:1,name:'复盘与报告'}).waitFor();
     await click('生成本轮复盘');
     await page.getByRole('heading',{name:'已知事实',exact:true}).waitFor();
     const insight=(await state()).insights.filter(i=>i.campaign_id===campaign.id).at(-1);
@@ -84,13 +84,13 @@ async function main() {
     }
     await click('确认应用调整',page.getByRole('dialog'));
     s=await state();check('人工确认后计划更新并保留版本',s.plans.find(p=>p.id===plan.id).budget===250&&s.plans.find(p=>p.id===plan.id).config_version===2);
-    await nav('AI 优化复盘');await click('开始观察');
+    await nav('复盘与报告');await click('开始观察');
     await click('检查后续数据');
     observation=(await state()).observations.find(o=>o.insight_id===insight.id);
     check('没有后续数据时保持观察中',observation.status==='observing'&&!observation.comparison);
     await page.screenshot({path:path.join(out,'02-observation-waiting.png'),fullPage:true});
-    await nav('广告投放');const followup=await loadScene('followup_no_change');
-    await nav('AI 优化复盘');
+    await nav('广告的投放');const followup=await loadScene('followup_no_change');
+    await nav('复盘与报告');
     await page.getByLabel('后续模拟批次 '+observation.id.slice(-6)).selectOption(followup.id);
     await page.getByLabel('观察备注 '+observation.id.slice(-6),{exact:true}).fill('同口径模拟窗口未产生新增成交，不声称优化成功。');
     await click('检查后续数据');
@@ -98,14 +98,14 @@ async function main() {
     check('后续无改善场景完成描述性复盘',observation.status==='reviewed'&&observation.comparison.orders_delta===0);
     check('旧批次预算快照未被新配置覆盖',(await state()).batches.find(b=>b.id===baseline.id).plan_snapshot.budget===300);
     await page.screenshot({path:path.join(out,'03-observation-reviewed.png'),fullPage:true});
-    await nav('活动报告');
+    await nav('复盘与报告');await page.getByRole('navigation',{name:'复盘与报告视图'}).getByRole('button',{name:'活动报告',exact:true}).click();
     await page.getByLabel('报告标题',{exact:true}).fill('模拟投放调整复盘验收');
     await page.getByLabel('运营结论（人工判断）',{exact:true}).fill('本轮仅验证业务动作与数据范围，后续模拟窗口没有改善。');
     await page.getByLabel('下一步行动',{exact:true}).fill('继续设计可比较的素材测试，保留原始依据。');
     await click('保存新的报告快照');
     report=(await state()).reports.filter(r=>r.campaign_id===campaign.id).at(-1);
     check('报告保存选中批次与配置快照',report.snapshot.analytics.dataset_id===followup.id&&report.snapshot.plans.length===1&&report.snapshot.plans[0].budget===250);
-    await page.reload();await page.getByRole('heading',{level:1,name:'活动报告'}).waitFor();
+    await page.reload();await page.getByRole('heading',{level:1,name:'复盘与报告'}).waitFor();
     await page.getByRole('article',{name:'活动报告预览'}).waitFor();
     check('刷新恢复报告快照',await page.getByRole('article',{name:'活动报告预览'}).getByRole('heading',{name:report.title,exact:true}).isVisible());
     await page.screenshot({path:path.join(out,'04-report.png'),fullPage:true});

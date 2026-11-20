@@ -83,7 +83,7 @@ async function main() {
   const final = await state();
   check('新版本未覆盖原素材及其他组', final.creatives.find(c => c.id === generated[0].id).title === generated[0].title && final.creatives.find(c => c.id === generated[1].id).version === 1);
   check('只保存一笔现场订单', final.orders.filter(o => o.plan_id === plan.id).length === 1);
-  await nav('活动报告');
+  await nav('复盘与报告');await page.getByRole('navigation',{name:'复盘与报告视图'}).getByRole('button',{name:'活动报告',exact:true}).click();
   await page.getByLabel('报告标题', { exact: true }).fill('商品推广现场验收报告');
   await page.getByLabel('运营结论（人工判断）', { exact: true }).fill('本次模拟购买两件商品，金额198元。现场未提供广告消耗，不计算ROI。');
   const report = await saved(page.getByRole('button', { name: '保存新的报告快照', exact: true }), '/reports');

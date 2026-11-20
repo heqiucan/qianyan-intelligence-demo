@@ -1,0 +1,25 @@
+.live-audio-mixer {grid-column:1/-1;min-width:0;max-height:68vh;overflow:auto;scrollbar-width:thin}
+.live-audio-mixer[hidden] {display:none}
+.audio-mixer-global {display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:12px 0;border-bottom:1px solid #393344;margin-bottom:16px}
+.audio-mixer-global>.field {max-width:160px;margin:0}
+.audio-mixer-check {display:flex;align-items:center;gap:8px;line-height:1.6;font-size:13px;margin:8px 0}
+.audio-mixer-check input {width:16px;height:16px;accent-color:#a78bfa;flex:none}
+.audio-mixer-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.audio-mixer-track,.audio-mixer-recorder {min-width:0;border:1px solid #393344;border-radius:10px;padding:14px;background:#14111b}
+.audio-mixer-track-head {display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.audio-mixer-track-head h4 {margin:0;font-size:14px}
+.audio-mixer-track .field,.audio-mixer-recorder .field {min-width:0;margin:0 0 12px}
+.audio-mixer-track input[type=file] {width:100%;max-width:100%;font-size:12px;min-width:0}
+.audio-mixer-track select {width:100%;min-width:0}
+.audio-mixer-track-fields {display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.audio-mixer-track small {display:block;font-size:12px;color:#b9accd;margin-top:8px;line-height:1.7}
+.audio-mixer-recorder {margin-top:16px}
+.audio-mixer-recording {display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:14px}
+.audio-mixer-recording audio {max-width:100%;width:320px}
+.live-audio-mixer .button {min-height:40px;transition:transform 120ms ease-out,background-color 120ms ease-out}
+.live-audio-mixer .button:not(:disabled):active {transform:scale(.98)}
+.live-audio-mixer .button:focus-visible {outline:2px solid #c4a7ff;outline-offset:3px}
+@media(hover:hover) and (pointer:fine){.live-audio-mixer .button:not(:disabled):hover{background-color:#282030}}
+@media(max-width:900px){.live-audio-mixer{order:1}.audio-mixer-grid{grid-template-columns:1fr}.live-console[data-mobile-view=picture] .live-audio-mixer,.live-console[data-mobile-view=interaction] .live-audio-mixer{display:none}}
+@media(max-width:480px){.audio-mixer-track-fields{grid-template-columns:1fr}.audio-mixer-global>.field{max-width:none;flex-basis:100%}.live-audio-mixer .button{min-height:44px}}
+@media(prefers-reduced-motion:reduce){.live-audio-mixer *{animation:none!important;transition:none!important}}

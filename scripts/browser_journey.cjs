@@ -106,7 +106,7 @@ async function main() {
     await page.getByTestId('creative-workspace').getByRole('button', { name: '用当前素材创建投放', exact: true }).click();
     await page.getByLabel('计划名称', { exact: true }).fill('Agent 来源模拟计划');
     await click('保存计划草稿');
-    await page.getByRole('heading', { name: '广告投放', exact: true }).waitFor();
+    await page.getByRole('heading', { name: '广告的投放', exact: true }).waitFor();
     await visible('计划草稿已保存，下一步确认启动');
     check('保存计划后指引实际启动操作', true);
     await click('确认启动'); await click('确认模拟启动');

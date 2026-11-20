@@ -45,7 +45,7 @@ async function main() {
     await page.goto(base);
     await page.getByRole('heading', { name: '增长工作台', exact: true, level: 1 }).waitFor();
     const mainNav = page.getByRole('navigation', { name: '主导航' });
-    check('八个一级功能入口', (await mainNav.getByRole('button').allTextContents()).map(t => t.trim()).join('|') === '增长工作台|商品与品牌|营销与创意|广告投放|效果与获客|异常与待办|AI 优化复盘|活动报告');
+    check('八个一级功能入口', (await mainNav.getByRole('button').allTextContents()).map(t => t.trim()).join('|') === '增长工作台|商品与品牌|营销与创意|直播工作台|广告的投放|效果与获客|异常与待办|复盘与报告');
     check('原首页紫色球体与四张指标卡保留', await page.getByRole('img',{name:'紫色点阵星球品牌插画'}).isVisible() && await page.locator('.stat-card').count()===4);
     await page.screenshot({ path: path.join(out, '01-workbench.png'), fullPage: true });
     await btn('新建营销活动').click();
@@ -119,7 +119,7 @@ async function main() {
     await action(btn('核对当前文案'), `/creatives/${generated[0].id}/check`);
 
     const confirmDialog = page.waitForEvent('dialog');
-    const leave = btn('广告投放', mainNav).click();
+    const leave = btn('广告的投放', mainNav).click();
     const dialog = await confirmDialog; await dialog.dismiss(); await leave;
     check('未保存草稿离开可以取消且输入保留', await field('广告正文').inputValue() === '演示售价99元，500ml容量，更新后的手工文案。');
     await field('标题').fill('已核对的500ml随行杯');

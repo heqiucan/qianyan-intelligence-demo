@@ -380,6 +380,7 @@ def create_app(data_dir=None):
             try:
                 yield
             finally:
+                media_runner.shutdown()
                 demand_runner.stop()
                 runner.stop()
         finally:
@@ -703,6 +704,16 @@ def create_app(data_dir=None):
     register_live(app, store, adapter)
     from backend.live_workspace import register_workspace
     register_workspace(app, store)
+    from backend.live_interaction import register_interaction
+    register_interaction(app, store)
+    from backend.live_timer import register_timer
+    register_timer(app, store)
+    from backend.media_tools import register_media_tools
+    media_runner = register_media_tools(app, store)
+    from backend.speech.routes import register_speech
+    register_speech(app, store)
+    from backend.live_script_drafts import register_script_drafts
+    register_script_drafts(app, store, adapter)
     from backend.demand_assets import register_demand_assets
     from backend.demand_tasks import register_demand_tasks
     from backend.demand_content import register_demand_content
@@ -717,7 +728,7 @@ def create_app(data_dir=None):
 
     @app.get("/{path:path}")
     def frontend(path: str):
-        dist = ROOT / "frontend" / "dist"
+        dist = Path(os.getenv("DEMO_FRONTEND_DIR", str(ROOT / "frontend" / "dist")))
         target = (dist / path).resolve()
         if not target.is_relative_to(dist.resolve()):
             raise HTTPException(404, "页面不存在。")

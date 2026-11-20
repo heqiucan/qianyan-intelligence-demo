@@ -1,0 +1,16 @@
+.media-tools {grid-column:1/-1;max-height:70vh;overflow:auto;min-width:0}
+.media-tools[hidden] {display:none}
+.media-tools input[type=file] {max-width:100%;width:100%;font-size:12px}
+.media-tools .field {min-width:0}
+.media-tools p {line-height:1.7}
+.media-tools h4 {overflow-wrap:anywhere;max-width:70%}
+.media-job-list {display:grid;gap:14px;margin-top:20px}
+.media-job {padding:14px;border:1px solid #393344;border-radius:8px;min-width:0;overflow-wrap:anywhere}
+.media-job .row-actions {margin-top:12px}
+.media-job ul {padding-left:18px}
+.media-job li {display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:8px 0;overflow-wrap:anywhere}
+.media-caption-editor {border-top:1px solid #393344;margin-top:20px;padding-top:16px}
+.media-caption-editor fieldset {border:1px solid #393344;border-radius:8px;padding:12px;min-width:0;margin:12px 0}
+.media-caption-editor legend {padding:0 8px}
+@media(max-width:900px){.media-tools{order:1}.live-console[data-mobile-view=picture] .media-tools,.live-console[data-mobile-view=interaction] .media-tools{display:none}.media-tools .form-grid{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.media-tools *{animation:none!important;transition:none!important}}

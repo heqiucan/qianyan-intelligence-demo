@@ -28,7 +28,7 @@ async function main() {
   const dl=page.waitForEvent('download');await page.getByRole('button',{name:'导出 PNG 海报'}).click();const download=await dl;await download.saveAs(path.join(out,'poster.png'));check('PNG真实导出',fs.statSync(path.join(out,'poster.png')).size>1000);
   await page.getByRole('button',{name:'关闭弹窗'}).click();
   await page.screenshot({path:path.join(out,'02-creatives.png'),fullPage:true});
-  await page.getByRole('button',{name:'广告投放',exact:true}).click();await page.getByRole('button',{name:'创建投放计划'}).click();
+  await page.getByRole('button',{name:'广告的投放',exact:true}).click();await page.getByRole('button',{name:'创建投放计划'}).click();
   await page.getByLabel('计划名称',{exact:true}).fill('验收 · 素材测试');await page.getByRole('button',{name:'保存计划草稿'}).click();
   await page.getByRole('button',{name:'确认启动'}).click();await page.getByRole('button',{name:'体验购买'}).click();
   await page.getByRole('heading',{name:'带上日常，开启新旅程'}).waitFor();
@@ -38,7 +38,7 @@ async function main() {
   await page.getByRole('button',{name:'模拟付款并下单'}).click();await page.getByRole('heading',{name:'这次转化，有迹可循。'}).waitFor();check('模拟订单保存',await page.getByText('模拟订单已保存').isVisible());
   await page.getByRole('button',{name:'查看订单来源'}).click();await page.getByRole('button',{name:'本次互动',exact:true}).click();
   await page.getByRole('button',{name:'查看链路'}).click();await page.getByRole('heading',{name:'订单来源链路'}).waitFor();check('来源链路可见',await page.locator('.trace-list').textContent().then(t=>t.includes('V2')&&t.includes('历史未知')));await page.getByRole('button',{name:'关闭弹窗'}).click();
-  await page.getByRole('button',{name:'AI 优化复盘'}).click();await page.getByRole('button',{name:'生成本轮复盘'}).click();await page.getByText('已知事实',{exact:true}).waitFor();await page.screenshot({path:path.join(out,'04-insights.png'),fullPage:true});await page.getByRole('button',{name:'采纳并生成 V2 草稿'}).click();
+  await page.getByRole('button',{name:'复盘与报告'}).click();await page.getByRole('button',{name:'生成本轮复盘'}).click();await page.getByText('已知事实',{exact:true}).waitFor();await page.screenshot({path:path.join(out,'04-insights.png'),fullPage:true});await page.getByRole('button',{name:'采纳并生成 V2 草稿'}).click();
   await page.locator('.creative-card').nth(3).waitFor();check('复盘建议生成下一版草稿',await page.locator('.creative-card').count()===4);
   await page.reload();await page.locator('.creative-card').nth(3).waitFor();check('刷新后数据保留',await page.locator('.creative-card').count()===4);
   await page.setViewportSize({width:390,height:844});await page.getByRole('button',{name:'增长工作台',exact:true}).click();await page.screenshot({path:path.join(out,'05-mobile.png'),fullPage:true});

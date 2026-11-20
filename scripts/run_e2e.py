@@ -46,6 +46,8 @@ def ready(base):
 
 def main():
     parser = argparse.ArgumentParser(description='在临时数据库和随机本机端口运行 replay 浏览器验收')
+    parser.add_argument('--extensions', action='store_true', help='额外运行定时、图层、音频、素材与草稿验收（需要本机FFmpeg和中文系统音色）')
+    parser.add_argument('--speech', action='store_true', help='额外运行 Windows 系统音色真实合成与浏览器播放验收')
     parser.add_argument('--timeout', type=int, default=300, help='浏览器验收超时秒数（默认 300）')
     args = parser.parse_args()
     if args.timeout < 1:
@@ -83,7 +85,7 @@ def main():
                     return 1
                 print(f'隔离 replay 验收：{base}；使用临时数据库，结束后清理。', flush=True)
                 try:
-                    for script in ('browser_live_workspace.cjs', 'browser_demand_workflow.cjs', 'browser_demand_regressions.cjs', 'browser_product_evidence.cjs', 'browser_campaign_product.cjs'):
+                    for script in (('browser_live_speech.cjs', 'browser_live_interaction.cjs') if args.speech else ()) + ('browser_live_workspace.cjs', 'browser_live_preview.cjs', 'browser_navigation.cjs', 'browser_demand_workflow.cjs', 'browser_demand_regressions.cjs', 'browser_product_evidence.cjs', 'browser_campaign_product.cjs') + (('browser_live_timer.cjs','browser_video_layers.cjs','browser_audio_mixer.cjs','browser_live_media.cjs','browser_script_drafts.cjs') if args.extensions else ()):
                         result = subprocess.run([node, str(ROOT / 'scripts' / script)],
                             cwd=ROOT, env=environment, timeout=args.timeout, stdout=subprocess.PIPE,
                             stderr=subprocess.STDOUT, text=True, encoding='utf-8', **hidden)

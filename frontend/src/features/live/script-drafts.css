@@ -1,0 +1,16 @@
+.live-script-drafts {grid-column:1/-1;min-width:0;max-height:70vh;overflow:auto;scrollbar-width:thin}
+.live-script-drafts[hidden] {display:none}
+.live-script-drafts .field {min-width:0}
+.live-script-drafts textarea {width:100%;resize:vertical}
+.live-script-drafts .form-grid {grid-template-columns:repeat(2,minmax(0,1fr))}
+.live-script-drafts .live-panel-title>.badge {flex-shrink:0}
+.script-draft-review {border-top:1px solid #393344;margin-top:20px;padding-top:16px}
+.live-console .script-draft-sources {padding:12px 0}
+.live-console .script-draft-sources summary {cursor:pointer;color:#dac4ff;padding:8px 0;min-height:40px}
+.script-draft-sources article {border-left:2px solid #685080;padding:8px 12px;margin:10px 0}
+.script-draft-sources p {white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.8}
+.script-draft-ack {display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.7;margin:16px 0}
+.script-draft-ack input {flex:none;margin-top:4px}
+.live-script-drafts .notice ul {padding-left:20px;line-height:1.7}
+@media(max-width:900px){.live-script-drafts{order:1}.live-console[data-mobile-view=picture] .live-script-drafts,.live-console[data-mobile-view=interaction] .live-script-drafts{display:none}}
+@media(max-width:600px){.live-script-drafts .form-grid{grid-template-columns:minmax(0,1fr)}.live-script-drafts .button{min-height:44px}}

@@ -74,6 +74,10 @@ def register_workspace(app, store):
                                      text=body.text.strip() if body.kind == 'comment' else '',
                                      created_at=now(), session_version=s['version'], simulated=True)
                         r['events'] = (r['events'] + [event])[-200:]
+                        from backend.live_interaction import decide, record_result
+                        result=decide(db,s,event)
+                        record_result(db,session_id,result)
+                        event['reply']=result
                         detail = '收到模拟' + {'comment':'弹幕', 'enter':'进场', 'follow':'关注'}[body.kind]
                 elif body.action == 'pause':
                     if r['status'] != 'running':

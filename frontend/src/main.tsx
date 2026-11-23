@@ -9,4 +9,6 @@ import './workspace-v3.css';
 import './creative-studio.css';
 import './features/journey/journey.css';
 import './features/live/live.css';
+import './app/theme.css';
+import './app/theme-business.css';
 createRoot(document.getElementById('root')!).render(<ErrorBoundary><App/></ErrorBoundary>);

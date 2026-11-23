@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from 'react';
-import { Bell, ChevronRight, CircleHelp, Menu, Settings2, X } from 'lucide-react';
+import { ArrowUpRight, Bell, ChevronRight, CircleHelp, Menu, Settings2, X } from 'lucide-react';
 import { detailLabel, pageFor, pages } from './pages';
 import './workspace.css';
+import ThemeControls from './ThemeControls';
 
 export default function AppShell({ route, go, children, actions, pending, openDialog }: {
   route: string; go: (route: string) => void; children: ReactNode; actions?: ReactNode;
@@ -25,7 +26,7 @@ export default function AppShell({ route, go, children, actions, pending, openDi
       <header className="topbar">
         <button className="button ghost workspace-menu-toggle" title="主导航" aria-label="打开主导航" aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X size={20}/> : <Menu size={20}/>}</button>
         <nav className="breadcrumb" aria-label="当前位置"><button onClick={() => go(page.route)}>{page.label}</button>{detail && <><ChevronRight size={14}/><span>{detail}</span></>}</nav>
-        <button className="button ghost workspace-log-button" title="执行记录" aria-label="查看执行记录" onClick={() => openDialog('logs')}><Bell size={18}/></button>
+        <div className="workspace-appearance"><a className="button ghost workspace-website-link" href="/website.html" target="_blank" rel="noreferrer" aria-label="产品官网" title="产品官网"><span>产品官网</span><ArrowUpRight size={15}/></a><ThemeControls/><button className="button ghost workspace-log-button" title="执行记录" aria-label="查看执行记录" onClick={() => openDialog('logs')}><Bell size={18}/></button></div>
       </header>
       <main className={'page workspace-page ' + (page.id === 'live' ? 'live-workspace-page' : '')}>
         <div className="page-heading"><h1>{page.label}</h1><div className="heading-actions">{actions}</div></div>

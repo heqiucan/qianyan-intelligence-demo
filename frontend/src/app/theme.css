@@ -1,0 +1,78 @@
+/* Product UI theme tokens. Dark remains the existing workspace design. */
+@media screen {
+:root {--theme-bg:#111015;--theme-surface:#1a181f;--theme-text:#f1eef7;--theme-muted:#bdb4ca;--theme-border:#393440;--theme-accent:#c4a7ff;--theme-soft:#30283c}
+html[data-theme=light] {--theme-bg:#f7f8fc;--theme-surface:#fff;--theme-text:#24213b;--theme-muted:#625d78;--theme-border:#e5e2ef;--theme-accent:#7446c8;--theme-soft:#f2edfc;--bg:var(--theme-bg);--surface:#fff;--surface-raised:#f4f2f9;--border:#eae7f1;--border-strong:#d9d3e6;--text:var(--theme-text);--muted:var(--theme-muted);--brand:#7446c8;--brand-light:#6840b2;--green:#147b62;--amber:#935b0d;--danger:#b43654;color:var(--theme-text);background:var(--theme-bg)}
+.workspace-appearance {display:flex;align-items:center;gap:14px;margin-left:auto;flex-shrink:0}
+.workspace-website-link {display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.theme-controls {display:flex;gap:3px;align-items:center;padding:3px;border:1px solid var(--theme-border);border-radius:20px;background:var(--theme-surface)}
+.theme-controls button {display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:0;border-radius:50%;background:none;color:var(--theme-muted);cursor:pointer;transition:background-color 120ms ease-out,transform 120ms ease-out}
+.theme-controls button[aria-pressed=true] {background:var(--theme-soft);color:var(--theme-accent)}
+.theme-controls button:active {transform:scale(.96)}
+.theme-controls button:focus-visible {outline:2px solid var(--theme-accent);outline-offset:2px}
+.theme-settings {width:fit-content;border-radius:8px;margin-top:12px;flex-wrap:wrap}
+.theme-settings button {width:auto;border-radius:5px;padding:8px 12px;gap:7px;height:38px}
+.theme-settings-section {margin-bottom:24px}
+html[data-theme=light] .workspace-frame {background:var(--theme-bg)}
+html[data-theme=light] .workspace-sidebar {background:#fff;border-color:var(--theme-border)}
+html[data-theme=light] .workspace-frame .topbar {background:#fcfbff;border-color:var(--theme-border)}
+html[data-theme=light] .workspace-brand {color:var(--theme-text)}
+html[data-theme=light] .workspace-sidebar .nav-item {color:#4c4268}
+html[data-theme=light] .workspace-sidebar .nav-item.active {background:#eee5ff;color:#6238ae;box-shadow:inset 0 0 0 1px #d7c2ff}
+html[data-theme=light] .workspace-sidebar .nav-item.active svg {color:#7446c8}
+html[data-theme=light] :is(.workspace-utilities,.workspace-tabs,.workspace-action-row,.workspace-frame .workspace-scope) {border-color:var(--theme-border)}
+html[data-theme=light] :is(.workspace-utilities details,.workspace-inline-note,.workspace-action-row small,.workspace-tabs button,.workspace-frame .workspace-scope>summary,.breadcrumb) {color:var(--theme-muted)}
+html[data-theme=light] .workspace-tabs button[aria-current=page] {color:var(--theme-accent);background:var(--theme-soft)}
+html[data-theme=light] .workspace-count {color:var(--theme-accent);background:#ece2fb}
+html[data-theme=light] :is(.panel,.stat-card,.creative-card,.modal,.access-card,.toast,.busy-indicator) {background:#fff;border-color:var(--theme-border);color:var(--theme-text);box-shadow:0 2px 10px #30205005}
+html[data-theme=light] :is(.muted,.subtle,.stat-label,.stat-foot,.field,.log-item p,.log-item small,.settings-list p,.guide-list p,.v2-details>div>span) {color:var(--theme-muted)}
+html[data-theme=light] :is(.stat-value,.log-item strong,.v2-details>div>strong,.settings-list h3) {color:var(--theme-text)}
+html[data-theme=light] :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea) {background:#fff;color:var(--theme-text);border-color:#d9d3e6;box-shadow:none;color-scheme:light}
+html[data-theme=light] :is(input,textarea)::placeholder {color:#81778e;opacity:1}
+html[data-theme=light] :is(input,textarea,select):focus {border-color:#9164d5;outline-color:#9164d5}
+html[data-theme=light] :is(input[type=checkbox],input[type=radio],input[type=range]) {accent-color:#7446c8}
+html[data-theme=light] .button {color:#59436f;border-color:#dcd3eb;background:#fff}
+html[data-theme=light] .button.primary {background:#7950c4;color:white;border-color:#7950c4;box-shadow:0 2px 5px #7446c820}
+html[data-theme=light] .button.ghost {background:transparent;border-color:transparent;color:#664596}
+html[data-theme=light] .button.danger {color:#a82e4b;background:#fff0f3;border-color:#f1cad4}
+html[data-theme=light] :is(.badge,.chip) {color:#6840a1;background:#f1eafa;border-color:#dfd1ef}
+html[data-theme=light] .badge.neutral {color:#625d78;background:#f4f3f8;border-color:#e5e2ef}
+html[data-theme=light] :is(.badge.green,.badge.success) {color:#147052;background:#e9f8f2;border-color:#c4e5d8}
+html[data-theme=light] .badge.amber {color:#87560a;background:#fff5df;border-color:#eddbb7}
+html[data-theme=light] :is(.badge.red,.badge.danger) {color:#ac304d;background:#ffedf1;border-color:#f2c8d2}
+html[data-theme=light] .notice {background:#f7f3fc;color:#62477d;border-color:#e2d7ef}
+html[data-theme=light] :is(.error-banner,.kb-warning) {background:#fff0f3;border-color:#f0bdca;color:#a72a46}
+html[data-theme=light] :is(.data-table th,.data-table td,.modal-header,.modal-footer,.log-item,.v2-details>div) {border-color:var(--theme-border)}
+html[data-theme=light] .data-table th {background:#f7f6fb;color:#625a75}
+html[data-theme=light] .data-table td {color:#352d49}
+html[data-theme=light] .data-table small {color:#6d647c}
+html[data-theme=light] .empty-state {color:#6d647c}
+html[data-theme=light] .modal::backdrop {background:#21182b55;backdrop-filter:blur(3px)}
+html[data-theme=light] .access-page {background:var(--theme-bg);color:var(--theme-text)}
+html[data-theme=light] ::-webkit-scrollbar-track {background:#f5f3fa}
+html[data-theme=light] ::-webkit-scrollbar-thumb {background:#d5cce3}
+html[data-theme=light] .workspace-overview .stat-card {position:relative;overflow:clip;background:#fff;border-color:#e6def4}
+html[data-theme=light] .workspace-overview .stat-card:nth-child(2) {background:#fcfaff;border-color:#c9a9f3}
+html[data-theme=light] .workspace-overview .stat-card:nth-child(3) {background:#f5fcfa;border-color:#c5e8de}
+html[data-theme=light] .workspace-overview .stat-card:nth-child(4) {background:#fff7fa;border-color:#f3d2df}
+html[data-theme=light] .workspace-overview .stat-card:nth-child(3) svg {color:#198367}
+html[data-theme=light] .workspace-overview .stat-card:nth-child(4) svg {color:#b74568}
+html[data-theme=light] .workspace-overview .stat-card .stat-foot {color:#625d78}
+html[data-theme=light] .workspace-utilities details summary {color:#625d78}
+html[data-theme=light] :is(.workspace-frame,.modal) :is(.field>span,.panel-header .muted,.product-stage>.muted,summary) {color:#625d78}
+html[data-theme=light] .product-stage-caption :is(h2,span) {color:#352d49}
+html[data-theme=light] .theme-controls button {background:transparent;color:#625d78}
+html[data-theme=light] .theme-controls button[aria-pressed=true] {background:#eee5ff;color:#6238ae}
+html[data-theme=light] :is(.consumer-page,.order-success) {background:var(--theme-bg);color:var(--theme-text)}
+html[data-theme=light] :is(.consumer-info>p,.order-success p,.consumer-header .brand) {color:var(--theme-muted)}
+html[data-theme=light] .workspace-action-row>svg:first-child {color:#7651b7}
+html[data-theme=light] .workspace-action-row:nth-child(3)>svg:first-child {color:#16886b}
+html[data-theme=light] .workspace-action-row:nth-child(4)>svg:first-child {color:#ad6a0b}
+@media(hover:hover) and (pointer:fine){
+ html[data-theme=light] .workspace-sidebar .nav-item:hover:not(.active),html[data-theme=light] .workspace-tabs button:hover,html[data-theme=light] .workspace-action-row:hover {background:#f3eff9;color:#52317c}
+ html[data-theme=light] .button:not(.primary):not(:disabled):hover {background:#f1eaf9;color:#52317c}
+ html[data-theme=light] .data-table tbody tr:hover {background:#faf8fe}
+ .theme-controls button:hover {background:var(--theme-soft)}
+}
+@media(max-width:760px){.workspace-appearance{gap:6px}.workspace-website-link span{display:none}.workspace-website-link{width:32px;padding:0}.theme-controls button{width:30px;height:30px}.theme-settings button{width:auto}}
+@media(prefers-reduced-motion:reduce){.theme-controls button{transition:none}}
+}

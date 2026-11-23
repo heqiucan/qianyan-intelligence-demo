@@ -5,6 +5,7 @@ import CampaignModal from '../components/CampaignModal';
 import ModelStatus from '../components/ModelStatus';
 import { Button, Details, Modal } from '../components/ui';
 import type { useWorkspaceData } from './useWorkspaceData';
+import ThemeControls from './ThemeControls';
 
 export default function AppDialogs({ data, dialog, close, campaign, trace, closeTrace, switchCampaign, go }: {
   data: ReturnType<typeof useWorkspaceData>; dialog: string; close: () => void; campaign?: Campaign;
@@ -24,6 +25,7 @@ export default function AppDialogs({ data, dialog, close, campaign, trace, close
       }, '活动已保存')}/>}
     {dialog === 'logs' && <Modal title="执行记录" wide onClose={close}><div className="log-list">{state.logs.slice().reverse().slice(0, 60).map(log => <div className="log-item" key={log.id}><Clock3 size={18}/><div><strong>{log.action}</strong><p>{log.detail}</p><small>{date(log.created_at)}</small></div></div>)}</div></Modal>}
     {dialog === 'settings' && <Modal title="工作空间设置" onClose={close}>
+      <section className="theme-settings-section"><h3>外观</h3><ThemeControls settings/></section>
       <ModelStatus initial={state.model}/>
       <Details items={[["内容生成", state.model.label], ["数据保存", '本机工作空间'], ["平台状态", '广告投放与付款为模拟操作']]}/>
       <details><summary>模型连接与配置</summary><p>在项目目录运行 configure-zhipu.cmd 配置密钥，运行 check-zhipu.cmd 检测连接。配置后重启服务生效。</p>

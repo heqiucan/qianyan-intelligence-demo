@@ -1,0 +1,234 @@
+/* Business-only light palette. Base theme tokens and the import belong to the shell.
+   Screen-only rules leave the existing white report print stylesheet authoritative. */
+@media screen {
+  html[data-theme='light'] :is(
+    .agent-workspace, .kb-workspace, .demand-workspace, .studio-page,
+    .ads-page, .ads-dialog, .feedback-page, .feedback-dialog,
+    .live-workspace, .live-console, .analytics-workspace, .analytics-summary,
+    .v2-modal
+  ) {
+    --text: var(--theme-text, #24213b);
+    --muted: var(--theme-muted, #625d78);
+    --surface: var(--theme-surface, #fff);
+    --surface-raised: var(--theme-soft, #f2edfc);
+    --border: var(--theme-border, #e5e2ef);
+    --border-strong: var(--theme-border, #e5e2ef);
+    --brand: var(--theme-accent, #7446c8);
+    --brand-light: var(--theme-accent, #7446c8);
+    --green: #246b4d;
+    --amber: #805614;
+    --danger: #a3314e;
+    color: var(--theme-text, #24213b);
+  }
+
+  /* Shared business controls, including dialogs rendered outside their page. */
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) :is(.field > span, .field > label, .data-table td, .data-table td strong, .v2-details strong, .facts-list li) {
+    color: var(--theme-text, #24213b);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) :is(.muted, .subtle, .field small, .data-table small, .eyebrow, .creative-meta, .studio-help, .studio-mode-note, .agent-boundary, .v2-details span, .v2-details dt) {
+    color: var(--theme-muted, #625d78);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) :is(input:not([type='checkbox']):not([type='radio']):not([type='range']), select, textarea) {
+    color-scheme: light;
+    color: var(--theme-text, #24213b);
+    background: var(--theme-surface, #fff);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .v2-modal) :is(input, textarea)::placeholder {
+    color: var(--theme-muted, #625d78);
+    opacity: 1;
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .v2-modal) input {
+    accent-color: var(--theme-accent, #7446c8);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .v2-modal) input::file-selector-button {
+    color: var(--theme-accent, #7446c8);
+    background: var(--theme-soft, #f2edfc);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) :is(.button.secondary, .button.ghost, .tab) {
+    color: var(--theme-text, #24213b);
+    background: var(--theme-surface, #fff);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) .button.primary {
+    color: #fff;
+    background: var(--theme-accent, #7446c8);
+    border-color: var(--theme-accent, #7446c8);
+    box-shadow: none;
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) :is(.tabs, .data-table th, .v2-compare section, .v2-diff-list > div) {
+    background: var(--theme-bg, #f7f8fc);
+    color: var(--theme-muted, #625d78);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .v2-modal) :is(.data-table td, .creative-buttons, .v2-details > div, .v2-compare section) {
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) :is(.tab.active, .tab[aria-selected='true'], .button[aria-pressed='true']) {
+    background: var(--theme-soft, #f2edfc);
+    color: var(--theme-accent, #7446c8);
+    border-color: #c9b8e7;
+  }
+  /* Preview overlays keep their original palette along with the media itself. */
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) .badge:not(.creative-preview *, .live-preview *) {
+    background: var(--theme-soft, #f2edfc);
+    color: var(--theme-accent, #7446c8);
+    border-color: #c9b8e7;
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) .badge.neutral:not(.creative-preview *, .live-preview *) {
+    color: var(--theme-muted, #625d78);
+    background: var(--theme-bg, #f7f8fc);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) .badge.green:not(.creative-preview *, .live-preview *),
+  html[data-theme='light'] :is(.kb-success, .studio-check-summary.checked, .claim-mark.consistent) {
+    color: #246b4d;
+    background: #edf7f0;
+    border-color: #b5d8c2;
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) :is(.notice, .badge.amber):not(.creative-preview *, .live-preview *),
+  html[data-theme='light'] :is(.kb-warning, .studio-check-summary.needs-review, .claim-mark.missing_evidence) {
+    color: #805614;
+    background: #fff7e6;
+    border-color: #e5cf9e;
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .v2-modal) :is(.error-banner, .badge.danger, .button.danger),
+  html[data-theme='light'] :is(.claim-mark.conflict, .studio-error) {
+    color: #a3314e;
+    background: #fff0f3;
+    border-color: #e7b5c2;
+  }
+
+  /* Agent, retrieval and demand work areas. */
+  html[data-theme='light'] :is(.agent-entry-strip, .kb-next, .kb-retrieval-note, .kb-query-expansion, .kb-corrections, .kb-progress, .kb-tags > span, .kb-intro-icon, .kb-file-icon) {
+    color: var(--theme-accent, #7446c8);
+    background: var(--theme-soft, #f2edfc);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.kb-intro, .kb-draft-item, .kb-source-pages article, .demand-task-card) {
+    color: var(--theme-text, #24213b);
+    background: var(--theme-surface, #fff);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.kb-module-tabs, .kb-tabs) button {
+    color: var(--theme-muted, #625d78);
+    background: var(--theme-surface, #fff);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.kb-module-tabs, .kb-tabs) button[aria-pressed='true'],
+  html[data-theme='light'] :is(.kb-draft-item.active, .demand-task-card.selected, .demand-steps button[aria-current='step']) {
+    color: var(--theme-accent, #7446c8);
+    background: var(--theme-soft, #f2edfc);
+    border-color: var(--theme-accent, #7446c8);
+  }
+  html[data-theme='light'] :is(.kb-module-tabs, .kb-tabs) button span {
+    color: var(--theme-accent, #7446c8);
+    background: var(--theme-soft, #f2edfc);
+  }
+  html[data-theme='light'] :is(.kb-intro p, .kb-stepper, .kb-tags, .kb-empty, .kb-excerpt, .kb-generate p, .kb-progress span, .kb-draft-item span, .kb-draft-item small, .kb-ack, .kb-boundary, .kb-import-note, .kb-query-expansion p, .kb-corrections p) {
+    color: var(--theme-muted, #625d78);
+  }
+  html[data-theme='light'] :is(.kb-empty h3, .kb-query-expansion strong, .kb-corrections strong) {
+    color: var(--theme-text, #24213b);
+  }
+  html[data-theme='light'] :is(.kb-stepper .active, .kb-hit-methods, .kb-hit-index, .kb-source-pages small, .kb-intro .eyebrow, .kb-empty > svg) {
+    color: var(--theme-accent, #7446c8);
+  }
+  html[data-theme='light'] :is(.kb-module-tabs, .kb-hit-index, .kb-hit-methods span + span, .kb-generate) {
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.kb-source-preview blockquote, .demand-inset, .demand-json) {
+    color: var(--theme-text, #24213b);
+    background: var(--theme-bg, #f7f8fc);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  /* The source warning is itself !important; keep this exception class-specific. */
+  html[data-theme='light'] .demand-flag { color: #805614 !important; }
+
+  /* Creative evidence and comparison UI; no poster, product image or canvas rules. */
+  html[data-theme='light'] :is(.studio-evidence-panel, .studio-checked-text, .studio-revision-diff section > div > div) {
+    background: var(--theme-bg, #f7f8fc);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] .studio-page .creative-content p { color: var(--theme-muted, #625d78); }
+  html[data-theme='light'] :is(.studio-inline-note, .claim-mark.manual_review) {
+    color: #27617e;
+    background: #edf5fa;
+    border-color: #a9c9da;
+  }
+  html[data-theme='light'] :is(.studio-check-empty, .studio-finding-kind, .studio-evidence-link) { color: #27617e; }
+  html[data-theme='light'] .studio-finding.conflict .studio-finding-kind { color: #a3314e; }
+  html[data-theme='light'] .studio-finding.missing_evidence .studio-finding-kind { color: #805614; }
+  html[data-theme='light'] .studio-finding.consistent .studio-finding-kind { color: #246b4d; }
+  html[data-theme='light'] :is(.ads-page, .ads-dialog, .feedback-page, .feedback-dialog) :is(.v2-text-button, summary) { color: var(--theme-accent, #7446c8); }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) :is(details, .v2-compare p, .v2-compare pre, .v2-diff-list span) {
+    color: var(--theme-text, #24213b);
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) small:not(.creative-preview *, .live-preview *, .speech-dirty) {
+    color: var(--theme-muted, #625d78);
+  }
+
+  /* Live controls and transcript surfaces surround an intentionally unchanged stage. */
+  html[data-theme='light'] :is(.live-console .live-credit details p, .live-status-grid > div, .live-tool-button, .live-mobile-tabs button, .audio-mixer-track, .audio-mixer-recorder, .live-lineup details, .interaction-reply) {
+    color: var(--theme-text, #24213b);
+    background: var(--theme-bg, #f7f8fc);
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] .workspace-frame .live-console .live-controlbar {
+    background: var(--theme-surface, #fff);
+    border-color: var(--theme-border, #e5e2ef);
+    box-shadow: 0 4px 18px #24213b0d;
+  }
+  html[data-theme='light'] .live-console .live-credit details p { box-shadow: 0 8px 24px #24213b14; }
+  html[data-theme='light'] :is(.live-status-grid strong, .live-sku-editor legend, .live-review h4) { color: var(--theme-text, #24213b); }
+  html[data-theme='light'] :is(.live-home-entry p, .live-result-stats span, .live-chart-empty, .live-status-grid small, .live-console .live-feed-note, .live-console-feed small, .live-feed-empty, .live-feed-empty small, .live-console .live-control-hint, .live-tool-button small, .live-empty-session, .live-preview-status, .live-console .live-preview-source, .audio-mixer-track small, .live-speech-summary small) {
+    color: var(--theme-muted, #625d78);
+  }
+  html[data-theme='light'] :is(.live-sequence, .live-workspace summary, .live-trend summary, .live-reports summary, .live-console .live-credit summary, .speech-line legend, .live-console .script-draft-sources summary) {
+    color: var(--theme-accent, #7446c8);
+  }
+  html[data-theme='light'] :is(.live-draft-status, .speech-dirty, .live-speech-summary .speech-dirty) { color: #805614; }
+  html[data-theme='light'] :is(.live-sku-summary, .live-sku-editor, .live-comparison, .live-review, .live-reports details, .live-console-feed li, .live-simulation-form, .live-console .live-settings-panel > .live-tools, .live-credit, .live-draft-status, .live-source-settings, .speech-line, .speech-queue-list li, .speech-preview, .script-draft-review, .script-draft-sources article, .media-job, .media-caption-editor, .media-caption-editor fieldset, .audio-mixer-global) {
+    border-color: var(--theme-border, #e5e2ef);
+  }
+  html[data-theme='light'] :is(.speech-queue-list li[aria-current='step'], .live-mobile-tabs button[aria-pressed='true']) {
+    color: var(--theme-accent, #7446c8);
+    background: var(--theme-soft, #f2edfc);
+    border-color: var(--theme-accent, #7446c8);
+  }
+
+  /* SVG presentation attributes are overridden only inside the business trend chart. */
+  html[data-theme='light'] :is(.analytics-workspace, .analytics-summary) {
+    --analytics-teal: #246b4d;
+    --analytics-amber: #805614;
+    --analytics-muted: var(--theme-muted, #625d78);
+  }
+  html[data-theme='light'] :is(.analytics-bar-track, .analytics-composition-track, .live-bar-row > div) { background: var(--theme-border, #e5e2ef); }
+  html[data-theme='light'] .analytics-workspace .is-returning { background: var(--theme-accent, #7446c8); }
+  html[data-theme='light'] .analytics-tabs button[aria-selected='true'] {
+    color: #246b4d;
+    background: #edf7f0;
+    border-color: #b5d8c2;
+  }
+  html[data-theme='light'] .live-trend svg text { fill: var(--theme-muted, #625d78); }
+  html[data-theme='light'] .live-trend svg line { stroke: var(--theme-border, #e5e2ef); }
+  html[data-theme='light'] .live-trend svg polyline { stroke: var(--theme-accent, #7446c8); }
+  html[data-theme='light'] .live-trend svg circle { fill: var(--theme-accent, #7446c8); }
+  html[data-theme='light'] .live-bar-row i { background: var(--theme-accent, #7446c8); }
+  /* Spend is the first row and has an inline background in TrendChart.tsx. */
+  html[data-theme='light'] .live-comparison > div > .live-bar-row:first-of-type i { background: #805614 !important; }
+
+  @media (hover: hover) and (pointer: fine) {
+    html[data-theme='light'] :is(.kb-module-tabs button, .kb-tabs button, .kb-draft-item, .live-tool-button, .live-mobile-tabs button, .analytics-tabs button, .analytics-rank-row:is(button), .analytics-stat, .analytics-summary-costs button):hover {
+      background: var(--theme-soft, #f2edfc);
+    }
+    html[data-theme='light'] .live-audio-mixer .button:not(.primary):not(.danger):not(:disabled):hover { background: var(--theme-soft, #f2edfc); }
+    html[data-theme='light'] .live-audio-mixer .button.primary:not(:disabled):hover { background: var(--theme-accent, #7446c8); }
+    html[data-theme='light'] .studio-library .creative-card:hover { border-color: #c9b8e7; }
+    html[data-theme='light'] :is(.studio-evidence-link, .live-workspace summary, .live-trend summary):hover { color: var(--theme-accent, #7446c8); }
+  }
+  html[data-theme='light'] :is(.agent-workspace, .kb-workspace, .demand-workspace, .studio-page, .ads-page, .ads-dialog, .feedback-page, .feedback-dialog, .live-workspace, .live-console, .analytics-workspace, .analytics-summary, .v2-modal) :is(button, input, select, textarea, summary, a):focus-visible {
+    outline-color: var(--theme-accent, #7446c8);
+  }
+}

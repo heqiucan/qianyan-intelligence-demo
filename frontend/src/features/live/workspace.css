@@ -1,4 +1,24 @@
 .live-console {display:grid;gap:14px;min-width:0}
+.live-console>.workspace-tabs {margin-bottom:0}
+.workspace-frame .live-console .live-controlbar {position:sticky;bottom:12px;z-index:20;background:#211c29;border-color:#52485e}
+.workspace-frame .live-console[data-workspace-area=media] .live-stage-column,
+.workspace-frame .live-console[data-workspace-area=media] .live-interaction {display:none}
+.workspace-frame .live-console[data-workspace-area=media] .media-tools {grid-column:1/-1;max-height:none;overflow:visible}
+@media(min-width:1100px){
+ .workspace-frame .live-console[data-detail-open=true]:not([data-workspace-area=media]) .live-desk-grid {grid-template-columns:minmax(280px,.85fr) minmax(420px,1.15fr)}
+ .workspace-frame .live-console[data-detail-open=true] .live-interaction {grid-column:1;grid-row:2;min-height:180px;max-height:280px}
+ .workspace-frame .live-console[data-detail-open=true] .live-stage-column {grid-column:1;grid-row:1}
+ .workspace-frame .live-console[data-detail-open=true] .live-context-cards {grid-template-columns:1fr}
+ .workspace-frame .live-console[data-detail-open=true] .live-settings-panel,
+ .workspace-frame .live-console[data-detail-open=true] .live-runtime-settings,
+ .workspace-frame .live-console[data-detail-open=true] .live-interaction-settings,
+ .workspace-frame .live-console[data-detail-open=true] .live-audio-mixer,
+ .workspace-frame .live-console[data-detail-open=true] .live-script-drafts,
+ .workspace-frame .live-console[data-detail-open=true] .live-speech-panel-host {grid-column:2;grid-row:1 / span 2;max-height:calc(100vh - 190px);overflow:auto}
+ .workspace-frame .live-console .live-speech-panels>.panel {max-height:none;overflow:visible}
+ .workspace-frame .live-console[data-detail-open=true] .speech-editor-grid {grid-template-columns:1fr}
+ .workspace-frame .live-console[data-detail-open=true] .live-tool-grid {grid-template-columns:1fr 1fr}
+}
 .live-console .panel {min-width:0;overflow-wrap:anywhere;padding:16px}
 .live-console .row-actions {display:flex;align-items:center;flex-wrap:wrap;gap:8px}
 .live-console input,.live-console textarea {max-width:100%;box-sizing:border-box}

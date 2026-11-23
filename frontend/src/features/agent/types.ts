@@ -4,7 +4,15 @@ import type { Evidence, KnowledgeDraft, Scene } from '../knowledge/types';
 export type TaskStatus = 'queued' | 'running' | 'waiting_input' | 'waiting_review' | 'completed' | 'failed' | 'cancelled' | 'interrupted';
 export interface AgentEvent {
   id: string; action: string; detail: string; status: string; at: string; attempt: number;
-  source_ids?: string[];
+  source_ids?: string[]; ended_at?: string;
+}
+export interface AgentIntent {
+  token: string; taskId: string; scene: Scene; campaignId: string;
+  liveSessionId?: string; liveItemId?: string;
+}
+export interface CreateTaskInput {
+  scene: Scene; goal: string; source_mode: AgentTask['source_mode']; channel: string;
+  space_id?: string; campaign_id?: string; live_session_id?: string; live_item_id?: string;
 }
 export interface AgentTask {
   id: string; goal: string; scene: Scene; source_mode: 'demo' | 'knowledge' | 'catalog'; live_context?:LiveContext; space_id: string; space_name: string;
@@ -18,6 +26,10 @@ export interface AgentTask {
   check: null | { passed: boolean; blocking: string[]; checks: string[]; note: string };
 }
 export const active = (status: TaskStatus) => status === 'queued' || status === 'running';
+export type AgentTaskSummary = Omit<AgentTask, 'events' | 'evidence' | 'draft' | 'can_complete' | 'check'>;
+export const statusTone = (status: TaskStatus) => status === 'completed' ? 'green'
+  : status === 'failed' ? 'danger' : ['waiting_input', 'waiting_review', 'interrupted'].includes(status) ? 'amber'
+    : status === 'cancelled' ? 'neutral' : 'purple';
 export const statusLabels: Record<TaskStatus, string> = {
   queued: '等待执行', running: '正在处理', waiting_input: '需要补充', waiting_review: '待你审阅',
   completed: '已确认完成', failed: '执行未完成', cancelled: '已取消', interrupted: '服务中断 · 可继续',

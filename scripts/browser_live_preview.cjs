@@ -3,6 +3,7 @@ const {chromium}=require('./playwright_runtime.cjs');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
+const {spawnSync}=require('node:child_process');
 async function main(){
  const base=process.env.DEMO_TEST_BASE;
  assert.ok(base&&new URL(base).hostname==='127.0.0.1'&&new URL(base).port!=='8001');
@@ -25,16 +26,23 @@ async function main(){
   const revoke=URL.revokeObjectURL.bind(URL);URL.revokeObjectURL=url=>{window.__revoked.push(url);revoke(url)};
  });
  try{
+  const post=async(url,data)=>{const response=await page.request.post(base+'/api'+url,{data});assert.equal(response.status(),200,await response.text());return response.json()};
+  const currentState=await(await page.request.get(base+'/api/state')).json();assert.equal(currentState.model.mode,'replay');
+  const products=await(await page.request.get(base+'/api/live/catalog')).json();
+  const prepared=[];
+  for(let index=0;index<2;index++){
+   let session=await post('/live/sessions',{campaign_id:'campaign-demo',title:'预览专项 '+Date.now()+' '+index,host:'测试主播',scheduled_start:new Date().toISOString(),scheduled_end:new Date(Date.now()+3600000).toISOString(),items:[{product_id:products[0].id,sku_id:products[0].skus[0].id}]});
+   session=await post('/live/sessions/'+session.id+'/status',{status:'ready',expected_version:session.version,acknowledged:true});prepared.push(session);
+   const configured=await post('/live/workspace/'+session.id,{action:'configure',expected_revision:0,account:'预览测试账号',room:'预览测试直播间'});
+   await post('/live/workspace/'+session.id,{action:'start',expected_revision:configured.revision});
+  }
   await page.goto(base+'/#/live?module=video&feature=source');await page.getByLabel('本地视频文件',{exact:true}).waitFor();
   check('打开来源设置不自动请求摄像头',await page.evaluate(()=>window.__gumCalls===0));
-  const fixture=await page.evaluate(async()=>{
-   const canvas=document.createElement('canvas');canvas.width=640;canvas.height=360;const ctx=canvas.getContext('2d');let frame=0;
-   const draw=()=>{ctx.fillStyle='#171326';ctx.fillRect(0,0,640,360);ctx.fillStyle='#c9a5ff';ctx.fillRect(40+(frame++%30)*8,110,100,100);ctx.fillStyle='white';ctx.font='28px sans-serif';ctx.fillText('LOCAL PREVIEW TEST',130,65)};draw();
-   const stream=canvas.captureStream(10);const chunks=[];const recorder=new MediaRecorder(stream,{mimeType:'video/webm'});
-   const done=new Promise(resolve=>recorder.onstop=resolve);recorder.ondataavailable=e=>chunks.push(e.data);recorder.start();const interval=setInterval(draw,80);await new Promise(r=>setTimeout(r,1000));recorder.stop();await done;clearInterval(interval);stream.getTracks().forEach(t=>t.stop());
-   return Array.from(new Uint8Array(await new Blob(chunks,{type:'video/webm'}).arrayBuffer()));
-  });
-  const file={name:'本地预览测试.webm',mimeType:'video/webm',buffer:Buffer.from(fixture)};
+  // A deterministic encoded fixture avoids background canvas capture producing empty frames.
+  const fixturePath=path.resolve(out,'preview-source.webm');
+  const encoded=spawnSync('ffmpeg',['-y','-f','lavfi','-i','testsrc2=size=640x360:rate=10','-t','2','-an','-c:v','libvpx','-b:v','250k',fixturePath],{encoding:'utf8',windowsHide:true});
+  assert.equal(encoded.status,0,encoded.stderr);
+  const file={name:'本地预览测试.webm',mimeType:'video/webm',buffer:fs.readFileSync(fixturePath)};
   await page.getByLabel('本地视频文件',{exact:true}).setInputFiles(file);await page.getByText('本地预览 · 视频已就绪',{exact:true}).waitFor();
   check('本地视频真实解码且默认静音',await media().evaluate(v=>v.videoWidth===640&&v.videoHeight===360&&v.muted&&v.paused));
   const originalUrl=await media().getAttribute('src');await button('播放预览').click();await page.getByText('本地预览 · 预览中',{exact:true}).waitFor();await button('暂停预览').click();
@@ -58,9 +66,8 @@ async function main(){
   await page.evaluate(()=>{navigator.mediaDevices.getUserMedia=()=>new Promise(resolve=>{window.__resolveCamera=resolve})});await button('启动摄像头预览').click();await button('取消摄像头请求').click();await page.evaluate(async()=>{const stream=await window.__originalGum({audio:false,video:true});window.__resolveCamera(stream)});await page.waitForFunction(()=>window.__streams.at(-1).getTracks().every(t=>t.readyState==='ended'));
   check('取消授权等待后迟到的设备也会释放',await media().count()===0);
   await page.evaluate(()=>{navigator.mediaDevices.getUserMedia=window.__originalGum});await button('启动摄像头预览').click();await page.getByText('本地预览 · 预览中',{exact:true}).waitFor();await page.evaluate(()=>window.__streams.at(-1).getVideoTracks()[0].dispatchEvent(new Event('ended')));await page.getByText(/摄像头已断开/).waitFor();check('设备断开清理画面且提示重新连接',await media().count()===0);
-  await button('启动摄像头预览').click();await page.getByText('本地预览 · 预览中',{exact:true}).waitFor();await page.getByRole('navigation',{name:'主导航',exact:true}).getByRole('button',{name:'增长工作台',exact:true}).click();await page.getByRole('heading',{level:1,name:'增长工作台',exact:true}).waitFor();check('离开工作台释放摄像头',await page.evaluate(()=>window.__streams.every(s=>s.getTracks().every(t=>t.readyState==='ended'))));
-  const state=await (await page.request.get(base+'/api/state')).json();const ready=state.live_sessions.filter(s=>s.status==='ready').at(-1);const other=state.live_sessions.find(s=>s.id!==ready?.id&&s.campaign_id===ready?.campaign_id);
-  assert(ready&&other,'run after workspace acceptance supplies two sessions');
+  await button('启动摄像头预览').click();await page.getByText('本地预览 · 预览中',{exact:true}).waitFor();await page.getByRole('navigation',{name:'主导航',exact:true}).getByRole('button',{name:'工作总览',exact:true}).click();await page.getByRole('heading',{level:1,name:'工作总览',exact:true}).waitFor();check('离开工作台释放摄像头',await page.evaluate(()=>window.__streams.every(s=>s.getTracks().every(t=>t.readyState==='ended'))));
+  const [ready,other]=prepared;
   await page.goto(base+'/#/live?module=video&feature=source&live='+ready.id);await page.getByLabel('选择营销活动',{exact:true}).selectOption(ready.campaign_id);await button('启动摄像头预览').click();await page.getByText('本地预览 · 预览中',{exact:true}).waitFor();
   await page.getByText('模拟运行中',{exact:true}).waitFor();await button('暂停模拟').click();await page.getByText('已暂停模拟',{exact:true}).waitFor();check('暂停模拟不停止摄像头预览',await media().evaluate(v=>!v.paused&&v.srcObject.getVideoTracks()[0].readyState==='live'));await button('恢复模拟').click();await page.getByText('模拟运行中',{exact:true}).waitFor();
   await button('停止预览').click();check('停止预览不停止本场模拟',await page.getByText('模拟运行中',{exact:true}).isVisible());await button('启动摄像头预览').click();await page.getByText('本地预览 · 预览中',{exact:true}).waitFor();

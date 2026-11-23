@@ -1,0 +1,59 @@
+/* product-ui: full-width work areas and semantic state colors. */
+.ads-page, .ads-dialog { min-width:0; }
+.ads-page *, .ads-dialog * { letter-spacing:0; }
+.ads-mode-note { display:flex; align-items:center; gap:8px; color:var(--amber); font-size:13px; margin-bottom:16px; }
+.ads-mode-note svg { flex-shrink:0; }
+.ads-tabs { display:flex; flex-wrap:wrap; gap:20px; border-bottom:1px solid var(--border-strong); margin-bottom:24px; }
+.ads-tabs button { display:inline-flex; align-items:center; gap:8px; min-height:42px; border:0; border-bottom:2px solid transparent; background:transparent; color:var(--muted); padding:8px 2px 12px; font-size:14px; }
+.ads-tabs button[aria-current=page] { color:var(--text); border-bottom-color:var(--brand-light); }
+.ads-section-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+.ads-section-heading h2 { font-size:18px; margin:0; }
+.ads-section-heading p { margin-top:5px; }
+.ads-page .row-actions, .ads-dialog .row-actions { flex-wrap:wrap; }
+.ads-page .button, .ads-dialog .button { white-space:normal; }
+.ads-page .button.primary, .ads-dialog .button.primary { background:var(--brand); box-shadow:none; }
+.ads-page button, .ads-dialog button { transition:transform 120ms cubic-bezier(0.23, 1, 0.32, 1); }
+.ads-page button:active:not(:disabled), .ads-dialog button:active:not(:disabled) { transform:scale(.98); }
+.ads-page :is(button,summary):focus-visible, .ads-dialog :is(button,summary):focus-visible { outline:2px solid var(--brand-light); outline-offset:3px; }
+.ads-plan-list { border-block:1px solid var(--border-strong); }
+.ads-page .table-wrap { max-width:100%; margin:0; overflow-x:auto; }
+.ads-page .data-table { min-width:820px; }
+.ads-page .data-table td { vertical-align:top; }
+.ads-page .data-table td:nth-child(2) { min-width:180px; max-width:320px; white-space:normal; overflow-wrap:anywhere; }
+.ads-page .data-table td:last-child { min-width:180px; max-width:280px; }
+.ads-page .data-table .v2-text-button { white-space:normal; overflow-wrap:anywhere; text-align:left; }
+.ads-page .data-table small { display:block; margin-top:5px; color:var(--muted); }
+.ads-page input[type=checkbox] { width:16px; height:16px; accent-color:var(--brand); }
+.ads-rules { padding:16px 0; font-size:13px; border-bottom:1px solid var(--border); }
+.ads-rules summary { cursor:pointer; color:var(--muted); }
+.ads-rules p { margin-top:10px; color:var(--muted); overflow-wrap:anywhere; }
+.ads-source-note { font-size:13px; color:var(--muted); margin:16px 0; overflow-wrap:anywhere; }
+.ads-form-fields { border:0; padding:0; margin:16px 0; min-width:0; }
+.ads-form-fields .field { min-width:0; }
+.ads-detail-actions { margin:20px 0; }
+.ads-adjustments { border-top:1px solid var(--border-strong); padding-top:18px; margin-top:22px; }
+.ads-adjustments h3, .ads-scene-preview h3 { font-size:15px; margin:0 0 15px; }
+.ads-adjustments article { display:flex; align-items:center; gap:12px; padding:14px 0; border-bottom:1px solid var(--border); }
+.ads-adjustments article>div { min-width:0; flex:1; }
+.ads-adjustments p { overflow-wrap:anywhere; }
+.ads-adjustments small { color:var(--muted); }
+.ads-scenario-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; max-width:900px; }
+.ads-scenario-fields .field { min-width:0; }
+.ads-scenario-fields select { width:100%; }
+.ads-scene-preview { border-top:1px solid var(--border-strong); margin-top:24px; padding-top:20px; }
+.ads-dialog .v2-compare section { min-width:0; border-radius:8px; }
+.ads-dialog .v2-details strong, .ads-dialog .v2-compare p { overflow-wrap:anywhere; }
+@media(hover:hover) and (pointer:fine) {
+  .ads-tabs button:hover { color:var(--text); }
+}
+@media(max-width:760px) {
+  .ads-section-heading { align-items:flex-start; }
+  .ads-scenario-fields { grid-template-columns:1fr; }
+  .ads-adjustments article { flex-wrap:wrap; align-items:flex-start; }
+  .ads-adjustments article>div { flex-basis:100%; }
+  .ads-dialog .v2-compare { grid-template-columns:1fr; }
+}
+@media(prefers-reduced-motion:reduce) {
+  .ads-page *, .ads-dialog * { animation:none!important; transition:none!important; scroll-behavior:auto!important; }
+  .ads-page button:active:not(:disabled), .ads-dialog button:active:not(:disabled) { transform:none; }
+}

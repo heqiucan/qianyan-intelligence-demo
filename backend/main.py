@@ -4,7 +4,7 @@ Run: python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 """
 from __future__ import annotations
 
-from contextlib import asynccontextmanager, contextmanager
+from contextlib import asynccontextmanager
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, ROUND_HALF_UP
 import hashlib
@@ -13,7 +13,6 @@ import json
 import os
 from pathlib import Path
 import re
-import sqlite3
 from typing import Literal
 from uuid import uuid4
 
@@ -26,6 +25,7 @@ from pydantic import BaseModel, Field, ConfigDict, field_validator
 from backend.model_adapter import ModelAdapter, ModelFailure
 from backend.claims import inspect_claims
 from backend.creative_handoff import check_origin
+from backend.core.storage import SQLiteStore, put, get, all_records
 
 ROOT = Path(__file__).resolve().parents[1]
 COLLECTIONS = ("product", "campaigns", "creatives", "plans", "orders", "events", "logs", "insights", "datasets")
@@ -153,39 +153,7 @@ class AcceptInput(Idempotent):
     creative_id: str
 
 
-class Store:
-    def __init__(self, directory):
-        self.directory = Path(directory).resolve()
-        self.path = self.directory / "demo.sqlite3"
-
-    @contextmanager
-    def read(self):
-        """Read snapshots never claim the single SQLite writer slot."""
-        connection = sqlite3.connect(self.path, timeout=15)
-        connection.row_factory = sqlite3.Row
-        try:
-            connection.execute('PRAGMA query_only=ON')
-            connection.execute('BEGIN')
-            yield connection
-        finally:
-            connection.rollback()
-            connection.close()
-
-    @contextmanager
-    def transaction(self):
-        connection = sqlite3.connect(self.path, timeout=15)
-        connection.row_factory = sqlite3.Row
-        try:
-            connection.execute("PRAGMA busy_timeout=15000")
-            connection.execute("BEGIN IMMEDIATE")
-            yield connection
-            connection.commit()
-        except Exception:
-            connection.rollback()
-            raise
-        finally:
-            connection.close()
-
+class Store(SQLiteStore):
     def initialize(self):
         self.directory.mkdir(parents=True, exist_ok=True)
         (self.directory / "uploads").mkdir(exist_ok=True)
@@ -203,22 +171,6 @@ class Store:
             migrate_defaults(db)
             from backend.knowledge import initialize_knowledge
             initialize_knowledge(db)
-
-
-def put(db, collection, record):
-    db.execute("INSERT INTO records(collection,id,data) VALUES (?,?,?) ON CONFLICT(collection,id) DO UPDATE SET data=excluded.data", (collection, record["id"], json.dumps(record, ensure_ascii=False)))
-    return record
-
-
-def all_records(db, collection):
-    return [json.loads(x[0]) for x in db.execute("SELECT data FROM records WHERE collection=? ORDER BY rowid", (collection,))]
-
-
-def get(db, collection, record_id):
-    row = db.execute("SELECT data FROM records WHERE collection=? AND id=?", (collection, record_id)).fetchone()
-    if not row:
-        raise HTTPException(404, "找不到对应记录。")
-    return json.loads(row[0])
 
 
 def log(db, action, detail):

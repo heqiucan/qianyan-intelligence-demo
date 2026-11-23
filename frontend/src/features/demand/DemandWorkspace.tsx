@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState,useCallback} from 'react';
-import {ArrowRight,Database,RefreshCw,ListChecks,Layers,FileText} from 'lucide-react';
+import {ArrowLeft,ArrowRight,Database,RefreshCw,ListChecks,Layers,FileText,Plus} from 'lucide-react';
 import {api,date} from '../../api';
 import {Badge,Button,Empty,Field} from '../../components/ui';
 import type {Space,Document} from '../knowledge/types';
@@ -37,7 +37,7 @@ export default function DemandWorkspace({view,model,initialSpaceId,initialTaskId
     const items=await api<Run[]>('/demand/tasks?space_id='+encodeURIComponent(spaceId),'GET',undefined,{signal:controller.signal});
     if(cancelled)return;setRuns(items);
     let detail:Run|null=null;
-    if(taskId){detail=await api<Run>('/demand/tasks/'+encodeURIComponent(taskId),'GET',undefined,{signal:controller.signal});if(cancelled)return;if(detail.space_id===spaceId)setTask(detail)}
+    if(taskId&&taskId!=='new'){detail=await api<Run>('/demand/tasks/'+encodeURIComponent(taskId),'GET',undefined,{signal:controller.signal});if(cancelled)return;if(detail.space_id===spaceId)setTask(detail)}
     failures=0;setError('');
     if(items.some(r=>['queued','running'].includes(r.status))||(detail&&['queued','running'].includes(detail.status)))next=2500;
    }catch(e){if(!cancelled&&!controller.signal.aborted){setError((e as Error).message);failures+=1;next=Math.min(60000,2500*2**Math.min(failures,5))}}
@@ -48,21 +48,22 @@ export default function DemandWorkspace({view,model,initialSpaceId,initialTaskId
   return()=>{cancelled=true;if(timer)clearTimeout(timer);controller?.abort();document.removeEventListener('visibilitychange',visibility)};
  },[spaceId,taskId,view]);
  const space=spaces.find(s=>s.id===spaceId);
- const navigate=(v:View,id=taskId)=>go(({tasks:'overview',library:'product',results:'analytics',content:'creative',attention:'tasks'}[v])+`?tab=demand&space=${encodeURIComponent(spaceId)}`+(id?'&task='+encodeURIComponent(id):''));
+ const navigate=(v:View,id=taskId)=>go(`agent?tab=demand&view=${v}&space=${encodeURIComponent(spaceId)}`+(id?'&task='+encodeURIComponent(id):''));
  const pick=(id:string)=>{if(resultsDirty&&!confirm('当前结果操作尚未完成，确定切换任务？'))return;setResultsDirty(false);setTask(null);setTaskId(id);taskSelected?.(id,spaceId)};
- const refreshTask=async()=>{await load();if(!spaceId||pollLock.current)return;pollLock.current=true;try{const items=await api<Run[]>('/demand/tasks?space_id='+encodeURIComponent(spaceId));if(current.current!==spaceId)return;setRuns(items);if(taskId){const detail=await api<Run>('/demand/tasks/'+encodeURIComponent(taskId));if(detail.space_id===current.current&&selectedTask.current===taskId)setTask(detail)}setError('')}finally{pollLock.current=false}};
+ const refreshTask=async()=>{await load();if(!spaceId||pollLock.current)return;pollLock.current=true;try{const items=await api<Run[]>('/demand/tasks?space_id='+encodeURIComponent(spaceId));if(current.current!==spaceId)return;setRuns(items);if(taskId&&taskId!=='new'){const detail=await api<Run>('/demand/tasks/'+encodeURIComponent(taskId));if(detail.space_id===current.current&&selectedTask.current===taskId)setTask(detail)}setError('')}finally{pollLock.current=false}};
  const visible=runs.filter(r=>view==='attention'?['paused','interrupted','failed','waiting_review','waiting_input'].includes(r.status):view==='content'?['topics','faq'].includes(r.task_type):true);
  return <section className="demand-workspace" aria-label="需求素材与任务工作空间">
-  <div className="panel demand-context"><div><span className="eyebrow">需求 → 选题 → 有据可查的内容</span><h2>需求工作空间</h2><p className="muted">导入素材或使用明确标记的样例。需求记录用来理解问题，生成回答时单独检索已审核的事实资料。</p></div><Field label="机构与业务空间"><select value={spaceId} disabled={loading} onChange={e=>{if(dirty&&!confirm('当前编辑尚未保存，确定切换空间并放弃修改？'))return;setLibraryDirty(false);setBuilderDirty(false);setResultsDirty(false);setTaskId('');setSpaceId(e.target.value);taskSelected?.('',e.target.value)}}>{spaces.map(s=><option key={s.id} value={s.id}>{s.name} · {s.scene==='medical'?'医美':'直播'}{s.is_demo?' · 演示':''}</option>)}</select></Field></div>
+  <div className="demand-context"><h2>需求分析</h2><Field label="机构与业务空间"><select value={spaceId} disabled={loading} onChange={e=>{if(dirty&&!confirm('当前编辑尚未保存，确定切换空间并放弃修改？'))return;setLibraryDirty(false);setBuilderDirty(false);setResultsDirty(false);setTaskId('');setSpaceId(e.target.value);taskSelected?.('',e.target.value)}}>{spaces.map(s=><option key={s.id} value={s.id}>{s.name}{s.is_demo?' · 样例':''}</option>)}</select></Field></div>
   <nav className="demand-steps" aria-label="需求处理流程">{([['tasks','配置与任务',ListChecks],['library','素材与词库',Database],['results','筛选与确认',Layers],['content','选题与内容',FileText]] as const).map(([v,label,Icon],i)=><button key={v} aria-current={view===v?'step':undefined} onClick={()=>navigate(v)}><Icon size={17}/><span>0{i+1} {label}</span><ArrowRight size={14}/></button>)}</nav>
   {error&&<div role="alert" className="error-banner">{error}<Button onClick={()=>{setError('');refreshTask().catch(e=>setError(e.message))}}>重新读取</Button></div>}
   {loading?<p role="status">正在读取当前空间…</p>:!space?<div className="panel"><Empty text="当前没有机构空间。请先在知识库创建机构与业务空间。"/><Button kind="primary" onClick={()=>go('product?tab=knowledge')}>去知识库创建空间<ArrowRight size={15}/></Button></div>:<>
    {view==='library'?<DemandLibrary key={spaceId} space={space} batches={batches} packs={packs} docs={docs} reload={load} dirtyChanged={markLibraryDirty} start={()=>navigate('tasks')}/>:<>
-    {view==='tasks'&&<TaskBuilder key={spaceId} space={space} batches={batches} packs={packs} templates={templates} model={model} dirtyChanged={markBuilderDirty} reload={load} started={r=>{setTask(r);setTaskId(r.id);taskSelected?.(r.id,spaceId);void load().catch(e=>setError(e.message))}} library={()=>navigate('library')}/>}
-    <section className="panel"><div className="demand-section-head"><div><h3>{view==='attention'?'需求任务待办':view==='content'?'选题与 FAQ 任务':'任务看板'}</h3><p className="muted">已保存进度以服务端记录为准。刷新页面可继续查看；中断任务需要手动恢复。</p></div><Button onClick={()=>refreshTask().catch(e=>setError(e.message))}><RefreshCw size={15}/>刷新</Button></div>
+    {taskId&&<div className="row-actions"><Button kind="ghost" onClick={()=>navigate(view,'')}><ArrowLeft size={15}/>返回任务列表</Button></div>}
+    {view==='tasks'&&taskId==='new'&&<TaskBuilder key={spaceId} space={space} batches={batches} packs={packs} templates={templates} model={model} dirtyChanged={markBuilderDirty} reload={load} started={r=>{setBuilderDirty(false);setTask(r);setTaskId(r.id);taskSelected?.(r.id,spaceId);void load().catch(e=>setError(e.message))}} library={()=>navigate('library')}/>}
+    {!taskId&&<section className="workspace-section"><div className="demand-section-head"><h3>{view==='attention'?'需求任务待办':view==='content'?'选题与 FAQ 任务':'任务列表'}</h3><div className="row-actions"><Button onClick={()=>refreshTask().catch(e=>setError(e.message))}><RefreshCw size={15}/>刷新</Button><Button kind="primary" onClick={()=>navigate('tasks','new')}><Plus size={15}/>新建需求任务</Button></div></div>
      {!visible.length?<Empty text={view==='content'?'还没有内容任务。在结果页确认需求后，转为选题或 FAQ。':'当前空间还没有符合条件的任务。'}/>:<div className="demand-task-grid">{visible.map(r=><button type="button" className={'demand-task-card '+(r.id===taskId?'selected':'')} key={r.id} onClick={()=>pick(r.id)}><div className="demand-card-head"><Badge tone={r.status==='failed'?'red':r.status==='completed'?'green':'neutral'}>{statusLabels[r.status]||r.status}</Badge><small>{kindLabels[r.task_type]}</small></div><strong>{r.name}</strong><span>已处理 {r.counts?.processed||0} · 待确认 {r.counts?.pending||0} · 已确认 {r.counts?.confirmed||0}</span><small>{date(r.created_at)} · 任务修订 {r.revision}</small></button>)}</div>}
-    </section>
-    {task&&task.space_id===spaceId?<DemandResults key={task.id} task={task} setTask={setTask} reload={refreshTask} dirtyChanged={markResultsDirty} go={go} openTask={r=>{setTask(r);setTaskId(r.id);taskSelected?.(r.id,spaceId);void load().catch(e=>setError(e.message))}}/>:taskId&&!error&&<p role="status">正在读取任务明细…</p>}
+    </section>}
+    {taskId!=='new'&&task&&task.id===taskId&&task.space_id===spaceId?<DemandResults key={task.id} task={task} setTask={setTask} reload={refreshTask} dirtyChanged={markResultsDirty} go={go} openTask={r=>{setTask(r);setTaskId(r.id);taskSelected?.(r.id,spaceId);void load().catch(e=>setError(e.message))}}/>:taskId&&taskId!=='new'&&!error&&<p role="status">正在读取任务明细…</p>}
    </>}
   </>}
  </section>

@@ -1,133 +1,141 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ArrowRight, Bot, Clock3, Plus, Send, Sparkles } from 'lucide-react';
-import { api, date, requestId, type ModelInfo } from '../../api';
-import { Badge, Button, Field, Modal, Submit } from '../../components/ui';
-import { type Evidence, type KnowledgeDraft, type Scene, type Space, sceneLabels } from '../knowledge/types';
-import TaskDetail from './TaskDetail';
-import { type AgentTask, active, presets, statusLabels } from './types';
+import { ArrowLeft, CornerUpLeft, Plus, RefreshCw } from 'lucide-react';
+import { api, requestId, type ModelInfo } from '../../api';
+import { Badge, Button, Modal } from '../../components/ui';
+import { type Evidence, type KnowledgeDraft, type Space } from '../knowledge/types';
 import type { HandoffContext } from '../journey/CreativeHandoff';
+import TaskCreate from './TaskCreate';
+import TaskDetail from './TaskDetail';
+import TaskList from './TaskList';
+import { type AgentIntent, type AgentTask, type AgentTaskSummary, type CreateTaskInput, active } from './types';
 import '../knowledge/knowledge.css';
 import './agent.css';
 
-export default function AgentWorkspace({ model, dirtyChanged, openKnowledge, handoff, intent, taskSelected }: {
-  model: ModelInfo; dirtyChanged: (value: boolean) => void; openKnowledge: (spaceId?: string) => void;
-  handoff: HandoffContext; intent?: { token: string; taskId: string; scene: Scene; campaignId: string;liveSessionId?:string;liveItemId?:string };
+export interface AgentWorkspaceProps {
+  model: ModelInfo;
+  dirtyChanged: (value: boolean) => void;
+  openKnowledge: (spaceId?: string) => void;
+  handoff: HandoffContext;
+  intent?: AgentIntent;
+  initialStatus?: 'attention';
   taskSelected: (id: string) => void;
-}) {
-  const [tasks, setTasks] = useState<AgentTask[]>([]), [spaces, setSpaces] = useState<Space[]>([]);
-  const [selected, setSelected] = useState(localStorage.getItem('marketing-agent-task') || ''), [task, setTask] = useState<AgentTask | null>(null);
-  const [scene, setScene] = useState<Scene>('live'), [goal, setGoal] = useState(presets.live);
-  const [sourceMode, setSourceMode] = useState('demo'), [spaceId, setSpaceId] = useState(''), [channel, setChannel] = useState('internal');
+  onReturn?: () => void;
+  returnLabel?: string;
+}
+
+export default function AgentWorkspace({ model, dirtyChanged, openKnowledge, handoff, intent, initialStatus, taskSelected, onReturn, returnLabel = '返回来源业务' }: AgentWorkspaceProps) {
+  const pageId = intent?.taskId || '';
+  const selected = pageId === 'new' ? '' : pageId;
+  const createToken = pageId === 'new' ? intent?.token : undefined;
+  const [tasks, setTasks] = useState<AgentTaskSummary[]>([]), [spaces, setSpaces] = useState<Space[]>([]);
+  const [task, setTask] = useState<AgentTask | null>(null), [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [source, setSource] = useState<Evidence | null>(null);
   const [formDirty, setFormDirty] = useState(false), [taskDirty, setTaskDirty] = useState(false);
-  const [linkedCampaign, setLinkedCampaign] = useState('');
-  const [liveSession,setLiveSession]=useState(''),[liveItem,setLiveItem]=useState('');
-  const lock = useRef(false), selectedRef = useRef(selected), dirtyRef = useRef(false);
-  selectedRef.current = selected; dirtyRef.current = formDirty || taskDirty || busy;
-  const markTaskDirty = useCallback((v: boolean) => setTaskDirty(v), []);
+  const lock = useRef(false), selectedRef = useRef(selected), dirtyRef = useRef(false), taskRequest = useRef(0);
+  selectedRef.current = selected;
+  dirtyRef.current = formDirty || taskDirty || busy;
+  const markTaskDirty = useCallback((value: boolean) => setTaskDirty(value), []);
+  const markFormDirty = useCallback((value: boolean) => setFormDirty(value), []);
+
+  useEffect(() => { dirtyChanged(formDirty || taskDirty || busy); }, [formDirty, taskDirty, busy, dirtyChanged]);
+  useEffect(() => () => dirtyChanged(false), [dirtyChanged]);
   useEffect(() => {
-    if (!intent) return;
-    setFormDirty(false); setTaskDirty(false); setError('');
-    if (intent.taskId === 'new') {
-      selectedRef.current = ''; setSelected(''); setTask(null); setScene(intent.scene);
-      const session=handoff.sessions?.find(s=>s.id===intent.liveSessionId),item=session?.items.find(i=>i.id===intent.liveItemId);
-      setLiveSession(intent.liveSessionId||'');setLiveItem(intent.liveItemId||'');
-      setGoal(item?'为'+item.product_snapshot.name+'（'+item.sku_label+'）准备直播讲解稿，分开场、规格展示和收尾。只使用本场已确认货盘中的事实，缺失信息列为待核实。':presets[intent.scene]); setSourceMode(item?'catalog':'demo'); setSpaceId('');
-      setLinkedCampaign(intent.scene === 'live' ? intent.campaignId : '');
-    } else { selectedRef.current = intent.taskId; setSelected(intent.taskId); }
-    const timer = setTimeout(() => document.getElementById('agent-workspace')?.scrollIntoView({ block: 'start' }), 100);
-    return () => clearTimeout(timer);
-  }, [intent?.token]);
-  useEffect(() => { dirtyChanged(formDirty || taskDirty || busy); return () => dirtyChanged(false); }, [formDirty, taskDirty, busy, dirtyChanged]);
+    setFormDirty(false); setTaskDirty(false); setError(''); setSource(null);
+  }, [pageId, createToken]);
+
+  const refreshTasks = useCallback(async () => {
+    const next = await api<AgentTaskSummary[]>('/agent/tasks');
+    setTasks(next); setLoaded(true);
+  }, []);
   const refreshLists = useCallback(async () => {
-    const [nextTasks, nextSpaces] = await Promise.all([api<AgentTask[]>('/agent/tasks'), api<Space[]>('/knowledge/spaces')]);
-    setTasks(nextTasks); setSpaces(nextSpaces);
-  }, []);
+    await Promise.all([refreshTasks(), api<Space[]>('/knowledge/spaces').then(setSpaces)]);
+  }, [refreshTasks]);
   const readTask = useCallback(async (id: string) => {
+    const request = ++taskRequest.current;
     const next = await api<AgentTask>('/agent/tasks/' + encodeURIComponent(id));
-    if (selectedRef.current === id) setTask(next);
-    return next;
+    if (selectedRef.current === id && request === taskRequest.current) setTask(next);
   }, []);
-  useEffect(() => { refreshLists().catch(e => setError(e.message)); }, [refreshLists]);
+  useEffect(() => { void refreshLists().catch(e => setError(e.message)); }, [refreshLists]);
   useEffect(() => {
-    localStorage.setItem('marketing-agent-task', selected); setTask(null); setError('');
-    if (selected) readTask(selected).catch(e => setError(e.message));
+    setTask(null);
+    if (selected) void readTask(selected).catch(e => { if (selectedRef.current === selected) setError(e.message); });
+    return () => { taskRequest.current += 1; };
   }, [selected, readTask]);
+
+  const polling = selected ? task?.id === selected && active(task.status) : pageId === '' && tasks.some(item => active(item.status));
   useEffect(() => {
-    if (!selected || !task || !active(task.status)) return;
-    let stopped = false, timer: ReturnType<typeof setTimeout>;
+    if (!polling) return;
+    let stopped = false;
+    let timer: ReturnType<typeof setTimeout>;
     const poll = async () => {
-      try { await readTask(selected); if (!stopped) await refreshLists(); }
-      catch (e) { if (!stopped) setError((e as Error).message); }
+      try {
+        // Never replace an editor with unsaved input while polling a running task.
+        if (!dirtyRef.current) {
+          if (selected) await readTask(selected);
+          if (!stopped) await refreshTasks();
+        }
+      } catch (e) { if (!stopped) setError((e as Error).message); }
       if (!stopped) timer = setTimeout(poll, 1400);
     };
     timer = setTimeout(poll, 900);
     return () => { stopped = true; clearTimeout(timer); };
-  }, [selected, task?.status, readTask, refreshLists]);
-  const select = (id: string) => {
+  }, [polling, selected, readTask, refreshTasks]);
+
+  const navigate = (next: () => void) => {
     if (lock.current) return;
-    if (id === selected) return;
-    if (dirtyRef.current && !confirm('当前输入尚未保存，确定切换并放弃这些修改？')) return;
-    setFormDirty(false); setTaskDirty(false); setSelected(id); setError('');
-    taskSelected(id);
+    if (dirtyRef.current && !confirm('当前输入尚未保存，确定离开并放弃这些修改？')) return;
+    setFormDirty(false); setTaskDirty(false); dirtyChanged(false);
+    next();
   };
   const run = async (operation: () => Promise<void>) => {
     if (lock.current) return false;
     lock.current = true; setBusy(true); setError('');
-    try { await operation(); await refreshLists(); return true; }
-    catch (e) { setError((e as Error).message); return false; }
+    try {
+      await operation();
+      // A failed list refresh must not report an accepted mutation as a failed submission.
+      await refreshTasks().catch(e => setError(e.message));
+      return true;
+    } catch (e) { setError((e as Error).message); return false; }
     finally { lock.current = false; setBusy(false); }
   };
-  const create = () => run(async () => {
-    const result = await api<{ id: string }>('/agent/tasks', 'POST', {
-      request_id: requestId(), scene, goal, source_mode: sourceMode,
-      ...(scene==='live'&&liveSession?{live_session_id:liveSession,live_item_id:liveItem}:{}),
-      ...(scene === 'live' && linkedCampaign ? { campaign_id: linkedCampaign } : {}),
-      ...(sourceMode === 'knowledge' ? { space_id: spaceId, channel } : { channel: 'internal' }),
-    });
-    setFormDirty(false); selectedRef.current = result.id; setSelected(result.id); await readTask(result.id); taskSelected(result.id);
+  const create = (input: CreateTaskInput) => run(async () => {
+    const result = await api<{ id: string }>('/agent/tasks', 'POST', { request_id: requestId(), ...input });
+    setFormDirty(false); setTaskDirty(false); dirtyChanged(false);
+    taskSelected(result.id);
   });
   const act = (action: string, data: Record<string, unknown> = {}) => run(async () => {
-    if (!task) return;
-    await api('/agent/tasks/' + task.id + '/' + action, 'POST', { request_id: requestId(), expected_attempt: task.attempt, ...data });
-    await readTask(task.id);
+    if (!task || task.id !== selected) throw new Error('请先读取当前任务。');
+    await api('/agent/tasks/' + encodeURIComponent(task.id) + '/' + action, 'POST', { request_id: requestId(), expected_attempt: task.attempt, ...data });
+    await readTask(task.id).catch(e => setError('操作已保存，请重新读取任务。' + e.message));
   });
   const changed = (draft: KnowledgeDraft) => {
-    setTask(current => current ? { ...current, draft, can_complete: current.status === 'waiting_review' && draft.status === 'confirmed' && !draft.source_warnings.length,
-      completion_stale: current.status === 'completed' && (current.completed_revision !== draft.revision || Boolean(draft.source_warnings.length)) } : current);
+    setTask(current => current?.draft?.id === draft.id ? {
+      ...current, draft,
+      can_complete: current.status === 'waiting_review' && draft.status === 'confirmed' && !draft.source_warnings.length,
+      completion_stale: current.status === 'completed' && (current.completed_revision !== draft.revision || Boolean(draft.source_warnings.length)),
+    } : current);
   };
-  const eligibleSpaces = spaces.filter(s => s.scene === scene);
-  const refreshCurrent = () => run(async () => { if (selected) await readTask(selected); });
+  const refreshCurrent = () => run(async () => { if (selected) await readTask(selected); else await refreshLists(); });
+  const currentTask = task?.id === selected ? task : null;
+
   return <section id="agent-workspace" className="agent-workspace kb-workspace" aria-label="营销任务 Agent">
-    <header className="agent-intro">
-      <div className="agent-intro-icon"><Bot size={27}/></div><div><div className="eyebrow">MARKETING TASK AGENT</div><h2>给一个目标，把依据和草稿一起交回来。</h2><p>医美预约 FAQ · 直播讲解脚本。检索资料、判断缺口、生成草稿，最后交给你确认。</p></div>
-      <Badge>{model.mode === 'replay' ? '规则演示' : '智谱模型已接入'}</Badge>
-    </header>
-    <div className="agent-layout">
-      <aside className="panel agent-history" aria-label="Agent 任务历史">
-        <Button kind={selected ? 'secondary' : 'primary'} disabled={busy} onClick={() => select('')}><Plus size={15}/>新建 Agent 任务</Button>
-        <div className="agent-history-title"><Clock3 size={14}/>任务记录<span>{tasks.length}</span></div>
-        {tasks.length ? tasks.map(item => <button key={item.id} className={`agent-task-item ${selected === item.id ? 'selected' : ''}`} aria-pressed={selected === item.id} disabled={busy} onClick={() => select(item.id)}>
-          <span>{sceneLabels[item.scene]}<small>{statusLabels[item.status]}</small></span><strong>{item.goal}</strong><time>{date(item.created_at)}</time>
-        </button>) : <p className="muted">从一个小任务开始。过程和草稿都会保存，稍后可以回来查看。</p>}
-      </aside>
-      <div className="agent-main">
-        {error && <div className="error-banner" role="alert"><span>{error}</span><Button disabled={busy} onClick={() => selected ? refreshCurrent() : run(refreshLists)}>重新读取</Button></div>}
-        {!selected ? <form className="panel agent-composer" onSubmit={e => { e.preventDefault(); create(); }}>
-          <div className="panel-header"><div><h3>这次，想让 AI 帮你完成什么？</h3><p className="muted">先选业务场景，再说清希望交付的内容。</p></div><Sparkles size={22}/></div>
-          <div className="agent-scene-options">{(['medical', 'live'] as Scene[]).map(value => <button key={value} type="button" aria-pressed={scene === value} className={scene === value ? 'selected' : ''} disabled={busy} onClick={() => { setScene(value); setGoal(presets[value]); setSpaceId(''); setLinkedCampaign('');setLiveSession('');setLiveItem('');setSourceMode('demo'); setFormDirty(true); }}><span>{value === 'medical' ? '01' : '02'}</span><strong>{sceneLabels[value]}</strong><small>{value === 'medical' ? '预约沟通与内部 FAQ' : '有依据的直播讲解'}</small><ArrowRight size={16}/></button>)}</div>
-          <Field label="希望 Agent 完成的任务"><textarea required minLength={4} maxLength={1500} rows={4} disabled={busy} value={goal} onChange={e => { setGoal(e.target.value); setFormDirty(true); }}/></Field>
-          <div className="agent-form-grid"><Field label="使用哪些资料"><select value={sourceMode} disabled={busy} onChange={e => { setSourceMode(e.target.value); setFormDirty(true); }}>{liveSession&&<option value="catalog">本场已确认货盘 · 当前商品资料</option>}<option value="demo">预置虚构示例 · 可以直接体验</option><option value="knowledge">选择我的知识库 · 仅使用已审核资料</option></select></Field>{sourceMode === 'knowledge' && <><Field label="资料空间"><select value={spaceId} disabled={busy} required onChange={e => { setSpaceId(e.target.value); setFormDirty(true); }}><option value="">请选择{sceneLabels[scene]}资料空间</option>{eligibleSpaces.map(space => <option key={space.id} value={space.id}>{space.name}{space.is_demo ? '（示例）' : ''}</option>)}</select></Field><Field label="资料渠道范围"><select value={channel} disabled={busy} onChange={e => { setChannel(e.target.value); setFormDirty(true); }}><option value="internal">内部资料</option><option value="douyin">抖音渠道资料</option></select></Field></>}</div>
-          {scene === 'live' && <Field label="关联营销活动（可选）"><select disabled={busy||!!liveSession} value={linkedCampaign} onChange={e => { setLinkedCampaign(e.target.value); setFormDirty(true); }}><option value="">独立内容任务，转入时再选择活动</option>{handoff.campaigns.map(c => <option key={c.id} value={c.id}>{c.name} · {c.product_snapshot.name}</option>)}</select></Field>}
-          {liveSession&&<p className="notice">已绑定直播场次与货盘条目：{handoff.sessions?.find(s=>s.id===liveSession)?.title}。转入时保留同一商品及货盘版本。</p>}
-          <div className="agent-scope-note"><BookNote/>{sourceMode === 'catalog' ? '仅使用已人工确认的本场商品快照，资料来源可以核对；不是平台审核或库存同步。' : sourceMode === 'demo' ? '为本次场景准备独立的虚构资料空间，所有示例均会明确标记。后续可换成你导入的资料。' : '只检索所选机构 / 品牌和渠道内，已审核且有效的资料。业务事实不足时会请求补充。'}</div>
-          <div className="agent-start"><div><strong>{model.mode === 'replay' ? '当前为本地规则演示' : `当前模型：${model.model_name}`}</strong><p>{model.mode === 'replay' ? '展示真实检索与流程，正文为资料摘录；不会伪装成模型生成。' : '模型选择动作与生成内容，后端限定执行范围。最多 7 次模型请求 / 轮。'}</p></div><Submit busy={busy}><Send size={15}/>开始任务</Submit></div>
-          <p className="agent-boundary">资料范围由本任务固定，不随上方活动筛选切换。直播稿确认并完成任务后，可以转为关联活动的创意草稿。</p>
-        </form> : task ? <TaskDetail key={task.id} task={task} busy={busy} act={act} refresh={refreshCurrent} changed={changed} openSource={setSource} dirtyChanged={markTaskDirty} openKnowledge={() => openKnowledge(task.space_id)} handoff={handoff}/> : !error && <div className="panel" role="status">正在读取已保存的任务…</div>}
+    <header className="agent-page-header">
+      <div className="agent-page-title">
+        {pageId && <Button kind="ghost" disabled={busy} onClick={() => navigate(() => taskSelected(''))}><ArrowLeft size={16}/>任务列表</Button>}
+        <h2>{pageId === 'new' ? '新建 Agent 任务' : selected ? '任务详情' : 'Agent 任务'}</h2>
+        {!selected && <Badge tone="neutral">{model.mode === 'replay' ? '规则演示 · 未调用模型' : model.model_name || '模型模式'}</Badge>}
       </div>
-    </div>
-    {source && <Modal title="Agent 引用原文快照" wide onClose={() => setSource(null)}><div className="kb-source-preview"><Badge>{source.is_demo ? '虚构示例资料' : '资料引用'}</Badge><h3>{source.title}</h3><p className="muted">版本 {source.version} · {source.locator}</p><blockquote>{source.text}</blockquote><p className="muted">这是任务当时读取的原文。资料更新或失效后，旧草稿会提示重新核对。</p></div></Modal>}
+      <div className="row-actions">
+        {onReturn && <Button kind="ghost" disabled={busy} onClick={() => navigate(onReturn)}><CornerUpLeft size={15}/>{returnLabel}</Button>}
+        {!pageId && <Button disabled={busy} onClick={() => void refreshCurrent()} title="刷新任务列表"><RefreshCw size={15}/>刷新</Button>}
+        {pageId !== 'new' && <Button kind="primary" disabled={busy} onClick={() => navigate(() => taskSelected('new'))}><Plus size={15}/>新建任务</Button>}
+      </div>
+    </header>
+    {error && <div className="error-banner" role="alert"><span>{error}</span><Button disabled={busy || formDirty || taskDirty} onClick={() => void refreshCurrent()}>重新读取</Button></div>}
+    {!pageId ? <TaskList key={initialStatus || 'all'} initialStatus={initialStatus} tasks={tasks} loaded={loaded} busy={busy} failed={Boolean(error)} select={id => navigate(() => taskSelected(id))}/>
+      : pageId === 'new' ? <TaskCreate key={intent?.token || 'new'} model={model} spaces={spaces} handoff={handoff} intent={intent} busy={busy} create={create} dirtyChanged={markFormDirty}/>
+      : currentTask ? <TaskDetail key={currentTask.id} task={currentTask} busy={busy} act={act} refresh={refreshCurrent} changed={changed} openSource={setSource} dirtyChanged={markTaskDirty} openKnowledge={() => openKnowledge(currentTask.space_id)} handoff={handoff}/>
+      : !error && <div className="agent-empty" role="status">正在读取已保存的任务…</div>}
+    {source && <Modal title="Agent 引用原文快照" wide onClose={() => setSource(null)}><div className="kb-source-preview"><Badge>{source.is_demo ? '虚构示例资料' : '资料引用'}</Badge><h3>{source.title}</h3><p className="muted">版本 {source.version} · {source.locator}</p><blockquote>{source.text}</blockquote><p className="muted">任务读取时的原文快照；资料更新或失效后，旧草稿需重新核对。</p></div></Modal>}
   </section>;
 }
-
-function BookNote() { return <span className="agent-note-dot" aria-hidden="true"/>; }

@@ -16,6 +16,7 @@ import LiveSpeech from './speech/LiveSpeech';
 import {liveModules} from './modules';
 import {liveToolGroups as groups, isLiveToolGroup, featuresInGroup, type LiveToolGroup} from './workspaceAreas';
 import './workspace.css';
+import WorkspaceTabs from '../../app/WorkspaceTabs';
 
 interface Props {
  sessions:LiveSession[];campaign?:Campaign;busy:boolean;act:Act;go:(route:string)=>void;
@@ -59,13 +60,20 @@ export default function LiveWorkspace(props:Props){
  const openTools=(group:LiveToolGroup)=>props.go(route('ai','console')+(tools===group?'':'&tools='+group));
  const view=feature.id==='simulation'?'simulation':feature.id==='console'&&pane==='logs'?'logs':feature.id==='console'&&pane==='account'?'control':'settings';
  const settings=feature.id==='console'&&pane==='session'?<><div className="live-panel-title"><h3>场次与货盘</h3><Button onClick={()=>choose('ai','console')}>收起场次管理</Button></div><div className="row-actions"><Button onClick={()=>props.go('product?tab=catalog')}>管理商品与 SKU</Button><Button onClick={()=>props.go('product')}>查看最新商品资料</Button></div><LiveSessions {...props} dirtyChanged={reportEditorDirty} embedded go={navigate}/></>:!feature.available?<section className="live-feature-content" aria-label="直播子功能内容"><div className="live-panel-title"><h3>{feature.name}</h3><Badge tone="neutral">待开发</Badge></div><p>{feature.description}</p><p className="muted">该功能尚未开放，目前不执行生成、播放、发送或平台操作。</p><Button onClick={()=>choose('ai','console')}>返回直播控制台</Button></section>:null;
- return <div className="live-console" data-mobile-view={mobileView}>
+ const area=pane==='session'?'sessions':(['groups','variables','writing'].includes(feature.id)||tools==='scripts')?'scripts':(['slicing','conversion','subtitles'].includes(feature.id)||tools==='more')?'media':'control';
+ const detailOpen=Boolean(tools||settings||['voices','hosts','blocked','rhythm','groups','variables','writing','voice-keywords','timed','welcome','service','control','text-keywords','playlist','ambience'].includes(feature.id)||pane==='speech'||pane==='account'||pane==='logs');
+ return <div className="live-console" data-mobile-view={mobileView} data-workspace-area={area} data-detail-open={detailOpen}>
+  <WorkspaceTabs label="直播工作区" selected={area} items={[
+   {id:'control',label:'现场控制',route:route('ai','console')},
+   {id:'sessions',label:'场次与货盘',route:route('ai','console','session')},
+   {id:'scripts',label:'话术管理',route:route('scripts','groups')},
+   {id:'media',label:'素材处理',route:route('ai','conversion')},
+  ]} go={props.go}/>
   <section className="panel live-workspace-header" aria-label="直播工作台顶部">
    <Badge tone="neutral">抖音 · 本地模拟</Badge>
    {list.length?<Field label="当前直播场次"><select value={session?.id||''} disabled={props.busy} onChange={e=>props.go(route(module.id,feature.id,pane,e.target.value))}>{list.map(s=><option key={s.id} value={s.id}>{s.title}</option>)}</select></Field>:<span className="muted">尚无直播场次</span>}
    {session&&<Badge>{statusLabels[session.status]} · V{session.version}</Badge>}
    <Button disabled={props.busy} onClick={()=>choose('ai','console','session')}>管理场次与货盘</Button>
-   <div className="live-credit"><strong>算力：未接入</strong><details><summary>充值说明</summary><p>卡密充值暂未开放。当前没有算力余额或扣费账本，请勿在此输入卡密。</p></details></div>
   </section>
   <nav className="live-mobile-tabs" aria-label="直播区域切换">{[['picture','画面与控制'],['interaction','评论与互动'],['settings','设置与工具']].map(([id,label])=><button key={id} type="button" aria-pressed={mobileView===id} onClick={()=>{setMobileView(id);if(id==='settings'&&!tools&&!settings&&view==='settings')openTools('more')}}>{label}</button>)}</nav>
   <div className="live-desk-grid">
@@ -83,7 +91,7 @@ export default function LiveWorkspace(props:Props){
    {session&&<ScriptDrafts key={'drafts:'+session.id} session={session} visible={['writing','variables'].includes(feature.id)} dirtyChanged={reportDraftDirty} onImported={scriptImported} close={()=>choose('ai','console')}/>}
    <div ref={setSpeechHost} className="live-speech-panel-host"/>
    {(tools||settings||!session)&&<section className="panel live-settings-panel" aria-label="直播操作面板">
-    {tools&&<section className="live-tools" aria-label={groups[tools].title}><div className="live-panel-title"><h3>{groups[tools].title}</h3><Button onClick={()=>choose('ai','console')}>收起工具</Button></div><div className="live-tool-grid">{featuresInGroup(tools).map(({module:m,feature:f})=><button type="button" key={m.id+f.id} className="live-tool-button" onClick={()=>choose(m.id,f.id)}><span>{f.name}</span><small>{f.availabilityLabel||(f.available?'本地模拟可用':'待开发')}</small></button>)}</div></section>}
+    {tools&&<section className="live-tools" aria-label={groups[tools].title}><div className="live-panel-title"><h3>{groups[tools].title}</h3><Button onClick={()=>choose('ai','console')}>收起工具</Button></div><div className="live-tool-grid">{featuresInGroup(tools).filter(({feature:f})=>f.available).map(({module:m,feature:f})=><button type="button" key={m.id+f.id} className="live-tool-button" onClick={()=>choose(m.id,f.id)}><span>{f.name}</span></button>)}</div>{!featuresInGroup(tools).some(({feature:f})=>f.available)&&<p>暂无可用设置。</p>}</section>}
     {settings}
     {!session&&!settings&&<div className="live-empty-session"><Radio size={22}/><h3>先准备一场直播</h3><p>创建场次、添加商品并核对货盘后，即可配置账号和测试互动。</p><Button kind="primary" onClick={()=>choose('ai','console','session')}>创建直播场次</Button></div>}
    </section>}

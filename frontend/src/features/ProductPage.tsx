@@ -58,7 +58,7 @@ export default function ProductPage({product, busy, error, act, dirtyChanged}: {
         <div className="notice">资料完整性：{[draft.name, draft.brand, draft.capacity, draft.color, draft.description, draft.evidence].filter(Boolean).length}/6 项。完整性只统计填写情况，不表示内容已被外部核实。</div>
       </section>
       <section className="panel product-detail">
-        <div className="panel-header"><div><h3>商品与品牌资料</h3><span className="muted">生成内容的事实依据 · 虚构测试商品</span></div><Badge tone={dirty ? 'amber' : 'green'}>{dirty ? '有未保存修改' : '已保存'}</Badge></div>
+        <div className="panel-header"><div><h3>商品与品牌资料</h3><span className="muted">内容生成依据</span></div><Badge tone={dirty ? 'amber' : 'green'}>{dirty ? '有未保存修改' : '已保存'}</Badge></div>
         <form onSubmit={e => { e.preventDefault(); if (!invalidEvidence) setConfirmSave(true); }}>
           <div className="form-grid">
             <Field label="商品名称" full><input value={draft.name} onChange={e => set('name', e.target.value)} required maxLength={100}/></Field>

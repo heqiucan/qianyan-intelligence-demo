@@ -1,19 +1,48 @@
-import type { ReactNode } from 'react';
-import { ArrowRight, BrainCircuit, Check, ChevronRight, ListTodo, Megaphone, Play, Sparkles } from 'lucide-react';
-import { date, money, type Analytics, type Campaign, type State } from '../api';
-import { Badge, Button, Details } from '../components/ui';
-import { OrbitVisual } from '../visuals';
+import { useEffect, useState } from 'react';
+import { ArrowRight, Bot, ChevronRight, FileCheck, ListTodo, Megaphone, Radio } from 'lucide-react';
+import { api, type Analytics, type Campaign, type State } from '../api';
+import { Button } from '../components/ui';
 import OverviewStats from '../components/OverviewStats';
+import type { AgentTask } from './agent/types';
+import { active, statusLabels } from './agent/types';
+import TrendChart from './live/TrendChart';
 
 interface Props {
-  controls?:ReactNode; start?: ReactNode; state: State; campaign?: Campaign; campaignId: string; analytics: Analytics | null;
+  state: State; campaign?: Campaign; campaignId: string; analytics: Analytics | null;
   go: (page: string) => void; inspect: (section: string) => void; setDialog: (dialog: string) => void;
 }
 
-// Preserve the original home presentation; creative checks remain an enhancement in its page.
-export default function Overview({state, campaign, campaignId, analytics, go, inspect, setDialog, start, controls}: Props) {
-  const cs = state.creatives.filter(c => c.campaign_id === campaignId);
-  const ps = state.plans.filter(p => p.campaign_id === campaignId);
-  const batches = state.batches.filter(b => b.campaign_id === campaignId);
-  return <><section className="hero"><div className="hero-copy"><Badge><Sparkles size={13}/>营销行动工作台</Badge><h2>让好创意，<br/>走向下一次增长。</h2><p>明确目标，执行投放，追踪成交。<br/>每次调整都有依据，也有下一步。</p><div className="hero-actions"><Button kind="primary" onClick={()=>go('creative')}>开始创作<ArrowRight size={16}/></Button><Button kind="ghost" onClick={()=>setDialog('guide')}><Play size={14}/>演示路线</Button></div><div className="hero-caption">CREATE. ACT. LEARN.</div></div><div className="hero-art"><OrbitVisual/></div></section><OverviewStats analytics={analytics} onSelect={inspect}/><div className="live-home-entry panel"><div><h3>直播筹备，从这一场开始</h3><p>选商品、排货盘、准备讲解，再按场次复盘。</p></div><Button kind="primary" onClick={()=>go('creative?tab=live')}>准备直播场次<ArrowRight size={16}/></Button></div>{controls}{start}<div className="dashboard-grid"><section className="panel"><div className="panel-header"><div><h3>当前活动策略</h3><span className="muted">{campaign?.name} · 策略 V{campaign?.strategy_version||1}</span></div><Button kind="ghost" onClick={()=>setDialog('campaign-edit')}>编辑策略</Button></div><Details items={[["内部观察目标",campaign?.goal],["受众假设",campaign?.audience],["主推卖点",campaign?.selling_point],["活动预算上限",money(campaign?.budget_limit)],["计划周期",campaign?.start_date?`${campaign.start_date} → ${campaign.end_date}`:'待补充'],["商品依据",`${campaign?.product_snapshot.name} · 资料 V${campaign?.product_snapshot.version}`]]}/>{(campaign?.strategy_history?.length||0)>0&&<details><summary>查看策略历史（{campaign?.strategy_history?.length}）</summary>{campaign?.strategy_history?.map((h,i)=><p key={i} className="muted">V{h.strategy_version||i+1} · {h.goal||h.name} · {date(h.updated_at||h.created_at)}</p>)}</details>}</section><section className="panel"><div className="panel-header"><h3>下一步，继续推进</h3><Badge>{cs.filter(c=>c.status==='draft').length+ps.filter(p=>p.status==='draft').length} 项待确认</Badge></div><div className="next-actions">{[{p:'creative',icon:Sparkles,t:'确认活动素材',s:`${cs.filter(c=>c.status==='draft').length} 份创意草稿`},{p:'ads',icon:Megaphone,t:'核对投放计划',s:`${ps.filter(p=>p.status==='draft').length} 份草稿 · ${ps.filter(p=>p.status==='running').length} 个模拟运行计划`},{p:'tasks',icon:ListTodo,t:'检查异常与待办',s:`${state.tasks.filter(t=>t.campaign_id===campaignId&&!['resolved','ignored'].includes(t.status)).length} 项待处理`},{p:'optimize',icon:BrainCircuit,t:'继续优化观察',s:`${state.observations.filter(o=>o.campaign_id===campaignId&&o.status!=='reviewed').length} 项待观察`}].map(a=><button key={a.p} onClick={()=>go(a.p)}><span className="action-icon"><a.icon size={19}/></span><span><strong>{a.t}</strong><small>{a.s}</small></span><ChevronRight size={16}/></button>)}</div></section></div></>;
+export default function Overview({ state, campaignId, analytics, go }: Props) {
+  const [tasks, setTasks] = useState<AgentTask[]>([]);
+  const [taskError, setTaskError] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    api<AgentTask[]>('/agent/tasks').then(value => { if (!cancelled) setTasks(value); }).catch(error => { if (!cancelled) setTaskError(error.message); });
+    return () => { cancelled = true; };
+  }, []);
+  const creatives = state.creatives.filter(c => c.campaign_id === campaignId && c.status === 'draft');
+  const plans = state.plans.filter(p => p.campaign_id === campaignId && p.status === 'draft');
+  const issues = state.tasks.filter(t => t.campaign_id === campaignId && !['resolved', 'ignored'].includes(t.status));
+  const current = tasks.filter(task => active(task.status) || ['waiting_review', 'waiting_input', 'failed', 'interrupted'].includes(task.status));
+  const pending = [
+    { label: '创意待确认', count: creatives.length, route: 'tasks?view=creative', icon: FileCheck },
+    { label: '计划待启动', count: plans.length, route: 'ads', icon: Megaphone },
+    { label: '异常待处理', count: issues.length, route: 'tasks', icon: ListTodo },
+  ];
+  return <div className="workspace-overview">
+    <OverviewStats analytics={analytics} onSelect={section => go('analytics?section=' + section)}/>
+    <div className="workspace-overview-grid">
+      <section className="workspace-section" aria-label="待处理事项">
+        <div className="workspace-section-heading"><h2>待处理事项</h2><Button kind="ghost" onClick={() => go('tasks')}>全部待办<ArrowRight size={14}/></Button></div>
+        {pending.map(item => <button className="workspace-action-row" key={item.label} onClick={() => go(item.route)}><item.icon size={19}/><span><strong>{item.label}</strong></span><b>{item.count}</b><ChevronRight size={16}/></button>)}
+        <button className="workspace-action-row" onClick={() => go('live?pane=session')}><Radio size={19}/><span><strong>直播场次</strong><small>{state.live_sessions.filter(s => s.campaign_id === campaignId && s.status !== 'archived').length} 场待管理</small></span><ChevronRight size={16}/></button>
+      </section>
+      <section className="workspace-section" aria-label="当前 Agent 任务">
+        <div className="workspace-section-heading"><h2>当前 Agent 任务</h2><Button kind="ghost" onClick={() => go('agent?agent=new')}><Bot size={15}/>新建任务</Button></div>
+        {taskError ? <p role="alert">任务读取失败。<Button onClick={() => go('agent')}>进入任务页</Button></p> : current.length ? current.slice(0, 4).map(task => <button key={task.id} className="workspace-action-row" onClick={() => go('agent?agent=' + encodeURIComponent(task.id))}><Bot size={19}/><span><strong>{task.goal}</strong><small>{statusLabels[task.status]}</small></span><ChevronRight size={16}/></button>) : <p className="workspace-inline-note">暂无运行中或待处理的内容任务。</p>}
+        <Button kind="ghost" onClick={() => go('agent')}>查看任务记录<ArrowRight size={14}/></Button>
+      </section>
+    </div>
+    {analytics && Boolean(analytics.trend?.points.length) && <div className="workspace-overview-trend"><TrendChart analytics={analytics}/></div>}
+  </div>;
 }

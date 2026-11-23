@@ -1,98 +1,136 @@
-import { normalizeRoute, sameLiveSession } from './navigation';
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
-import { LayoutDashboard, Package, Sparkles, Megaphone, ChartNoAxesCombined, BrainCircuit, ArrowUpRight, ArrowRight, Plus, ChevronRight, ChevronDown, Check, X, Settings2, Bell, CircleHelp, Play, Pause, Square, Download, Upload, Clock3, ShoppingBag, Users, Wallet, Target, RefreshCw, FileText, Layers, ShieldCheck, ExternalLink, CheckCircle2, Copy, LoaderCircle, ListTodo, SlidersHorizontal, GitCompareArrows } from 'lucide-react';
-import {api,requestId,money,number,date,type State,type Campaign,type Creative,type Plan,type Analytics,type Order,type Product,type V2Record} from './api';
-import LiveCatalog from './features/live/LiveCatalog';
-import LiveSessions from './features/live/LiveSessions';
-import LiveWorkspace from './features/live/LiveWorkspace';
-import LiveResults, {LiveReports} from './features/live/LiveResults';
+import { useState } from 'react';
+import { ArrowLeft, ArrowRight, BrainCircuit, Plus, Sparkles, X } from 'lucide-react';
+import { type Creative, type Order } from './api';
+import { Button, Field, Submit } from './components/ui';
+import { routeWith } from './navigation';
+import AppShell from './app/AppShell';
+import AppDialogs from './app/AppDialogs';
+import ScopeFilter from './app/ScopeFilter';
+import WorkspaceTabs from './app/WorkspaceTabs';
+import { pageFor } from './app/pages';
+import { useWorkspaceData } from './app/useWorkspaceData';
+import { useWorkspaceNavigation } from './app/useWorkspaceNavigation';
 import Overview from './features/Overview';
-import CreativeStudio from './features/CreativeStudio';
+import AgentWorkspace from './features/agent/AgentWorkspace';
+import DemandWorkspace from './features/demand/DemandWorkspace';
+import type { View as DemandView } from './features/demand/types';
+import KnowledgeWorkspace from './features/knowledge/KnowledgeWorkspace';
+import type { Scene } from './features/knowledge/types';
 import ProductPage from './features/ProductPage';
-import KnowledgeModule from './features/knowledge/KnowledgeModule';
+import CreativeStudio from './features/CreativeStudio';
+import CampaignList from './features/CampaignList';
 import AdsPage from './features/AdsPage';
 import AnalyticsPage from './features/AnalyticsPage';
-import Consumer from './features/Consumer';
-import CampaignModal from './components/CampaignModal';
-import {Badge,Button,Field,Empty,Table,Modal,Submit,Details} from './components/ui';
-import {type Act,names,buyers,today,later} from './domain';
-import FeedbackPages from './Feedback';
 import MetricsSummary from './features/MetricsSummary';
-import AgentWorkspace from './features/agent/AgentWorkspace';
-import TaskStart from './features/journey/TaskStart';
-import ActivityJourney from './features/journey/ActivityJourney';
-import SourceGuide from './features/journey/SourceGuide';
-import JourneyGuide from './features/journey/JourneyGuide';
-import type { Scene } from './features/knowledge/types';
-import DemandWorkspace from './features/demand/DemandWorkspace';
-import ModelStatus from './components/ModelStatus';
-import type { View as DemandView } from './features/demand/types';
+import Consumer from './features/Consumer';
+import FeedbackPages from './Feedback';
+import LiveCatalog from './features/live/LiveCatalog';
+import LiveWorkspace from './features/live/LiveWorkspace';
+import LiveResults, { LiveReports } from './features/live/LiveResults';
 
-const pages=[{id:'overview',label:'增长工作台',icon:LayoutDashboard},{id:'product',label:'商品与品牌',icon:Package},{id:'creative',label:'营销与创意',icon:Sparkles},{id:'live',label:'直播工作台',icon:Play},{id:'ads',label:'广告的投放',icon:Megaphone},{id:'analytics',label:'效果与获客',icon:ChartNoAxesCombined},{id:'tasks',label:'异常与待办',icon:ListTodo},{id:'review',label:'复盘与报告',icon:FileText}];
-const getRoute=()=>normalizeRoute(location.hash.replace(/^#\/?/,'')||'overview');
-export default function App(){
- const [route,setRoute]=useState(getRoute),[state,setState]=useState<State|null>(null),[campaignId,setCampaignId]=useState(localStorage.getItem('campaign')||''),[dataset,setDatasetRaw]=useState(localStorage.getItem('v2-dataset')||'session'),[batchId,setBatchIdRaw]=useState(localStorage.getItem('v2-batch')||''),[planId,setPlanId]=useState(localStorage.getItem('v2-plan')||''),[dateFrom,setDateFrom]=useState(localStorage.getItem('v2-from')||''),[dateTo,setDateTo]=useState(localStorage.getItem('v2-to')||''),[analytics,setAnalytics]=useState<Analytics|null>(null),[analyticsError,setAnalyticsError]=useState(''),[busy,setBusy]=useState(false),[error,setError]=useState(''),[toast,setToast]=useState(''),[auth,setAuth]=useState(false),[revision,setRevision]=useState(0),[dialog,setDialog]=useState(''),[trace,setTrace]=useState<Order|null>(null),[focus,setFocus]=useState('orders'),[dirty,setDirty]=useState(false),[planCreative,setPlanCreative]=useState(''),[historyOptions,setHistoryOptions]=useState<{id:string;name:string}[]>([]);
- const [presentation,setPresentation]=useState(localStorage.getItem('presentation-mode')==='1');
- const previousScope=useRef<{campaignId:string;dataset:string;batchId:string;planId:string;dateFrom:string;dateTo:string}|null>((()=>{try{return JSON.parse(sessionStorage.getItem('presentation-previous')||'null')}catch{return null}})());
- const [entryScene,setEntryScene]=useState<Scene>(localStorage.getItem('journey-scene')==='medical'?'medical':'live');
- const params=new URLSearchParams(route.split('?')[1]||'');const knowledgeSelected=params.get('tab')==='knowledge';const demandSelected=params.get('tab')==='demand';const liveWorkspaceSelected=route.split('?')[0]==='live';const reviewView=params.get('view')==='reports'?'reports':'optimize';
- const lock=useRef(false),routeRef=useRef(route),dirtyRef=useRef(dirty);dirtyRef.current=dirty;const campaign=state?.campaigns.find(c=>c.id===campaignId);const cs=state?.creatives.filter(c=>c.campaign_id===campaignId)||[];const ps=state?.plans.filter(p=>p.campaign_id===campaignId)||[];const batches=state?.batches.filter(b=>b.campaign_id===campaignId)||[];
- const liveDraftsRetained=useRef(false),liveSessionIds=useRef<string[]>([]);liveSessionIds.current=state?.live_sessions.filter(s=>s.campaign_id===campaignId).map(s=>s.id)||[];
- const markDirty=useCallback((value:boolean)=>{dirtyRef.current=value;setDirty(value)},[]);
- const markLiveDirty=useCallback((value:boolean,retain=true)=>{liveDraftsRetained.current=retain;markDirty(value)},[markDirty]);
- const refresh=async()=>{const s=await api<State>('/state');for(const k of ['insights','adjustments','batches','tasks','observations','reports','live_sessions'] as const)if(!s[k])(s as unknown as Record<string,unknown>)[k]=[];setState(s);setAuth(false);setCampaignId(p=>s.campaigns.some(c=>c.id===p)?p:s.campaigns[0]?.id||'');setRevision(v=>v+1)};
- const act:Act=async(fn,success)=>{if(lock.current)return false;lock.current=true;setBusy(true);setError('');try{await fn();await refresh();if(success)setToast(success);return true}catch(e){const x=e as Error&{status?:number};setError(x.message||'操作失败，请重试');if(x.status===401)setAuth(true);return false}finally{lock.current=false;setBusy(false)}};
- const setDataset=(s:string)=>{setDatasetRaw(s);setPlanId('');if(s!=='session'){setDateFrom('');setDateTo('')}};
- const setBatchId=(s:string)=>{setBatchIdRaw(s);setPlanId('')};
- const switchCampaign=(id:string)=>{if(dirtyRef.current&&!confirm('当前有未保存内容或正在播报，确定切换活动、停止播报并放弃修改？'))return;dirtyRef.current=false;setDirty(false);setCampaignId(id);setPlanId('');setBatchIdRaw('');if(dataset==='batch')setDatasetRaw('session')};
- const go=(p:string)=>{const next=normalizeRoute(p);const retain=liveDraftsRetained.current&&sameLiveSession(routeRef.current,next,liveSessionIds.current);if(!retain&&dirtyRef.current&&!confirm('当前有未保存内容或正在播报，确定离开、停止播报并放弃本次修改？'))return;if(!retain){dirtyRef.current=false;setDirty(false)}location.hash='/'+next;if(!retain)window.scrollTo(0,0)};
- useEffect(()=>{refresh().catch(e=>{if(e.status===401)setAuth(true);else setError(e.message)});const change=()=>{const next=getRoute();const retain=liveDraftsRetained.current&&sameLiveSession(routeRef.current,next,liveSessionIds.current);if(!retain&&dirtyRef.current&&!confirm('当前有未保存内容或正在播报，确定离开、停止播报并放弃本次修改？')){history.replaceState(null,'','#/'+routeRef.current);return}if(!retain){dirtyRef.current=false;setDirty(false)}routeRef.current=next;setRoute(next);if(!retain)window.scrollTo(0,0)};window.addEventListener('hashchange',change);return()=>window.removeEventListener('hashchange',change)},[]);
- useEffect(()=>{if(location.hash!=='#/'+route)history.replaceState(null,'','#/'+route)},[route]);
- useEffect(()=>{if(!dirty)return;const h=(e:BeforeUnloadEvent)=>{e.preventDefault();e.returnValue=''};window.addEventListener('beforeunload',h);return()=>window.removeEventListener('beforeunload',h)},[dirty]);
- useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),4500);return()=>clearTimeout(t)},[toast]);
- useEffect(()=>{localStorage.setItem('campaign',campaignId);localStorage.setItem('v2-dataset',dataset);localStorage.setItem('v2-batch',batchId);localStorage.setItem('v2-plan',planId);localStorage.setItem('v2-from',dateFrom);localStorage.setItem('v2-to',dateTo)},[campaignId,dataset,batchId,planId,dateFrom,dateTo]);
- useEffect(()=>{if(!state||!campaignId)return;let cancelled=false;setAnalytics(null);setAnalyticsError('');if(dataset==='batch'&&!batchId)return;const q=new URLSearchParams({campaign_id:campaignId,dataset});if(planId)q.set('plan_id',planId);if(dataset==='batch')q.set('batch_id',batchId);if(dataset==='session'){if(dateFrom)q.set('date_from',dateFrom);if(dateTo)q.set('date_to',dateTo)}api<Analytics>('/analytics?'+q).then(a=>{if(!cancelled)setAnalytics(a)}).catch(e=>{if(!cancelled)setAnalyticsError(e.message)});return()=>{cancelled=true}},[campaignId,dataset,batchId,planId,dateFrom,dateTo,revision]);
- useEffect(()=>{if(!campaignId||dataset!=='history')return;let cancelled=false;setHistoryOptions([]);api<Analytics>('/analytics?dataset=history&campaign_id='+encodeURIComponent(campaignId)).then(a=>{if(!cancelled)setHistoryOptions(a.rows.filter(r=>r.plan_id).map(r=>({id:r.plan_id!,name:r.name})))}).catch(e=>{if(!cancelled)setError(e.message)});return()=>{cancelled=true}},[campaignId,dataset]);
- const inspect=(section:string)=>{setFocus(section);go('analytics');setTimeout(()=>document.getElementById('analytics-'+section)?.scrollIntoView({block:'center'}),80)};
- if(auth)return <div className="access-page"><form className="panel access-card" onSubmit={e=>{e.preventDefault();sessionStorage.setItem('demo-token',String(new FormData(e.currentTarget).get('token')));act(refresh)}}><h1>进入浙衍 AI 演示</h1><Field label="访问码"><input name="token" type="password" required/></Field><Submit busy={busy}>进入工作台</Submit>{error&&<p role="alert">{error}</p>}</form></div>;
- if(!state)return <div className="access-page"><div className="loading"><Sparkles size={32}/><h2>正在打开增长工作台</h2>{error?<><p role="alert">{error}</p><Button onClick={()=>act(refresh)}>重试连接</Button></>:<p>读取活动与本地保存的数据…</p>}</div></div>;
- if(route.startsWith('shop/'))return <Consumer key={route} plan={state.plans.find(p=>p.id===route.split('/')[1])} busy={busy} error={error} act={act} back={()=>go('ads')} viewOrder={p=>{switchCampaign(p.campaign_id);setDataset('session');setDateFrom('');setDateTo('');setPlanId(p.id);go('analytics')}}/>;
- const openKnowledge=(spaceId?:string,drafts=false)=>go(`${drafts?'creative':'product'}?tab=knowledge&${spaceId?'space='+encodeURIComponent(spaceId):'scene='+entryScene}`);
- const startAgent=()=>{setDialog('');go(`overview?agent=new&scene=${entryScene}&launch=${requestId()}`)};
- const sessionData=()=>{setDataset('session');setBatchIdRaw('');setDateFrom('');setDateTo('');setPlanId('')};
- const handoff={sessions:state.live_sessions,campaigns:state.campaigns,campaignId,transferred:async(c:Creative)=>{markDirty(false);await refresh();switchCampaign(c.campaign_id);setToast('已转为活动创意草稿，下一步核对商品事实并确认素材');go('creative?item='+encodeURIComponent(c.id))}};
- const knowledgeProps={knowledgeSelected,spaceId:params.get('space')||undefined,draftId:params.get('draft')||undefined,scene:(params.get('scene')==='medical'?'medical':params.get('scene')==='live'?'live':undefined) as Scene|undefined,handoff};
- const page=pages.find(p=>p.id===route.split('?')[0])||pages[0];const filteredPages=['overview','analytics','tasks','review'];const availablePlans=dataset==='history'?historyOptions:dataset==='batch'?batches.filter(b=>b.id===batchId).map(b=>({id:b.plan_id as string,name:(b.plan_snapshot?.name||ps.find(p=>p.id===b.plan_id)?.name||b.plan_id) as string})):ps;
- const demandRoute=(pageId:string)=>pageId+'?tab=demand'+(params.get('space')?'&space='+encodeURIComponent(params.get('space')!):'')+(params.get('task')||params.get('returnTask')?'&task='+encodeURIComponent(params.get('task')||params.get('returnTask')!):'');
- const knowledgeRoute=(pageId:string)=>pageId+'?tab=knowledge'+(params.get('space')?'&space='+encodeURIComponent(params.get('space')!):'')+(params.get('task')||params.get('returnTask')?'&returnTask='+encodeURIComponent(params.get('task')||params.get('returnTask')!):'');
- const demandView=(view:DemandView)=><DemandWorkspace key={page.id} view={view} model={state.model} initialSpaceId={params.get('space')||undefined} initialTaskId={params.get('task')||undefined} taskSelected={(id,space)=>{const next=page.id+'?tab=demand&space='+encodeURIComponent(space)+(id?'&task='+encodeURIComponent(id):'');history.replaceState(null,'','#/'+next);routeRef.current=next;setRoute(next)}} go={go} dirtyChanged={markDirty}/>;
- const filterPanel=!demandSelected&&filteredPages.includes(page.id)&&params.get('tab')!=='live'&&<details className="v2-filter panel" aria-label="统一数据范围" open={page.id!=='overview'&&!presentation}><summary className="v2-filter-head"><span><SlidersHorizontal size={15}/> 当前统计范围 · {dataset==='history'?'历史演示 D0':dataset==='batch'?'独立模拟批次':'现场互动记录'}</span><span>展开筛选与来源说明</span></summary><div className="v2-filter-fields"><Field label="数据来源"><select value={dataset} onChange={e=>setDataset(e.target.value)}><option value="session">现场互动记录</option><option value="history">历史演示 D0</option><option value="batch">模拟场景批次</option></select></Field>{dataset==='batch'&&<Field label="模拟数据批次"><select value={batchId} onChange={e=>setBatchId(e.target.value)}><option value="">请选择已载入的批次</option>{batches.map(b=><option key={b.id} value={b.id}>{b.label} · {date(b.created_at)}</option>)}</select></Field>}<Field label="投放计划筛选"><select value={planId} onChange={e=>setPlanId(e.target.value)}><option value="">全部计划</option>{availablePlans.map(p=><option key={p.id} value={p.id}>{p.name}</option>)}</select></Field><Field label="统计开始日期"><input type="date" disabled={dataset!=='session'} value={dateFrom} onChange={e=>setDateFrom(e.target.value)}/></Field><Field label="统计结束日期"><input type="date" disabled={dataset!=='session'} min={dateFrom} value={dateTo} onChange={e=>setDateTo(e.target.value)}/></Field><Button kind="ghost" onClick={()=>{setPlanId('');setDateFrom('');setDateTo('')}}>清除筛选</Button></div><p className="muted">{dataset==='session'?'包含已保存的现场模拟记录，可按日期筛选。':dataset==='history'?'D0 为固定历史样例，无逐日粒度。':'每个批次有独立固定窗口；在投放中心预览并载入。'} {analytics?.window}</p><SourceGuide compact={page.id!=='analytics'} dataset={dataset} analytics={analytics} batchId={batchId} session={()=>{sessionData();go('analytics')}} scenarios={()=>go('ads?scenarios=1')}/></details>;
- const togglePresentation=()=>{if(dirtyRef.current&&!confirm('当前有未保存内容，确定切换演示范围并放弃修改？'))return;markDirty(false);if(!presentation){previousScope.current={campaignId,dataset,batchId,planId,dateFrom,dateTo};sessionStorage.setItem('presentation-previous',JSON.stringify(previousScope.current));setCampaignId(state.campaigns.find(c=>c.id==='campaign-demo')?.id||campaignId);setDataset('history');setBatchIdRaw('');setPlanId('');setDateFrom('');setDateTo('')}else{const p=previousScope.current;if(p){setCampaignId(p.campaignId);setDatasetRaw(p.dataset);setBatchIdRaw(p.batchId);setPlanId(p.planId);setDateFrom(p.dateFrom);setDateTo(p.dateTo)}else sessionData()}setPresentation(!presentation);localStorage.setItem('presentation-mode',presentation?'0':'1')};
- return <div className={'app-shell v2 '+(presentation?'presentation-mode ':'')+(liveWorkspaceSelected?'live-desk-app':'')}><aside className="sidebar"><button className="brand v2-brand" onClick={()=>go('overview')}><img src="/brand-mark.svg" className="brand-icon"/><span>浙衍<span className="brand-ai"> AI</span><small>GROWTH STUDIO</small></span></button><div className="workspace-tag"><div className="workspace-avatar">青</div><div>青禾生活旗舰店<small>品牌演示空间</small></div><ChevronDown size={14}/></div><div className="nav-group"><span className="nav-caption">运营工作空间</span><nav aria-label="主导航">{pages.map(p=><button className={`nav-item ${page.id===p.id?'active':''}`} key={p.id} aria-label={p.label} aria-current={page.id===p.id?'page':undefined} onClick={()=>go(p.id)}><p.icon size={18}/><span>{p.label}</span>{p.id==='tasks'&&state.tasks.filter(t=>t.campaign_id===campaignId&&!['resolved','ignored'].includes(t.status)).length>0&&<span className="nav-ai">{state.tasks.filter(t=>t.campaign_id===campaignId&&!['resolved','ignored'].includes(t.status)).length}</span>}</button>)}</nav></div><div className="sidebar-bottom"><ModelStatus initial={state.model} compact/><button className="nav-item" onClick={()=>setDialog('settings')}><Settings2 size={18}/>演示设置</button><button className="nav-item" onClick={()=>setDialog('guide')}><CircleHelp size={18}/>演示指南</button><div className="sidebar-user"><div className="avatar">Z</div><div>演示运营员<small>本地工作空间</small></div><Badge tone="neutral">V3</Badge></div></div></aside>
- <div className="main-shell"><header className="topbar"><div className="breadcrumb">工作空间<ChevronRight size={14}/><strong>{page.label}</strong></div><div className="topbar-actions"><Button onClick={togglePresentation}>{presentation?'返回工作模式':'进入演示模式'}</Button><a className="button ghost" href="/website.html" target="_blank" rel="noreferrer">产品官网<ArrowUpRight size={14}/></a><Badge tone="neutral"><span className="status-dot"/>业务数据本地保存</Badge><button className="button ghost" aria-label="查看执行记录" onClick={()=>setDialog('logs')}><Bell size={19}/></button><div className="avatar">Z</div></div></header><main className={"page "+(page.id==='overview'?'overview-page':page.id==='live'?'live-workspace-page':'')}><div className="page-heading"><div><div className="eyebrow">ZHEY AN · GROWTH WORKSPACE</div><h1>{page.label}</h1><p className="muted">{({overview:'从推广目标，到可以持续追踪的经营动作。',product:'统一商品事实，让每次表达都有据可依。',creative:'用商品资料核对文案，查看修订依据，再交给你确认。',ads:'先核对，再执行。每次调整都保留原始依据。',analytics:'同一数据范围，看清投入、成交与客户来源。',tasks:'发现问题，记录处理，再核实结果。',live:'围绕当前直播场次，完成准备与互动测试。',review:'从效果复盘到活动报告，保存本轮结论与下一步行动。'} as Record<string,string>)[page.id]}</p></div><div className="heading-actions">{!demandSelected&&page.id!=='product'&&<select aria-label="选择营销活动" value={campaignId} onChange={e=>switchCampaign(e.target.value)}>{state.campaigns.map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select>}{page.id==='overview'&&!demandSelected&&!liveWorkspaceSelected&&<><Button onClick={()=>document.getElementById('task-start')?.scrollIntoView({block:'start'})}>从任务开始<ArrowRight size={14}/></Button><Button kind="primary" onClick={()=>setDialog('campaign')}><Plus size={16}/>新建营销活动</Button></>}</div></div>
- {error&&<div className="error-banner" role="alert"><span>{error}</span><button className="button ghost" aria-label="关闭错误提示" onClick={()=>setError('')}><X size={16}/></button></div>}
- {knowledgeSelected&&params.get('returnTask')&&<div className="notice"><strong>为需求任务补充事实资料</strong><p>在当前空间导入事实资料并完成审核，再返回原任务重试生成。需求素材本身不会充当事实依据。</p><Button onClick={()=>go('creative?tab=demand&space='+encodeURIComponent(params.get('space')||'')+'&task='+encodeURIComponent(params.get('returnTask')!))}>返回来源需求任务<ArrowRight size={15}/></Button></div>}
- {page.id==='review'&&<nav className="kb-module-tabs" aria-label="复盘与报告视图"><button aria-pressed={reviewView==='optimize'} onClick={()=>go('review?view=optimize')}>优化复盘</button><button aria-pressed={reviewView==='reports'} onClick={()=>go('review?view=reports')}>活动报告</button></nav>}
- {!['overview','live'].includes(page.id)&&!knowledgeSelected&&!['live','catalog','demand'].includes(params.get('tab')||'')&&<ActivityJourney state={state} campaign={campaign} route={page.id==='review'?reviewView:page.id} go={go}/>}
- {page.id==='overview'&&!demandSelected&&!liveWorkspaceSelected&&<div className="presentation-banner" role="status"><strong>{presentation?'演示模式':'工作模式'}</strong><span>{presentation?'固定虚构样例用于讲解；不是实时经营数据。':'数据保持当前选择；想查看完整样例可进入演示模式。'}</span><Badge tone="neutral">{dataset==='history'?'历史 D0 · 虚构样例':dataset==='batch'?'独立模拟批次':'现场互动 · 模拟订单'}</Badge></div>}
- {page.id!=='overview'&&filterPanel}
- {page.id==='overview'&&<nav className="kb-module-tabs" aria-label="增长工作台模式"><button aria-pressed={!demandSelected&&!liveWorkspaceSelected} onClick={()=>go('overview')}>经营与营销任务</button><button aria-pressed={demandSelected} onClick={()=>go('overview?tab=demand')}>需求任务工作台</button></nav>}
- {page.id==='overview'&&demandSelected&&demandView('tasks')}
- {liveWorkspaceSelected&&<LiveWorkspace key={campaignId} toolGroup={params.get('tools')||undefined} moduleId={params.get('module')||undefined} featureId={params.get('feature')||undefined} pane={params.get('pane')||undefined} sessions={state.live_sessions} campaign={campaign} busy={busy} act={act} go={go} selectedId={params.get('live')||undefined} dirtyChanged={markLiveDirty}/>}
- {page.id==='overview'&&!demandSelected&&!liveWorkspaceSelected&&<><Overview controls={<>{filterPanel}<div className="agent-entry-strip"><span><Sparkles size={15}/>营销任务 Agent · 医美 FAQ / 直播脚本</span><Button kind="ghost" onClick={()=>document.getElementById('agent-workspace')?.scrollIntoView({block:'start'})}>交给 AI 处理<ArrowRight size={14}/></Button></div></>}  state={state} campaign={campaign} campaignId={campaignId} analytics={analytics} go={go} inspect={inspect} setDialog={setDialog} start={<><TaskStart scene={entryScene} changeScene={s=>{setEntryScene(s);localStorage.setItem('journey-scene',s)}} startAgent={startAgent} newCampaign={()=>setDialog('campaign')} knowledge={drafts=>openKnowledge(undefined,drafts)} analyze={()=>{sessionData();go('analytics')}} guide={()=>setDialog('guide')}/><ActivityJourney state={state} campaign={campaign} route="overview" go={go}/></>}/><AgentWorkspace taskSelected={id=>{const target=id?'overview?agent='+encodeURIComponent(id):'overview';history.replaceState(null,'','#/'+target);routeRef.current=target;setRoute(target)}} model={state.model} dirtyChanged={markDirty} openKnowledge={spaceId=>openKnowledge(spaceId)} handoff={handoff} intent={params.get('agent')?{token:route,taskId:params.get('agent')!,scene:params.get('scene')==='medical'?'medical':'live',campaignId:params.get('campaign')||'',liveSessionId:params.get('live')||'',liveItemId:params.get('line')||''}:undefined}/></>}
- {page.id==='product'&&<KnowledgeModule demandSelected={demandSelected} onDemand={()=>go(demandRoute(page.id))} extraSelected={params.get('tab')==='catalog'} onExtra={()=>go('product?tab=catalog')} mode="product" {...knowledgeProps} navigateTab={k=>go(k?knowledgeRoute('product'):'product')} model={state.model} dirty={dirty} dirtyChanged={markDirty}><>{demandSelected?demandView('library'):params.get('tab')==='catalog'?<LiveCatalog act={act} busy={busy} dirtyChanged={markDirty} legacy={()=>go('product')}/>:<ProductPage product={state.product} busy={busy} error={error} act={act} dirtyChanged={markDirty}/>}{!demandSelected&&<div className="panel"><h3>资料准备好后，继续创作</h3><p className="muted">当前活动使用 {campaign?.product_snapshot.name || '未选择商品'} · V{campaign?.product_snapshot.version}；最新保存的是 {state.product.name} · V{state.product.version}。新活动引用最新资料；直播商品以各场货盘快照为准。</p><div className="row-actions"><Button disabled={dirty} onClick={()=>go('creative')}>返回当前活动创意<ArrowRight size={15}/></Button><Button kind="primary" disabled={dirty} onClick={()=>setDialog('campaign-latest')}>使用最新商品创建活动</Button></div></div>}</></KnowledgeModule>}
- {page.id==='creative'&&<KnowledgeModule demandSelected={demandSelected} onDemand={()=>go(demandRoute(page.id))} extraSelected={params.get('tab')==='live'} onExtra={()=>go('creative?tab=live')} mode="creative" {...knowledgeProps} navigateTab={k=>go(k?knowledgeRoute('creative'):'creative')} model={state.model} dirty={dirty} dirtyChanged={markDirty}><>{demandSelected?demandView('content'):params.get('tab')==='live'?<LiveSessions sessions={state.live_sessions} campaign={campaign} busy={busy} act={act} go={go} selectedId={params.get('live')||undefined} dirtyChanged={markDirty}/>:<CreativeStudio latestProduct={state.product} useLatestProduct={()=>setDialog('campaign-latest')} go={go} initialCreativeId={params.get('item')||undefined} key={campaignId+(params.get('item')||'')} creatives={cs} campaign={campaign} busy={busy} error={error} act={act} useCreative={c=>{setPlanCreative(c.id);go('ads')}} openProduct={()=>go('product')} dirtyChanged={markDirty} modelLabel={state.model.label}/>}</></KnowledgeModule>}
- {page.id==='ads'&&<AdsPage initialScenarios={params.get('scenarios')==='1'} key={campaignId} state={state} campaignId={campaignId} busy={busy} error={error} act={act} go={go} initialCreative={planCreative} clearCreative={()=>setPlanCreative('')} loadedBatch={b=>{setDataset('batch');setBatchId(b.id);setPlanId('');go('analytics')}}/>}
- {page.id==='analytics'&&<><nav className="kb-module-tabs" aria-label="效果分析范围"><button aria-pressed={params.get('tab')!=='live'&&!demandSelected} onClick={()=>go('analytics')}>活动效果</button><button aria-pressed={params.get('tab')==='live'} onClick={()=>go('analytics?tab=live')}>直播场次复盘</button><button aria-pressed={demandSelected} onClick={()=>go(demandRoute('analytics'))}>需求筛选与确认</button></nav>{demandSelected?demandView('results'):params.get('tab')==='live'?<LiveResults state={state} campaignId={campaignId} selectedId={params.get('live')||undefined} go={go} dirtyChanged={markDirty}/>:analyticsError?<div className="error-banner" role="alert">效果数据读取失败：{analyticsError}<Button onClick={()=>setRevision(v=>v+1)}>重试读取效果</Button></div>:dataset==='batch'&&!batchId?<div className="v3-source-empty">请先选择一个模拟数据批次。批次由广告投放中的场景预览载入。<br/><Button onClick={()=>go('ads')}>去选择模拟场景</Button></div>:!analytics?<div className="v3-source-empty" role="status">正在读取当前范围的效果数据…</div>:<><MetricsSummary analytics={analytics} onSelect={inspect}/><AnalyticsPage analytics={analytics} focus={focus} trace={setTrace} selectPlan={setPlanId}/><Button kind="primary" onClick={()=>go('optimize')}><BrainCircuit size={16}/>基于当前范围进行复盘</Button></>}</>}
- {page.id==='review'&&reviewView==='reports'&&<LiveReports key={campaignId} campaignId={campaignId}/>}
- {page.id==='tasks'&&<nav className="kb-module-tabs" aria-label="待办范围"><button aria-pressed={!demandSelected} onClick={()=>go('tasks')}>活动异常与待办</button><button aria-pressed={demandSelected} onClick={()=>go(demandRoute('tasks'))}>需求任务待办</button></nav>}
- {page.id==='tasks'&&demandSelected&&demandView('attention')}
- {!demandSelected&&['tasks','review'].includes(page.id)&&<FeedbackPages key={campaignId+(page.id==='review'?reviewView:page.id)} page={page.id==='review'?reviewView:'tasks'} state={state} campaignId={campaignId} dataset={dataset} batchId={batchId} planId={planId} dateFrom={dateFrom} dateTo={dateTo} busy={busy} act={act} go={go} setDataset={setDataset} setBatchId={setBatchId} setPlanId={setPlanId}/>}
- <footer className="app-footer"><span>浙衍 AI · 让每次营销都有下一步</span><span>DEMO V3 · 规则核对 / {state.model.label} / 模拟投放</span></footer></main></div>
- {(dialog==='campaign'||dialog==='campaign-edit'||dialog==='campaign-latest')&&<CampaignModal key={dialog} campaign={dialog==='campaign-edit'?campaign:undefined} prefill={dialog==='campaign-latest'?campaign:undefined} latestProduct={dialog==='campaign-latest'} product={state.product} busy={busy} error={error} close={()=>setDialog('')} save={body=>act(async()=>{const c=await api<Campaign>(dialog==='campaign-edit'?`/campaigns/${campaignId}`:'/campaigns',dialog==='campaign-edit'?'PUT':'POST',{...body,request_id:requestId()});switchCampaign(c.id);setDialog('');if(dialog!=='campaign-edit')go('creative')},'活动策略已保存，下一步核对创意素材')}/>}
- {dialog==='logs'&&<Modal title="执行记录" wide onClose={()=>setDialog('')}><div className="log-list">{state.logs.slice().reverse().slice(0,60).map(l=><div className="log-item" key={l.id}><Clock3 size={18}/><div><strong>{l.action}</strong><p>{l.detail}</p><small>{date(l.created_at)}</small></div></div>)}</div></Modal>}
- {dialog==='settings'&&<Modal title="演示设置与运行边界" onClose={()=>setDialog('')}><ModelStatus initial={state.model}/><Details items={[["AI 模式",state.model.label],["连接状态",state.model.status||"等待验证"],["模型费用",state.model.mode==='replay'?'本地回放，无模型调用':'只调用已核实的免费型号；限流后手动重试，不自动换型号'],["数据保存",'本地 SQLite，刷新后保留'],["广告与付款",'模拟操作，无真实花费或扣款'],["数据来源",'D0、现场互动、模拟场景批次分开统计']]}/><div className="notice">免费模型配置：在项目文件夹双击 configure-zhipu.cmd，填入开放平台 API Key，再运行 check-zhipu.cmd 检测并重启 Demo。密钥只填在本机窗口。</div><div className="modal-footer"><Button disabled={busy||state.model.mode==='replay'||!state.model.configured} onClick={()=>act(()=>api('/model/check','POST'),'免费模型连接测试通过')}><Sparkles size={15}/>测试免费模型连接</Button><Button disabled={busy} onClick={()=>act(refresh,'数据已重新读取')}><RefreshCw size={15}/>重新读取数据</Button></div></Modal>}
- {dialog==='guide'&&<JourneyGuide scene={entryScene} close={()=>setDialog('')} agent={startAgent} demand={()=>{setDialog('');go('overview?tab=demand'+(params.get('space')?'&space='+encodeURIComponent(params.get('space')!):''))}} campaign={()=>setDialog('campaign')} knowledge={()=>{setDialog('');openKnowledge()}}/>}
- {trace&&<Modal title="订单来源链路" onClose={()=>setTrace(null)}><Details items={[["营销活动",state.campaigns.find(c=>c.id===trace.campaign_id)?.name],["投放计划",state.plans.find(p=>p.id===trace.plan_id)?.name||trace.plan_id],["素材版本",`${state.creatives.find(c=>c.id===trace.creative_id)?.title||trace.creative_id} · V${state.creatives.find(c=>c.id===trace.creative_id)?.version||1}`],["配置版本",`V${trace.plan_config_version||1}`],["订单编号",trace.id],["测试买家",`${trace.buyer_id} · ${buyers[trace.buyer_type]}`],["数量",trace.quantity||1],["模拟金额",money(trace.amount)]]}/><div className="notice">当前来源：{analytics?.label}。显式关联演示计划，不代表平台真实归因。</div></Modal>}
- {busy&&<div className="busy-indicator" role="status"><LoaderCircle size={16}/>正在处理并保存…</div>}{toast&&<div className="toast" role="status"><CheckCircle2 size={16}/>{toast}</div>}</div>;
+export default function App() {
+  const data = useWorkspaceData();
+  const navigation = useWorkspaceNavigation();
+  const { route, go, markDirty, markLiveDirty } = navigation;
+  const { state, campaignId, dataset, batchId, planId, dateFrom, dateTo, analytics, analyticsError, busy, error, auth, act, refresh } = data;
+  const [dialog, setDialog] = useState('');
+  const [trace, setTrace] = useState<Order | null>(null);
+  const [planCreative, setPlanCreative] = useState('');
+  const params = new URLSearchParams(route.split('?')[1] || '');
+  const page = pageFor(route);
+  const view = params.get('view') || '';
+  const campaign = state?.campaigns.find(item => item.id === campaignId);
+  const creatives = state?.creatives.filter(item => item.campaign_id === campaignId) || [];
+  const plans = state?.plans.filter(item => item.campaign_id === campaignId) || [];
+  const batches = state?.batches.filter(item => item.campaign_id === campaignId) || [];
+  navigation.liveSessionIds.current = state?.live_sessions.filter(item => item.campaign_id === campaignId).map(item => item.id) || [];
+  const switchCampaign = (id: string) => {
+    if (id === campaignId) return true;
+    if (!navigation.canLeave()) return false;
+    markDirty(false); data.setCampaignId(id); data.setPlanId(''); data.setBatchId('');
+    if (dataset === 'batch') data.setDataset('session');
+    return true;
+  };
+  const inspect = (section: string) => go('analytics?section=' + section);
+  const openKnowledge = (spaceId?: string) => go('product?tab=knowledge' + (spaceId ? '&space=' + encodeURIComponent(spaceId) : '') + '&returnTo=' + encodeURIComponent(route));
+  const handoff = {
+    sessions: state?.live_sessions, campaigns: state?.campaigns || [], campaignId,
+    transferred: async (creative: Creative) => {
+      markDirty(false); await refresh(); switchCampaign(creative.campaign_id);
+      data.setToast('已转为活动创意草稿'); go('creative?item=' + encodeURIComponent(creative.id));
+    },
+  };
+  const availablePlans = dataset === 'history' ? data.historyOptions : dataset === 'batch'
+    ? batches.filter(b => b.id === batchId).map(b => ({ id: String(b.plan_id), name: String(b.plan_snapshot?.name || plans.find(p => p.id === b.plan_id)?.name || b.plan_id) })) : plans;
+  const scope = <ScopeFilter {...data} batches={batches} plans={availablePlans}/>;
+  const feedbackProps = { state: state!, campaignId, dataset, batchId, planId, dateFrom, dateTo, busy, act, go,
+    setDataset: data.setDataset, setBatchId: data.setBatchId, setPlanId: data.setPlanId, dirtyChanged: markDirty };
+  const knowledgeProps = { model: state?.model!, dirtyChanged: markDirty, initialSpaceId: params.get('space') || undefined,
+    initialDraftId: params.get('draft') || undefined, initialScene: (['medical', 'live'].includes(params.get('scene') || '') ? params.get('scene') : undefined) as Scene | undefined, handoff };
+
+  if (auth) return <div className="access-page"><form className="panel access-card" onSubmit={event => {
+    event.preventDefault(); sessionStorage.setItem('demo-token', String(new FormData(event.currentTarget).get('token'))); void act(refresh);
+  }}><h1>进入浙衍 AI</h1><Field label="访问码"><input name="token" type="password" required/></Field><Submit busy={busy}>进入工作台</Submit>{error && <p role="alert">{error}</p>}</form></div>;
+  if (!state) return <div className="access-page"><div className="loading"><Sparkles size={32}/><h2>正在打开工作空间</h2>{error && <><p role="alert">{error}</p><Button onClick={() => act(refresh)}>重试连接</Button></>}</div></div>;
+  if (route.startsWith('shop/')) return <Consumer key={route} plan={state.plans.find(p => p.id === route.split('/')[1])} busy={busy} error={error} act={act} back={() => go('ads')} viewOrder={plan => {
+    switchCampaign(plan.campaign_id); data.setDataset('session'); data.setDateFrom(''); data.setDateTo(''); data.setPlanId(plan.id); go('analytics?section=orders');
+  }}/>;
+
+  const demandView = (['tasks', 'library', 'results', 'content', 'attention'].includes(view) ? view : 'tasks') as DemandView;
+  const demandSelected = page.id === 'agent' && params.get('tab') === 'demand';
+  const knowledgeSelected = params.get('tab') === 'knowledge';
+  const returnTo = params.get('returnTo');
+  const agentReturn = returnTo || (params.get('live') ? 'live?pane=session&live=' + encodeURIComponent(params.get('live')!) : params.get('campaign') ? 'creative' : '');
+  const taskTarget = (id: string) => routeWith(route, { agent: id || undefined });
+  const pending = state.tasks.filter(task => task.campaign_id === campaignId && !['resolved', 'ignored'].includes(task.status)).length + creatives.filter(c => c.status === 'draft').length;
+
+  return <>
+    <AppShell key={navigation.editorEpoch} route={route} go={go} pending={pending} openDialog={setDialog} actions={<>
+      {!['agent', 'product', 'codex'].includes(page.id) && <select aria-label="选择营销活动" value={campaignId} onChange={event => switchCampaign(event.target.value)}>{state.campaigns.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select>}
+      {page.id === 'overview' && <Button kind="primary" onClick={() => go('agent?agent=new')}><Plus size={15}/>新建任务</Button>}
+    </>}>
+      {error && <div className="error-banner" role="alert"><span>{error}</span><button className="button ghost" aria-label="关闭错误提示" onClick={() => data.setError('')}><X size={16}/></button></div>}
+      {page.id === 'overview' && <>{scope}<Overview state={state} campaign={campaign} campaignId={campaignId} analytics={analytics} go={go} inspect={inspect} setDialog={setDialog}/></>}
+      {page.id === 'agent' && <>
+        <WorkspaceTabs label="Agent 任务类型" selected={demandSelected ? 'demand' : 'content'} items={[{ id: 'content', label: '内容任务', route: 'agent' }, { id: 'demand', label: '需求分析', route: 'agent?tab=demand' }]} go={go}/>
+        {demandSelected ? <DemandWorkspace view={demandView} model={state.model} initialSpaceId={params.get('space') || undefined} initialTaskId={params.get('task') || undefined}
+          taskSelected={(id, space) => navigation.navigateChecked(routeWith(route, { task: id || undefined, space }))} go={go} dirtyChanged={markDirty}/>
+          : <>{agentReturn && <Button kind="ghost" onClick={() => go(agentReturn)}><ArrowLeft size={14}/>返回来源业务</Button>}
+            <AgentWorkspace model={state.model} dirtyChanged={markDirty} openKnowledge={openKnowledge} handoff={handoff} initialStatus={params.get('status') === 'attention' ? 'attention' : undefined}
+              taskSelected={id => navigation.navigateChecked(taskTarget(id))} intent={params.has('agent') ? { token: route, taskId: params.get('agent')!, scene: params.get('scene') === 'medical' ? 'medical' : 'live', campaignId: params.get('campaign') || '', liveSessionId: params.get('live') || '', liveItemId: params.get('line') || '' } : undefined}/></>}
+      </>}
+      {page.id === 'product' && <>
+        <WorkspaceTabs label="商品与知识功能" selected={params.get('tab') || 'profile'} items={[{ id: 'catalog', label: '商品目录', route: 'product?tab=catalog' }, { id: 'profile', label: '品牌与商品资料', route: 'product' }, { id: 'knowledge', label: '知识库', route: 'product?tab=knowledge' }]} go={go}/>
+        {(returnTo || params.has('returnTask')) && <Button kind="ghost" onClick={() => go(returnTo || 'agent?tab=demand&view=content&space=' + encodeURIComponent(params.get('space') || '') + '&task=' + encodeURIComponent(params.get('returnTask')!))}><ArrowLeft size={14}/>返回来源任务</Button>}
+        {knowledgeSelected ? <KnowledgeWorkspace key={'knowledge:' + (params.get('space') || '')} {...knowledgeProps}/>
+          : params.get('tab') === 'catalog' ? <LiveCatalog act={act} busy={busy} dirtyChanged={markDirty} legacy={() => go('product')}/>
+          : <><ProductPage product={state.product} busy={busy} error={error} act={act} dirtyChanged={markDirty}/><div className="row-actions"><Button disabled={navigation.dirty.current} onClick={() => go('creative')}>查看活动创意<ArrowRight size={15}/></Button><Button disabled={navigation.dirty.current} onClick={() => setDialog('campaign-latest')}>使用最新商品创建活动</Button></div></>}
+      </>}
+      {page.id === 'creative' && <>
+        <WorkspaceTabs label="营销与创意功能" selected={knowledgeSelected ? 'knowledge' : view === 'campaigns' ? 'campaigns' : 'content'} items={[{ id: 'content', label: '创意素材', route: 'creative' }, { id: 'campaigns', label: '活动管理', route: 'creative?view=campaigns' }, { id: 'knowledge', label: '知识草稿', route: 'creative?tab=knowledge' }]} go={go}/>
+        {knowledgeSelected ? <KnowledgeWorkspace key={'draft:' + (params.get('draft') || params.get('space') || '')} {...knowledgeProps} initialTab="drafts"/>
+          : view === 'campaigns' ? <CampaignList state={state} create={() => setDialog('campaign')} select={id => { if (switchCampaign(id)) go('creative'); }}/>
+          : <CreativeStudio key={campaignId} latestProduct={state.product} useLatestProduct={() => setDialog('campaign-latest')} go={go} initialCreativeId={params.get('item') || undefined} creatives={creatives} campaign={campaign} busy={busy} error={error} act={act} useCreative={creative => { setPlanCreative(creative.id); go('ads'); }} openProduct={() => go('product')} dirtyChanged={markDirty} modelLabel={state.model.label}/>}
+      </>}
+      {page.id === 'live' && <LiveWorkspace key={campaignId} toolGroup={params.get('tools') || undefined} moduleId={params.get('module') || undefined} featureId={params.get('feature') || undefined} pane={params.get('pane') || undefined} sessions={state.live_sessions} campaign={campaign} busy={busy} act={act} go={go} selectedId={params.get('live') || undefined} dirtyChanged={markLiveDirty}/>}
+      {page.id === 'ads' && <AdsPage key={campaignId} initialScenarios={params.get('scenarios') === '1'} state={state} campaignId={campaignId} busy={busy} error={error} act={act} go={go} initialCreative={planCreative} clearCreative={() => setPlanCreative('')} loadedBatch={batch => { data.setDataset('batch'); data.setBatchId(batch.id); data.setPlanId(''); go('analytics'); }}/>}
+      {page.id === 'analytics' && <>
+        <WorkspaceTabs label="效果与复盘视图" selected={view || 'analytics'} items={[{ id: 'analytics', label: '效果分析', route: 'analytics' }, { id: 'optimize', label: '优化复盘', route: 'analytics?view=optimize' }, { id: 'reports', label: '活动报告', route: 'analytics?view=reports' }, { id: 'live', label: '场次复盘', route: 'analytics?view=live' }, { id: 'live-reports', label: '场次报告', route: 'analytics?view=live-reports' }]} go={go}/>
+        {!['live', 'live-reports'].includes(view) && scope}
+        {view === 'optimize' || view === 'reports' ? <FeedbackPages key={campaignId + view} {...feedbackProps} page={view} reportId={params.get('report') || undefined}/>
+          : view === 'live' ? <LiveResults state={state} campaignId={campaignId} selectedId={params.get('live') || undefined} go={go} dirtyChanged={markDirty}/>
+          : view === 'live-reports' ? <LiveReports key={campaignId} campaignId={campaignId}/>
+          : analyticsError ? <div className="error-banner" role="alert">{analyticsError}<Button onClick={() => act(refresh)}>重试读取效果</Button></div>
+          : dataset === 'batch' && !batchId ? <p>请选择一个模拟数据批次。<Button onClick={() => go('ads?scenarios=1')}>选择批次</Button></p>
+          : !analytics ? <p role="status">正在读取效果数据…</p>
+          : <><MetricsSummary analytics={analytics} onSelect={section => go('analytics?section=' + section)}/><AnalyticsPage analytics={analytics} focus={params.get('section') || 'overview'} onSelectView={section => go('analytics?section=' + section)} trace={setTrace} selectPlan={data.setPlanId}/><Button onClick={() => go('analytics?view=optimize')}><BrainCircuit size={16}/>生成复盘</Button></>}
+      </>}
+      {page.id === 'tasks' && <>
+        <WorkspaceTabs label="待办范围" selected={view || 'issues'} items={[{ id: 'issues', label: '活动异常', route: 'tasks' }, { id: 'creative', label: '创意待审核', route: 'tasks?view=creative' }, { id: 'agent', label: 'Agent 待处理', route: 'agent?status=attention' }, { id: 'demand', label: '需求待处理', route: 'agent?tab=demand&view=attention' }]} go={go}/>
+        {view === 'creative' ? <section className="workspace-section"><h2>创意待审核</h2>{creatives.filter(c => c.status === 'draft').map(creative => <button key={creative.id} className="workspace-action-row" onClick={() => go('creative?item=' + encodeURIComponent(creative.id))}><span><strong>{creative.title}</strong><small>{creative.product_snapshot.name} · V{creative.version}</small></span><ArrowRight size={16}/></button>)}{!creatives.some(c => c.status === 'draft') && <p>当前活动暂无待审核创意。</p>}</section>
+          : <>{scope}<FeedbackPages key={campaignId} {...feedbackProps} page="tasks"/></>}
+      </>}
+    </AppShell>
+    <AppDialogs data={data} dialog={dialog} close={() => setDialog('')} campaign={campaign} trace={trace} closeTrace={() => setTrace(null)} switchCampaign={switchCampaign} go={go}/>
+  </>;
 }

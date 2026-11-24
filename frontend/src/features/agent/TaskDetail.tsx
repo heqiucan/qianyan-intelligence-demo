@@ -56,7 +56,7 @@ export default function TaskDetail({ task, busy, act, refresh, changed, openSour
       <p className="muted">{task.space_name} · {task.channel === 'internal' ? '内部资料' : '抖音渠道资料'} · 创建于 {date(task.created_at)}</p>
       {task.campaign_id && <p className="muted">关联活动：{task.campaign_name} · 商品：{task.product_name}</p>}
       {task.live_context && <p className="agent-binding">绑定场次：{task.live_context.session_title} · 货盘 V{task.live_context.session_version} · SKU：{task.live_context.sku_label}</p>}
-      <p className="agent-provenance">{task.source === 'model' ? `智谱实际执行 · ${task.model_name}` : '规则演示 + 本地摘录回放 · 未调用模型'}{task.source_mode === 'demo' && ' · 全部为虚构示例'}{task.source_mode === 'catalog' && ' · 已人工确认货盘快照'}</p>
+      <p className="agent-provenance">{task.source === 'model' ? `模型执行 · ${task.model_name}` : '规则演示 + 本地摘录回放 · 未调用模型'}{task.source_mode === 'demo' && ' · 全部为虚构示例'}{task.source_mode === 'catalog' && ' · 已人工确认货盘快照'}</p>
       <div className={`agent-message ${['waiting_input', 'failed', 'interrupted'].includes(task.status) ? 'attention' : ''}`} role="status">
         {running ? <LoaderCircle size={17}/> : task.status === 'completed' ? <Check size={17}/> : <CircleAlert size={17}/>}<span>{task.message}</span>
       </div>

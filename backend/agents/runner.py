@@ -102,7 +102,7 @@ class AgentRunner:
                     raise ModelFailure("本轮模型调用次数已达上限，请查看执行记录后继续。", 429)
                 if self.adapter.mode != "replay":
                     task["model_calls"] += 1; task["total_model_calls"] += 1
-                event(task, label, "正在调用智谱，等待响应。" if self.adapter.mode != "replay" else "正在执行明确标注的规则演示。", "running")
+                event(task, label, "正在调用已配置模型，等待响应。" if self.adapter.mode != "replay" else "正在执行明确标注的规则演示。", "running")
             snapshot = self.change(task_id, attempt, before)
             self.adapter.operation_started(label)
             value = fn(snapshot)

@@ -1,8 +1,8 @@
-"""Replay by default; live requests are restricted to a verified free Zhipu model.
+"""Replay by default; live requests use explicit provider/model/base allowlists.
 
-Pricing was checked against BigModel's official pricing/model pages on 2026-11-10.
-The allowlist prevents a typo or fallback selecting a paid model; it cannot freeze
-the provider's future pricing. Credentials never enter browser responses or logs.
+Legacy Zhipu pricing was checked on 2026-11-10; it may change in future.
+DeepSeek is not a free-only mode and no billing price is asserted here.
+Allowlists prevent credential redirection and unintended model selection.
 """
 from __future__ import annotations
 
@@ -26,6 +26,10 @@ class ModelFailure(RuntimeError):
 FREE_MODEL = "glm-4-flash-250414"
 FREE_MODELS = {"glm-4-flash-250414": "GLM-4-Flash-250414", "glm-4.7-flash": "GLM-4.7-Flash"}
 ZHIPU_BASE = "https://open.bigmodel.cn/api/paas/v4"
+DEEPSEEK_BASE = "https://api.deepseek.com"
+DEEPSEEK_MODEL = "deepseek-flash"
+# Official mapping checked 2026-11-24; the API alias is not a pinned version.
+DEEPSEEK_VERSION = "DeepSeek-V4.1-Flash-1017"
 COPY_LIMITS = {"direction": 100, "title": 60, "body": 6000, "cta": 16, "script": 6000}
 COPY_SCHEMA = '{"direction":"创意方向","title":"标题","body":"正文","cta":"行动文案","script":"15秒视频分镜脚本"}'
 COPY_RULES = "标题不超过60字，行动文案不超过16字，方向不超过100字，正文和脚本各不超过6000字，字段均为非空字符串。不要生成图片或视频文件。"
@@ -67,8 +71,8 @@ def analysis_summary(analytics):
 class ModelAdapter:
     def __init__(self):
         self.mode = os.getenv("MODEL_PROVIDER", "replay").strip()
-        self.model = os.getenv("MODEL_NAME", "").strip() or FREE_MODEL
-        self.base = (os.getenv("MODEL_BASE_URL", "").strip() or ZHIPU_BASE).rstrip("/")
+        self.model = os.getenv("MODEL_NAME", "").strip() or (DEEPSEEK_MODEL if self.mode == 'deepseek' else FREE_MODEL)
+        self.base = (os.getenv("MODEL_BASE_URL", "").strip() or (DEEPSEEK_BASE if self.mode == 'deepseek' else ZHIPU_BASE)).rstrip("/")
         self._key = os.getenv("MODEL_API_KEY", "").strip()
         self.live_verified = False
         self.last_error = ""
@@ -103,8 +107,14 @@ class ModelAdapter:
         self._load_history()
 
     def _scope(self):
+        if self.mode == 'deepseek':
+            return 'deepseek', self.model if self.model == DEEPSEEK_MODEL else ''
         provider = 'replay' if self.mode == 'replay' else 'zhipu-free' if self.mode in {'zhipu-free', 'openai-compatible'} else 'unconfigured'
         return provider, self.model if provider == 'zhipu-free' and self.model in FREE_MODELS else ''
+
+    @property
+    def provider_label(self):
+        return 'DeepSeek' if self.mode == 'deepseek' else '智谱' if self.mode in {'zhipu-free', 'openai-compatible'} else '模型'
 
     @staticmethod
     def _public_call(row):
@@ -179,8 +189,14 @@ class ModelAdapter:
     def configuration_error(self):
         if self.mode == "replay":
             return ""
+        if self.mode == 'deepseek':
+            if self.model != DEEPSEEK_MODEL or self.base != DEEPSEEK_BASE:
+                return 'DeepSeek 配置已拦截：仅允许官方接口 https://api.deepseek.com 和 deepseek-flash，不会自动切换型号或服务商。'
+            if not self._key or self._key in {'your-api-key', 'configure-only-on-the-server'}:
+                return '尚未配置 DeepSeek API Key。请在本机设置 MODEL_API_KEY，随后重启服务。'
+            return ''
         if self.mode not in {"zhipu-free", "openai-compatible"}:
-            return "请用本机配置向导选择智谱免费模式，或将 MODEL_PROVIDER 设为 replay。"
+            return "MODEL_PROVIDER 仅支持 replay、deepseek、zhipu-free 或兼容旧配置的 openai-compatible。"
         if self.model not in FREE_MODELS or self.base != ZHIPU_BASE:
             return "免费模式已拦截配置：仅允许智谱官方接口和 GLM-4-Flash-250414 / GLM-4.7-Flash，不会切换到付费型号。"
         if not self._key or self._key in {"your-api-key", "configure-only-on-the-server"}:
@@ -191,11 +207,20 @@ class ModelAdapter:
     def info(self):
         error = self.configuration_error()
         replay = self.mode == "replay"
-        return {"mode": self.mode, "label": "演示回放" if replay else "智谱 · " + FREE_MODELS.get(self.model, "配置待修正"),
-                "model_name": None if replay else (self.model if self.model in FREE_MODELS else None), "configured": not error,
-                "live_verified": self.live_verified and not replay, "free_only": True,
+        provider, model = self._scope()
+        if provider == 'deepseek':
+            label = 'DeepSeek · ' + DEEPSEEK_VERSION + '（deepseek-flash 滚动别名）' if model else 'DeepSeek · 配置待修正'
+        elif provider == 'zhipu-free':
+            label = '智谱 · ' + FREE_MODELS.get(model, '配置待修正')
+        else:
+            label = '模型配置待修正'
+        return {"mode": self.mode, "label": "演示回放" if replay else label,
+                "model_name": model or None, "configured": not error,
+                "model_version": DEEPSEEK_VERSION if provider == 'deepseek' and model else None,
+                "model_version_note": '2026-11-24 官方文档映射；滚动别名可能变化，不代表响应已验证的固定版本。' if provider == 'deepseek' and model else None,
+                "live_verified": self.live_verified and not replay and not error, "free_only": provider in {'replay', 'zhipu-free'},
                 "status": "本地模板回放" if replay else (error or self.last_error or ("本次服务运行已成功调用" if self.live_verified else "有历史成功记录，本次启动尚未验证连接" if self.last_success_at else "已配置，等待首次调用验证")),
-                "pricing_checked_on": "2026-11-10", "busy": bool(self.current_operation),
+                "pricing_checked_on": "2026-11-10" if provider == 'zhipu-free' else None, "busy": bool(self.current_operation),
                 "operation": self.current_operation, "operation_started_at": self.operation_started_at,
                 "operation_label": OPERATIONS.get(self.current_operation, '模型任务') if self.current_operation else None,
                 "last_success_at": self.last_success_at, "last_failure_at": self.last_failure_at,
@@ -205,14 +230,15 @@ class ModelAdapter:
 
     @property
     def provenance(self):
-        return {} if self.mode == "replay" else {"model_provider": "zhipu-free", "model_name": self.model}
+        provider, model = self._scope()
+        return {"model_provider": provider, "model_name": model} if model else {}
 
     def _fail(self, message, status_code=502, error_kind='validation'):
         self.last_error = message
         self.last_error_kind = error_kind
         if self._active_call:
             self._active_call.update(error_kind=error_kind, error_message=message)
-        raise ModelFailure(message, status_code)
+        raise ModelFailure(message, status_code) from None
 
     def _verified(self):
         self.live_verified = True
@@ -223,7 +249,7 @@ class ModelAdapter:
 
     def _complete(self, job: str, data: dict, system_rules: str | None = None):
         if self.mode == "replay":
-            self._fail("当前是演示回放，请先在本机配置智谱免费模型。", error_kind='configuration')
+            self._fail("当前是演示回放，请先在本机配置模型服务。", error_kind='configuration')
         if error := self.configuration_error():
             self._fail(error, error_kind='configuration')
         payload = {"model": self.model, "messages": [
@@ -231,14 +257,14 @@ class ModelAdapter:
             {"role": "user", "content": job + "\n输入资料：" + json.dumps(data, ensure_ascii=False)}],
             "temperature": 0.4, "max_tokens": 3072,
             "response_format": {"type": "json_object"}, "stream": False}
-        if self.model == "glm-4.7-flash":
+        if self.mode == 'deepseek' or self.model == "glm-4.7-flash":
             payload["thinking"] = {"type": "disabled"}
         try:
             with httpx.Client(timeout=httpx.Timeout(90.0, connect=10.0), follow_redirects=False) as client:
                 if self._active_call:
                     self._active_call['remote_calls'] += 1
                     self._save_call()
-                response = client.post(ZHIPU_BASE + "/chat/completions", headers={"Authorization": f"Bearer {self._key}"}, json=payload)
+                response = client.post(self.base + "/chat/completions", headers={"Authorization": f"Bearer {self._key}"}, json=payload)
                 response.raise_for_status()
                 body = response.json()
                 if self._active_call:
@@ -246,15 +272,25 @@ class ModelAdapter:
                     self._save_call()
                 choice = body["choices"][0]
                 if choice.get("finish_reason") not in {None, "stop"}:
-                    self._fail("智谱返回未完成或被拦截的内容，未保存草稿。可缩短资料后重试。")
+                    self._fail(f"{self.provider_label}返回未完成或被拦截的内容，未保存草稿。可缩短资料后重试。")
                 parsed_result = json.loads(choice["message"]["content"])
                 if not isinstance(parsed_result, dict):
                     raise ValueError("Expected JSON object")
                 return parsed_result
         except httpx.TimeoutException:
+            if self.mode == 'deepseek':
+                self._fail('DeepSeek 响应超时，原有内容已保留。请稍后手动重试；未自动重试或切换模型。', 504, 'timeout')
             self._fail("智谱响应超时，原有内容已保留。免费接口繁忙时可稍后手动重试；不会切换付费模型。", 504, 'timeout')
         except httpx.HTTPStatusError as exc:
             status = exc.response.status_code
+            if self.mode == 'deepseek':
+                if status in {401, 403}:
+                    self._fail('DeepSeek 密钥或账号权限未通过验证，请检查本机配置及账号权限。', error_kind='authentication')
+                if status == 429:
+                    self._fail('DeepSeek 接口当前限流，请稍后手动重试；未自动重试或切换模型。', 503, 'rate_limit')
+                if status == 402:
+                    self._fail('DeepSeek 账号余额不足，请在官方平台核对账户状态；未自动重试或切换模型。', error_kind='provider')
+                self._fail('DeepSeek 未接受请求或接口暂时不可用，请核对账号及模型可用状态后手动重试；未自动切换模型。', error_kind='provider')
             try:
                 code = str(exc.response.json().get("error", {}).get("code", ""))
             except (ValueError, AttributeError):
@@ -269,11 +305,11 @@ class ModelAdapter:
                 self._fail(f"智谱未接受该请求。请在开放平台核对免费 {self.model} 的可用状态及账号权限；系统不会改用其他型号。", error_kind='provider')
             self._fail("智谱接口暂时不可用，已有内容已保留。请稍后手动重试。", error_kind='provider')
         except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError, AttributeError):
-            self._fail("智谱连接失败或返回了无效 JSON，未保存生成结果。请检查网络并重试。", error_kind='response')
+            self._fail(f"{self.provider_label}连接失败或返回了无效 JSON，未保存生成结果。请检查网络并重试。", error_kind='response')
 
     def _copy(self, item):
         if not isinstance(item, dict) or any(not isinstance(item.get(k), str) or not item[k].strip() or len(item[k]) > limit for k, limit in COPY_LIMITS.items()):
-            self._fail("智谱文案未通过字段或长度校验，未保存不完整草稿。请重试。")
+            self._fail(f"{self.provider_label}文案未通过字段或长度校验，未保存不完整草稿。请重试。")
         return {key: item[key].strip() for key in COPY_LIMITS}
 
     def creatives(self, product: dict, brief: dict | None = None) -> list[dict]:
@@ -281,7 +317,7 @@ class ModelAdapter:
             result = self._complete('返回 {"creatives":[' + COPY_SCHEMA + ',' + COPY_SCHEMA + ']}。恰好两组不同创意；按照活动受众、目标、语气和角度设计，不要固定为通勤或容量两种模板。' + COPY_RULES, {"product_facts": product_facts(product), "campaign_brief": brief or {}})
             items = result.get("creatives", [])
             if not isinstance(items, list) or len(items) != 2:
-                self._fail("智谱未返回两组完整创意，原有内容已保留。请重试。")
+                self._fail(f"{self.provider_label}未返回两组完整创意，原有内容已保留。请重试。")
             copies = [{**self._copy(item), **self.provenance} for item in items]
             self._verified()
             return copies
@@ -311,11 +347,11 @@ class ModelAdapter:
                 {**analysis_summary(analytics), "computed_facts": facts})
             recommendation = response.get("recommendation")
             if not isinstance(recommendation, str) or not 1 <= len(recommendation.strip()) <= 2000 or not all(isinstance(response.get(k), list) and 1 <= len(response[k]) <= 6 and all(isinstance(v, str) and 1 <= len(v.strip()) <= 1000 for v in response[k]) for k in ("hypotheses", "missing")):
-                self._fail("智谱复盘格式未通过校验，未保存不完整复盘。请重试。")
+                self._fail(f"{self.provider_label}复盘格式未通过校验，未保存不完整复盘。请重试。")
             if not any(word in recommendation for word in ("标题", "正文", "脚本", "开头", "第一秒", "首屏", "行动文案", "CTA")):
-                self._fail("智谱建议没有落实到具体文案修改，未保存这份复盘。请重新生成。")
+                self._fail(f"{self.provider_label}建议没有落实到具体文案修改，未保存这份复盘。请重新生成。")
             if re.search(r"显著(?:影响|提升|降低)|已经?(?:证明|证实)|一定会|保证(?:提升|增长)", " ".join(response["hypotheses"]) + recommendation):
-                self._fail("智谱复盘包含未经证实的效果结论，未保存这份复盘。请重新生成。")
+                self._fail(f"{self.provider_label}复盘包含未经证实的效果结论，未保存这份复盘。请重新生成。")
             self._verified()
             return {"facts": facts, **self.provenance, **{k: response[k] for k in ("hypotheses", "missing", "recommendation")}}
         history = analytics["dataset"] == "history" and metrics["orders"] > 0
@@ -381,6 +417,6 @@ class ModelAdapter:
     def check_connection(self):
         response = self._complete('这是连接测试，不是营销任务。只返回 {"ok":true}。', {})
         if response.get("ok") is not True:
-            self._fail("智谱已响应，但结构化连接测试未通过，请重试。")
+            self._fail(f"{self.provider_label}已响应，但结构化连接测试未通过，请重试。")
         self._verified()
         return self.info

@@ -41,6 +41,7 @@ export default function ModelStatus({initial, compact = false}: {initial: ModelI
     <div className="panel-header" style={{flexWrap: 'wrap', gap: 10}}><h3>模型状态与调用记录</h3><Badge tone={info.busy ? 'amber' : 'neutral'}>{current}</Badge></div>
     {pollError && <p role="status">{pollError}</p>}
     <Details items={[
+      ['当前模型', info.label],
       ['当前状态', info.status],
       ['开始时间', date(info.operation_started_at || '')],
       ['最近接口成功', info.last_success_at ? date(info.last_success_at) : '暂无真实接口成功记录'],
@@ -48,6 +49,7 @@ export default function ModelStatus({initial, compact = false}: {initial: ModelI
       ['接口请求数', `${info.call_count ?? 0} 次（本地保存的当前型号记录）`],
       ['实际费用', info.cost_note || '接口未返回计费金额，不估算费用。'],
     ]}/>
+    {info.model_version_note && <p className="muted">{info.model_version_note}</p>}
     {info.last_error && <p className="notice">最近未完成原因：{info.last_error}</p>}
     <p className="muted">历史记录保留在本地；重启后的连接需再次验证。回放不计为接口成功。仅保存任务类别、时间、结果状态及接口用量，不保存提示词、资料正文或密钥。</p>
     <details><summary>最近 {info.recent_calls?.length || 0} 条记录</summary>

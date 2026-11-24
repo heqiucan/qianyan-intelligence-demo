@@ -116,8 +116,10 @@ def main():
     print(f"数据目录：{data}", flush=True)
     if os.getenv("MODEL_PROVIDER", "replay") == "replay":
         print("AI 使用演示回放；投放与支付均为模拟。", flush=True)
+    elif os.getenv('MODEL_PROVIDER') == 'deepseek':
+        print('AI 已选择 DeepSeek deepseek-flash；按账户规则计费，首次调用验证连接。投放与支付仍为模拟。', flush=True)
     else:
-        print("AI 已选择智谱免费模型接口模式；首次调用才会验证配置，投放与支付均为模拟。", flush=True)
+        print("AI 已选择已配置的模型接口；首次调用才会验证连接，投放与支付均为模拟。", flush=True)
     if args.check:
         return 0
     url_host = "127.0.0.1" if args.host == "0.0.0.0" else args.host

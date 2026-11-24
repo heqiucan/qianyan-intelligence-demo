@@ -26,6 +26,25 @@ export default function AnalyticsPage({ analytics, focus, trace, selectPlan, onS
   const [view, setView] = useState<AnalyticsView>(() => resolveAnalyticsView(focus));
   const tabsId = useId();
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const workspace = useRef<HTMLDivElement | null>(null);
+  const hasAnalytics = analytics !== null;
+
+  useEffect(() => {
+    const element = workspace.current;
+    const header = element?.closest('.workspace-frame')?.querySelector('.topbar');
+    const toolbar = element?.querySelector('.analytics-toolbar');
+    if (!element || !header || !toolbar) return;
+    // Legacy layouts and wrapped header actions can exceed the shell's nominal height.
+    const measure = () => {
+      element.style.setProperty('--analytics-header-height', `${header.getBoundingClientRect().height}px`);
+      element.style.setProperty('--analytics-toolbar-height', `${toolbar.getBoundingClientRect().height}px`);
+    };
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    observer.observe(toolbar);
+    measure();
+    return () => observer.disconnect();
+  }, [hasAnalytics]);
 
   useEffect(() => { setView(resolveAnalyticsView(focus)); }, [focus]);
   useEffect(() => {
@@ -68,7 +87,7 @@ export default function AnalyticsPage({ analytics, focus, trace, selectPlan, onS
     tabs.current[next]?.focus();
   };
 
-  return <div className="analytics-workspace">
+  return <div className="analytics-workspace" ref={workspace}>
     <div className="analytics-toolbar">
       <div className="analytics-tabs" role="tablist" aria-label="活动效果视图">
         {views.map((item, index) => <button

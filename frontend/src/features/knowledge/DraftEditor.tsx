@@ -13,7 +13,7 @@ export default function DraftEditor({ draft, changed, dirtyChanged, openSource, 
   const [title, setTitle] = useState(draft.title), [blocks, setBlocks] = useState(draft.blocks);
   const [busy, setBusy] = useState(false), [error, setError] = useState(''), [ack, setAck] = useState(false);
   const dirty = title !== draft.title || JSON.stringify(blocks) !== JSON.stringify(draft.blocks);
-  const sourceLabel = (draft.source === 'replay' ? '本地摘录回放 · 未调用模型' : `${draft.writing_mode === 'evidence_composed' ? '智谱选取依据 · 原文组合' : '智谱生成'} · ${draft.model_name}`) + (draft.edited_by ? ' · 含人工修订' : '');
+  const sourceLabel = (draft.source === 'replay' ? '本地摘录回放 · 未调用模型' : `${draft.writing_mode === 'evidence_composed' ? '模型选取依据 · 原文组合' : '模型生成'} · ${draft.model_name}`) + (draft.edited_by ? ' · 含人工修订' : '');
   useEffect(() => { dirtyChanged(dirty || busy); return () => dirtyChanged(false); }, [dirty, busy, dirtyChanged]);
   useEffect(() => { setTitle(draft.title); setBlocks(draft.blocks); setAck(false); }, [draft.id, draft.revision]);
   const run = async (confirmDraft: boolean) => {

@@ -27,8 +27,8 @@ export default function AppDialogs({ data, dialog, close, campaign, trace, close
     {dialog === 'settings' && <Modal title="工作空间设置" onClose={close}>
       <section className="theme-settings-section"><h3>外观</h3><ThemeControls settings/></section>
       <ModelStatus initial={state.model}/>
-      <Details items={[["内容生成", state.model.label], ["数据保存", '本机工作空间'], ["平台状态", '广告投放与付款为模拟操作']]}/>
-      <details><summary>模型连接与配置</summary><p>在项目目录运行 configure-zhipu.cmd 配置密钥，运行 check-zhipu.cmd 检测连接。配置后重启服务生效。</p>
+      <Details items={[["内容生成", state.model.label], ["模型费用", state.model.mode === 'replay' ? '本地回放，无模型请求' : state.model.mode === 'deepseek' ? 'DeepSeek 按账户规则计费；接口未返回实际账单金额' : '以提供者当前账户规则为准'], ["数据保存", '本机工作空间'], ["平台状态", '广告投放与付款为模拟操作']]}/>
+      <details><summary>模型连接与配置</summary><p>{state.model.mode === 'deepseek' ? '在项目目录运行 configure-deepseek.cmd 配置密钥，check-deepseek.cmd 测试连接。deepseek-flash 是服务端别名，未来可能升级。' : '在项目目录运行对应提供者的配置脚本，密钥仅保存在本机。'} 配置后重启服务生效；连接测试会实际调用模型。</p>
         <Button disabled={busy || state.model.mode === 'replay' || !state.model.configured} onClick={() => act(() => api('/model/check', 'POST'), '连接测试通过')}><Sparkles size={15}/>测试模型连接</Button>
       </details>
       <div className="modal-footer"><Button disabled={busy} onClick={() => act(refresh, '数据已更新')}><RefreshCw size={15}/>刷新数据</Button></div>

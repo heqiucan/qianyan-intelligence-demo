@@ -34,7 +34,7 @@ def verify():
     if adapter.mode == "replay":
         print("当前为演示回放。请先运行 configure-zhipu.cmd 填写 API Key。")
         return 1
-    print(f"正在测试已配置的免费型号 {adapter.info['model_name']}，只发送连接测试，不上传商品或订单。")
+    print(f"正在测试已配置型号 {adapter.info['model_name']}，只发送连接测试，不上传商品或订单；按提供者账户规则计费。")
     try:
         adapter.check_connection()
     except ModelFailure as exc:

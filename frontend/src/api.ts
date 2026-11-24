@@ -9,13 +9,13 @@ export interface Order {id:string;plan_id:string;creative_id:string;campaign_id:
 export interface V2Record {id:string;campaign_id:string;created_at:string;[key:string]:any}
 export interface Insight extends V2Record {source:string;facts:string[];hypotheses:string[];missing:string[];recommendation:string;status?:string;analytics_snapshot?:Analytics}
 export interface ModelInfo {
- mode:string;label:string;configured:boolean;live_verified:boolean;model_name?:string|null;free_only:boolean;status:string;pricing_checked_on:string;
+ mode:string;label:string;configured:boolean;live_verified:boolean;model_name?:string|null;model_version?:string|null;model_version_note?:string|null;free_only:boolean;status:string;pricing_checked_on:string|null;
  busy?:boolean;operation?:string|null;operation_label?:string|null;operation_started_at?:string|null;last_success_at?:string|null;last_failure_at?:string|null;
  last_error?:string|null;last_error_kind?:string|null;call_count?:number;cost?:number|null;cost_note?:string;
  recent_calls?:{id:string;provider:string;model:string;operation:string;operation_label:string;started_at:string;finished_at:string|null;outcome:string;remote_calls:number;provider_succeeded:boolean;error_kind:string|null;error_message:string;usage:{prompt_tokens?:number;completion_tokens?:number;total_tokens?:number}|null;cost:number|null}[];
 }
 export interface State {live_sessions:LiveSession[];product:Product;campaigns:Campaign[];creatives:Creative[];plans:Plan[];orders:Order[];events:{id:string;plan_id:string;type:string;created_at:string}[];logs:{id:string;action:string;detail:string;created_at:string}[];insights:Insight[];adjustments:V2Record[];batches:V2Record[];tasks:V2Record[];observations:V2Record[];reports:V2Record[];model:ModelInfo}
-export const generationSource=(item:{source?:string;model_name?:string;edited_by?:string})=>(item.source==='model'?(item.model_name?`智谱生成 · ${item.model_name}`:'模型生成 · 历史型号未记录'):item.source==='replay'?'演示回放':item.source==='knowledge'?'已核对知识草稿转入':'来源未记录')+(item.edited_by?' · 人工修订':'');
+export const generationSource=(item:{source?:string;model_name?:string;edited_by?:string})=>(item.source==='model'?(item.model_name?`模型生成 · ${item.model_name}`:'模型生成 · 历史型号未记录'):item.source==='replay'?'演示回放':item.source==='knowledge'?'已核对知识草稿转入':'来源未记录')+(item.edited_by?' · 人工修订':'');
 export interface Metrics {impressions:number|null;clicks:number;spend:number|null;orders:number;buyers:number;new_customers:number;unknown_buyers:number;revenue:number;ctr:number|null;roi:number|null;cpa:number|null;cac:number|null}
 export interface Analytics {trend?:{points:{date:string;revenue:number;orders:number;spend:null}[];note:string};dataset:string;label:string;note:string;window:string;metrics:Metrics;rows:({name:string;plan_id?:string;creative_id?:string;live_context?:LiveContext}&Metrics)[];orders:Order[];spend_entries:V2Record[];views?:number;filters?:Record<string,string>}
 export const requestId=()=>typeof crypto.randomUUID==='function'?crypto.randomUUID():Array.from(crypto.getRandomValues(new Uint8Array(16)),n=>n.toString(16).padStart(2,'0')).join('');

@@ -118,7 +118,7 @@ def compose_live_script(adapter, task, sources):
     adapter._verified()
     return {"title": "直播讲解稿 · 依据编排", "blocks": blocks, "writing_mode": "evidence_composed",
             "selected_facts": [allowed[key] for key in dict.fromkeys(ids)],
-            "missing": ["本稿由智谱选择原文事实片段，后端加入固定中性衔接语；商品事实未自由扩写。",
+            "missing": ["本稿由模型选择原文事实片段，后端加入固定中性衔接语；商品事实未自由扩写。",
                         "已使用本场人工确认的货盘快照；库存与优惠须按原始资料核对，未连接平台实时数据。" if task.get("source_mode") == "catalog" else "尚未连接当前直播场次的价格、库存与优惠记录，使用前请核对。",
                         "约一分钟为任务目标，未实测语速；请试读并按展示节奏调整。"]}
 

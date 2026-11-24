@@ -148,7 +148,7 @@ export default function CreativeStudio({
       />
       {!creatives.length && <Button kind="ghost" onClick={openProduct}>查看商品依据<ArrowRight size={14}/></Button>}
     </>}
-    {generating && <p className="notice" role="status"><RefreshCw size={14}/>{modelLabel.includes('智谱') ? '正在等待模型生成，返回后保存为草稿。' : '正在读取演示回放并创建草稿。'}</p>}
+    {generating && <p className="notice" role="status"><RefreshCw size={14}/>{!modelLabel.includes('回放') ? '正在等待模型生成，返回后保存为草稿。' : '正在读取演示回放并创建草稿。'}</p>}
     {dialog && <CreativeDialogs
       dialog={dialog} creatives={creatives} busy={actionsBusy} error={error}
       close={() => setDialog(null)} edit={creative => { setDialog(null); openCreative(creative); }}

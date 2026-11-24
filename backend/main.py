@@ -707,6 +707,8 @@ def create_app(data_dir=None):
     register_demand_assets(app, store)
     register_demand_tasks(app, store, demand_runner)
     register_demand_content(app, store, adapter)
+    from backend.recommend import register_recommend
+    register_recommend(app, store)
 
     @app.api_route("/api", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
     @app.api_route("/api/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])

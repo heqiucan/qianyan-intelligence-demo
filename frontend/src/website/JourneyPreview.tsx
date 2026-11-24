@@ -62,6 +62,6 @@ export default function JourneyPreview() {
       <div className="qy-stage-copy"><span className="qy-kicker">STEP 0{stage + 1} / 06</span><h3>{selected.heading.split('\n').map((line, i) => <span key={line}>{i > 0 && <br />}{line}</span>)}</h3><p>{selected.text}</p><div className="qy-stage-output"><span>这一环节留下什么</span><strong>{selected.output}</strong></div><a className="qy-text-link" href={workspaceLink(selected.link)}>在工作台中体验<ArrowRight size={16} /></a></div>
       <div className="qy-demo-window"><div className="qy-window-bar"><div className="qy-window-dots"><i /><i /><i /></div><span>Qianyan / {selected.title}</span><span className="qy-window-label">交互示例</span></div><div className="qy-window-body" key={stage}><Preview stage={stage} /></div></div>
     </div>
-    <div className="qy-journey-bottom"><span>一个虚构保温杯案例，串起完整链路。</span><button className="qy-text-link" onClick={() => setStage(value => (value + 1) % stages.length)}>{stage === stages.length - 1 ? '回到商品起点' : '探索下一步'}<ArrowRight size={16} /></button></div>
+    <div className="qy-journey-bottom"><button className="qy-text-link" onClick={() => setStage(value => (value + 1) % stages.length)}>{stage === stages.length - 1 ? '回到商品起点' : '探索下一步'}<ArrowRight size={16} /></button></div>
   </div>;
 }

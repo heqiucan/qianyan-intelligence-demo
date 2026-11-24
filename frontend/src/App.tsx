@@ -22,6 +22,7 @@ import CampaignList from './features/CampaignList';
 import AdsPage from './features/AdsPage';
 import AnalyticsPage from './features/AnalyticsPage';
 import MetricsSummary from './features/MetricsSummary';
+import MedicalAssistantPanel from './features/medical/MedicalAssistantPanel';
 import Consumer from './features/Consumer';
 import FeedbackPages from './Feedback';
 import LiveCatalog from './features/live/LiveCatalog';
@@ -90,7 +91,10 @@ export default function App() {
       {page.id === 'overview' && <Button kind="primary" onClick={() => go('agent?agent=new')}><Plus size={15}/>新建任务</Button>}
     </>}>
       {error && <div className="error-banner" role="alert"><span>{error}</span><button className="button ghost" aria-label="关闭错误提示" onClick={() => data.setError('')}><X size={16}/></button></div>}
-      {page.id === 'overview' && <>{scope}<Overview state={state} campaign={campaign} campaignId={campaignId} analytics={analytics} go={go} inspect={inspect} setDialog={setDialog}/></>}
+      {page.id === 'overview' && <>
+        <WorkspaceTabs label="工作总览视图" selected={params.get('tab') === 'assistant' ? 'assistant' : 'overview'} items={[{ id: 'overview', label: '经营总览', route: 'overview' }, { id: 'assistant', label: '医美咨询助手', route: 'overview?tab=assistant' }]} go={go}/>
+        {params.get('tab') === 'assistant' ? <MedicalAssistantPanel/> : <>{scope}<Overview state={state} campaign={campaign} campaignId={campaignId} analytics={analytics} go={go} inspect={inspect} setDialog={setDialog}/></>}
+      </>}
       {page.id === 'agent' && <>
         <WorkspaceTabs label="Agent 任务类型" selected={demandSelected ? 'demand' : 'content'} items={[{ id: 'content', label: '内容任务', route: 'agent' }, { id: 'demand', label: '需求分析', route: 'agent?tab=demand' }]} go={go}/>
         {demandSelected ? <DemandWorkspace view={demandView} model={state.model} initialSpaceId={params.get('space') || undefined} initialTaskId={params.get('task') || undefined}

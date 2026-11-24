@@ -17,6 +17,7 @@
 | 导航、页面层级、返回、未保存保护 | SHELL | `frontend/src/app/pages.ts`、`frontend/src/navigation.ts`、`frontend/src/app/useWorkspaceNavigation.ts` |
 | 浅色、深色、系统外观、官网入口 | THEME / SITE | `frontend/src/app/ThemeControls.tsx`、`frontend/src/app/theme.ts`、`frontend/src/app/AppShell.tsx` |
 | 首页指标、当前任务 | HOME | `frontend/src/features/Overview.tsx`、`frontend/src/app/useWorkspaceData.ts` |
+| 医美咨询助手、公司看板、词表推荐 | RECOMMEND | `frontend/src/features/medical/MedicalAssistantPanel.tsx`、`backend/recommend.py`；入口 `#/overview?tab=assistant` |
 | 商品、品牌、SKU、活动策略 | PRODUCT / CAMPAIGN | `frontend/src/features/ProductPage.tsx`、`frontend/src/features/live/LiveCatalog.tsx`、`frontend/src/components/CampaignModal.tsx` |
 | 知识库、Obsidian、资料、检索 | KNOWLEDGE | `frontend/src/features/knowledge/KnowledgeWorkspace.tsx`、`backend/knowledge.py` |
 | Agent 创建、执行、审阅、重试 | AGENT | `frontend/src/features/agent/AgentWorkspace.tsx`、`backend/agents/routes.py` |

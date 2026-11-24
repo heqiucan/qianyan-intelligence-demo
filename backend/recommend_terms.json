@@ -1,0 +1,5567 @@
+[
+{
+"term": "360吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "400元一针的除皱针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "A",
+"action": "需复核"
+},
+{
+"term": "980元一次的黄金超声炮",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "dpl光子嫩肤",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "m22光子嫩肤脱毛",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "yestar光子嫩肤",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "需复核"
+},
+{
+"term": "yestar激光祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "需复核"
+},
+{
+"term": "一次吸脂最大量是多少",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "一次水光针大概多少钱",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般一支除皱针多少钱",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般丰胸手术需要多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "一般丰胸需多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "一般做个隆鼻手术要多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般做双眼皮多少价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "一般做双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "一般割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "一般割双眼皮大概需要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "一般双眼皮手术价格表",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般吸脂要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般手术丰胸多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "一般打除皱针多少钱一针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般正规医院激光祛斑要多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般正规的割双眼皮的医院多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "一般肚子吸脂多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般除皱针多少钱一针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般隆鼻需要多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一般面部提升术多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一针川字纹玻尿酸大概多少钱",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "一针除皱针大概费用是多少",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "三点定位双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "上海整形医院丰胸",
+"service": "丰胸",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "上腹部吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "下巴打了玻尿酸一年后突然肿了很硬",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "不埋线不开刀的永久双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "不开刀不埋线无痕永久双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "专业全面吸脂减肥",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "专业隆鼻修复医院",
+"service": "隆鼻",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸假体",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸手术一般多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸手术全过程",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸手术多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸手术有哪几种",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸手术费多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸整形医院一般要多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸整形美容医院",
+"service": "丰胸",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸注射整形手术费用",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸的手术",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸的最好方法",
+"service": "丰胸",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸脂肪多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸针一针管几年",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸针一针管几年丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸针一针管几年多少钱一次",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸针一针管几年要多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸针一针要多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸针多少钱一针",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸针多少钱一针丰胸针一针管几年",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸针大概一针要多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸隆胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "丰胸隆胸手术",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "临沂缩鼻翼",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "丽人整形医院吸脂",
+"service": "吸脂",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "乐提葆除皱针多少钱一支进口",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "乔雅登玻尿酸正品价格是多少一支",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "乳房丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "什么办法能丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "佛山超皮秒祛斑正规医院",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "修复双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "假体丰胸和自体脂肪丰胸哪个安全",
+"service": "丰胸",
+"intent": "方案对比",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "假体丰胸有什么危害和后遗症吗",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "假体隆鼻",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "假体隆鼻取出后鼻子会更塌吗",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "做一次皮秒祛斑多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "做个双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做个双眼皮大概需要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做个双眼皮手术大概多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做丰胸整形手术",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做光子嫩肤",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "做割双眼皮一般价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "做割双眼皮一般多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮价格表",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮哪家医院最专业最好",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮哪种好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮哪种最自然",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮埋线好还是全切好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮大约多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮手术一般多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮手术一般要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮手术医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮手术多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮是去医院还是整形医院",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮术多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮的医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "做双眼皮美容医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "做手术双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做玻尿酸多少钱",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做眼袋切眉的多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做膨体隆鼻",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做自体脂肪填充隆胸价格表",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "做自体脂肪移植丰胸多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "做面部提升全脸一次多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "光子嫩肤",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "光子嫩肤一次需要多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "光子嫩肤一般多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "光子嫩肤多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "光子嫩肤收缩毛孔价格",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "光子嫩肤祛斑多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "光子嫩肤祛斑需要做几次",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "光子嫩肤脱毛多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "光子嫩肤除毛",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "光子祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "全切双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "全脂肪丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "全脸超声炮多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "全脸面部提升多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "全身吸脂20斤要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "全身吸脂30斤多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "全身吸脂30斤要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "全身吸脂价格一览表",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "全身吸脂大概多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "兰州时光整形祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "关于双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "内切祛眼袋整形美容医院",
+"service": "眼部其他",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "军大吸脂医院",
+"service": "吸脂",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "冯斌自体脂肪隆胸存活率高吗",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "冰点脱毛有副作用吗",
+"service": "脱毛",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "冰点脱毛的危害",
+"service": "脱毛",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "减肥吸脂手术",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "切双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "切开双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "切眉",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "切眉和提眉哪个效果好",
+"service": "眼部其他",
+"intent": "方案对比",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "利美康做吸脂的医生",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割一只双眼皮价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割个双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割个双眼皮大概多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割割双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮一般价位是多少",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮一般价格多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮一般价格表",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮一般在多少钱左右",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮一般多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮一般大概多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮一般是多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮一般费用",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮一般需要花多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮价格表",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮和埋线哪个好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮和埋线哪个好一点",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮和埋线哪种好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮哪个好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮哪家整形医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮在医院需要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮埋线",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮埋线哪个好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮埋线好还是割好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮多少多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮多少钱一般",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮多少钱哦",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮大概多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮大概多少钱呀",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮大概需要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮好看还是埋线好看",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮好还是埋线",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮好还是埋线好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮得多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮手术一般多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮手术价格多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮手术多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮手术大约多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮手术要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮手术费多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮手术费用大概多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮手术需要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮整形美容医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮整形美容手术医院谁家好",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮是埋线好还是直接割好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮的一般多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮的价格一般多少钱呢",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮的医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮眼睛",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮要多少钱大概",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮要花多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮还是埋线",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮还是埋线好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮需要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "割双眼皮需要多少钱一次",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "医院做双眼皮大概要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "医院做双眼皮要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "医院割双眼皮",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "医院割双眼皮价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "医院割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "医院双眼皮",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "医院双眼皮手术大约多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "医院吸脂减肥价格",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "医院有做双眼皮的吗",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "医院激光祛斑",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "医院激光祛斑多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "医院祛斑",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "医院祛斑一般多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "南京做割双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "南京哪家割双眼皮医院比较好的医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "南京埋线双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "南医大友谊祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "需复核"
+},
+{
+"term": "南医大双眼皮埋线手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "南医大双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "南医大提眉手术",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "需复核"
+},
+{
+"term": "南医大整双眼皮手术费用",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "南医大激光祛斑多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "南医大皮秒激光祛斑价格",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "去正规医院割双眼皮需要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "去黑眼圈去眼圈",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼割双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮下垂提眉好还是全切好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮二次修复",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮二次修复时间",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮二次修复最佳时间",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮价格表",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮修复",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮做双眼皮手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮做哪种好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮全切",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮割",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮割双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮割双眼皮割双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮割多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮双眼皮双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮埋线",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮埋线多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮埋线好还是割好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮埋线的好还是割的好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮多少",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮大概多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮怎么",
+"service": "双眼皮",
+"intent": "做法/原理",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮恢复",
+"service": "双眼皮",
+"intent": "效果/风险/恢复",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮手术价格表",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮手术双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮手术哪个医院做的比较好",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮手术埋线",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮手术多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮手术多少钱一次",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮手术要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮整形",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮整形医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮整形手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮无痕",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮是割好还是埋线好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮是怎么做的",
+"service": "双眼皮",
+"intent": "做法/原理",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮有伤疤怎么修复",
+"service": "双眼皮",
+"intent": "做法/原理",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮的手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮美容医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "双眼皮需要费用是多少",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "可以做隆鼻吗",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "叶子医院私密整形",
+"service": "私密整形",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "转人工"
+},
+{
+"term": "吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂20斤大概多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂40斤大概多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂一般多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂一般要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂一般费用多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂价格",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂减肥瘦身",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂医院",
+"service": "吸脂",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂医院艺星",
+"service": "吸脂",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "吸脂哪个好",
+"service": "吸脂",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂哪种最安全",
+"service": "吸脂",
+"intent": "效果/风险/恢复",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂大约价格",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂安全吗",
+"service": "吸脂",
+"intent": "效果/风险/恢复",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂手术",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂手术多少",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂手术大概要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂手术费用",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂手术需要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂手术风险",
+"service": "吸脂",
+"intent": "效果/风险/恢复",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂整形一般多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂瘦腰部",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂瘦身",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂的副作用",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂肚子10斤多少费用",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂肪",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂肪20斤大概需要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂肪多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂肪大概需要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂腰腹部要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "吸脂费用",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "哈尔滨眼综合整形医院",
+"service": "眼部其他",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "哪个假体隆鼻整形医院",
+"service": "隆鼻",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "哪个割双眼皮好点",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "哪个玻尿酸好点",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "哪家丰胸好",
+"service": "丰胸",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "哪里打玻尿酸比较好",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "哪里的丰胸效果好",
+"service": "丰胸",
+"intent": "效果/风险/恢复",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "国家认可的丰胸品牌",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "在正规医院割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "埋线割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮一般价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮一般价格表",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮割开双眼皮那个好",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮取出",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮大概多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮广东",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "埋线双眼皮术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "埋线双眼皮能维持几年",
+"service": "双眼皮",
+"intent": "效果/风险/恢复",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "埋线和割双眼皮哪个好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "埋线好还是做双眼皮好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "埋线好还是割双眼皮好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "填充泪沟用胶原蛋白好还是玻尿酸好",
+"service": "填充",
+"intent": "方案对比",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "填充玻尿酸",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "填充鼻基底",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "多少钱一支玻尿酸",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "多少钱割双眼皮",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "多少钱吸脂",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "大华整形美容医院隆鼻",
+"service": "隆鼻",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "大小眼整形多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "大腿内侧吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "大腿吸脂一般多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "天生胸小怎么丰胸",
+"service": "丰胸",
+"intent": "做法/原理",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "女性私密处干燥",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "转人工"
+},
+{
+"term": "女性私密整形",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "转人工"
+},
+{
+"term": "女性私密紧致",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "转人工"
+},
+{
+"term": "好一点的医院割双眼皮大概多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "如何快速去掉黑眼圈",
+"service": "眼部其他",
+"intent": "做法/原理",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "威塑吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "威塑吸脂价格",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "富贵包吸脂好还是手术切除好",
+"service": "吸脂",
+"intent": "方案对比",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "富贵包吸脂手术多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "射频溶脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "射频溶脂瘦身瘦肚子",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "射频溶脂紧肤",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "小腿吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "川字纹是打玻尿酸还是除皱针",
+"service": "除皱针",
+"intent": "方案对比",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "川字纹除皱针价格一般多少钱",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "川字纹除皱针多少钱一针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "广州做双眼皮最好的医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "广州双眼皮正规医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "广州市双眼皮医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "广州祛疤痕医院排行榜",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "开双眼皮的多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "开眼角一般要多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "开眼角价格一般是多少",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "开眼角前后对比效果图",
+"service": "眼部其他",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "开眼角加割双眼皮一共多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "开眼角手术",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "微针美容一次多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "德玛玻尿酸价格多少钱一支",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "怎么丰胸",
+"service": "丰胸",
+"intent": "做法/原理",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "怎样丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "怎样快有效丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "怎样才能丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "成都军大吸脂怎么样",
+"service": "吸脂",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "成都大华医院割双眼皮",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "成都私密整形医院",
+"service": "私密整形",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "成都铜雀台整形美容医院怎么做双眼皮怎么样",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "扇形双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "手术做双眼皮整形",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "手术割双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "手术双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "手术双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "手术吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "手术吸脂20斤要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "手术吸脂40斤多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "手术吸脂40斤要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "手术开眼角",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "手术面部提升",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "手术面部轮廓提升",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "手臂吸脂多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "手臂吸脂需要多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "打一针童颜针",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "打丰胸针要多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "打水光针",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "打玻尿酸",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "打玻尿酸一针大概多少钱",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "打针丰胸要多少钱一针",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "打除皱针",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "打除皱针10天了眼睛一直浮肿",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "打除皱针一般要多少钱一针啊",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "打除皱针多少钱一次",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "打除皱针多少钱一针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "抬头纹除皱针多少钱一针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "抽脂吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "抽脂吸脂手术",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "提眉",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "提眉去眼袋能保持几年",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "提眉和割双眼皮哪个效果好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "提眉多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "提眉好还是割双眼皮好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "提眉手术大概多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "提眉手术大概需要多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "提眉手术费用一般多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "提眉手术需要多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "提眉术价格一般是多少",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "提眉术的价格一般是多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "整容医院割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "整容双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "整容双眼皮医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "整形做双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "整形割双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "整形医院做双眼皮价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "整形医院割双眼皮",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "整形医院割双眼皮价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "整形医院割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "整形医院私密整形",
+"service": "私密整形",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "转人工"
+},
+{
+"term": "整形医院隆鼻",
+"service": "隆鼻",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "整形双眼皮手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "整形祛疤",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "整形美容医院双眼皮",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "整形美容医院注射式丰胸",
+"service": "丰胸",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "整形腰腹部吸脂多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "整形自体脂肪面部填充手术",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "整形面部提升",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "新型无痕双眼皮手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "无痕双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "无痕双眼皮不埋线不开刀",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "无痕双眼皮怎么做",
+"service": "双眼皮",
+"intent": "做法/原理",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "无痕双眼皮怎么做的",
+"service": "双眼皮",
+"intent": "做法/原理",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "无痕双眼皮是怎么做出来的",
+"service": "双眼皮",
+"intent": "做法/原理",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "无痕双眼皮是怎么做的",
+"service": "双眼皮",
+"intent": "做法/原理",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "无痕提眉手术多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "无锡割双眼皮一般多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "日本吸脂价格",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "时光整形兰州双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "昆明吴氏隆鼻",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "昆明正规丰胸医院",
+"service": "丰胸",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "曙光美容医院超皮秒",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "需复核"
+},
+{
+"term": "曼托假体假体丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "最新双眼皮技术不开刀不埋线",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "有效祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "正品超声炮多少钱一次",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院做双眼皮要多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院割双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院割双眼皮大概多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院双眼皮",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院打除皱针价格是多少",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院激光祛斑多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院激光祛斑多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院激光祛斑的一般价格",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院玻尿酸多少钱一针",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院祛斑",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "正规医院祛斑大概要多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "正规的丰胸大约多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "正规祛斑医院",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "武汉做皮秒祛斑要多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "武汉哪个医院祛斑最好",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "武汉整形医院自体脂肪丰胸",
+"service": "丰胸",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "武汉激光祛斑多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "武汉皮秒激光正规的祛斑医院",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "武汉超皮秒祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "比较专业整形美容医院双眼皮",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "毛孔粗大打水光针好还是光子嫩肤好",
+"service": "填充",
+"intent": "方案对比",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "水光针",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "水光针一般多少钱一次",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "水光针多久打一次",
+"service": "填充",
+"intent": "效果/风险/恢复",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "水光针多少钱一次",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "沈阳医大做双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "沈阳杏林医院割双眼皮价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "沈阳杏林开双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "注射丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "注射玻尿酸",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "注射脂肪丰胸多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "注射除皱针",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "注射除皱针价格",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "济南双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "海薇玻尿酸380元一支",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "A",
+"action": "需复核"
+},
+{
+"term": "淡斑祛斑效果排名第一",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "深圳隆鼻整形医院排名第一名",
+"service": "隆鼻",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "温州割双眼皮整形医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "温州私密整形",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "溶脂减肥针",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "溶脂去眼袋的费用",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "溶脂瘦身",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "溶脂针",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "溶脂针多久见效",
+"service": "吸脂",
+"intent": "效果/风险/恢复",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "溶脂针多少钱一支",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "溶脂针多少钱一次",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "溶脂针多少钱一针",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "溶脂针大概多少钱一针",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "溶解玻尿酸",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光嫩肤祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光永久脱毛一般大概要多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一次多少",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一次多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一次多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一次大概多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一次的费用",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一次需要多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一般价格表",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一般多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一般大概要多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一般费用",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑一般需要多少费用",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑价格一般多少",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑价格表",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑价目表",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑做一次多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑大概一次多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑大概要多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑手术",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑整形美容医院",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑激光",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑的一般价格",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑的费用一般是多少",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光祛斑要做几次",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光美容祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光脱毛",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "激光脱毛一次多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光脱毛多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "激光要做几次才能祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "濡白天使和少女针",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "点阵激光",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "点阵激光一次多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "点阵激光多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "点阵激光能去凹陷疤吗",
+"service": "皮肤/激光",
+"intent": "效果/风险/恢复",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "热玛吉",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "热玛吉全脸价格多少钱一次",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "热玛吉收缩毛孔",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "热玛吉瘦脸",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "热玛吉紧肤的效果",
+"service": "抗衰仪器",
+"intent": "效果/风险/恢复",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "热玛吉面部提升除皱多少钱",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "熊猫针",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "熊猫针填充泪沟可以维持多久",
+"service": "填充",
+"intent": "效果/风险/恢复",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "环形吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸丰胸注射医院",
+"service": "丰胸",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸丰额头整形",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸取出",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸哪里好",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸填充",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸填充卧蚕一般多少钱",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸填充多少钱一支",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸填充疤痕价格",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸填充硬块多久消失",
+"service": "填充",
+"intent": "效果/风险/恢复",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸多少钱一支",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸多少钱一支价格表",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸多少钱一针",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸溶解",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸玻尿酸",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸肿了",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "玻尿酸除皱针多少钱",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "瑞蓝2号玻尿酸价格是多少钱一支",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "男性生殖私密按摩",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "排除"
+},
+{
+"term": "瘦手臂溶脂针多少钱一针",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒激光整形美容医院",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒激光点斑一次大概多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒激光祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒激光祛斑一次多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒激光祛斑一次大概多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒激光祛斑一般需要多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒激光祛斑价格",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "皮秒祛斑多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "目前最安全的面部提升手术",
+"service": "抗衰仪器",
+"intent": "效果/风险/恢复",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "眼皮下垂提眉术好还是割双眼皮好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "眼皮下垂是提眉好还是割双眼皮好",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "眼睛做双眼皮手术",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "眼睛双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "眼综合",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "眼综合5项一般多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "眼综合一般多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "眼综合多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "眼综合大概多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "眼综合美容医院",
+"service": "眼部其他",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑价格表",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑医院",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑杏林",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑正规医院",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑淡斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑激光",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "祛斑除皱方法",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "祛疤",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "祛疤多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "祛疤手术",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "祛痘",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "祛痣",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "祛眼袋一般价格多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "祛眼袋一般多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "祛眼袋的方法眼袋",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "私密修复",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "转人工"
+},
+{
+"term": "私密修复一般需要多少钱",
+"service": "私密整形",
+"intent": "价格咨询",
+"tier": "A",
+"action": "转人工"
+},
+{
+"term": "私密修复多少钱",
+"service": "私密整形",
+"intent": "价格咨询",
+"tier": "A",
+"action": "转人工"
+},
+{
+"term": "私密修复需要手术需要花多少钱",
+"service": "私密整形",
+"intent": "价格咨询",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "私密医院",
+"service": "私密整形",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "转人工"
+},
+{
+"term": "私密处修复手术",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "私密处整形手术",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "转人工"
+},
+{
+"term": "私密处整形手术费用",
+"service": "私密整形",
+"intent": "价格咨询",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "私密处紧致多少钱",
+"service": "私密整形",
+"intent": "价格咨询",
+"tier": "A",
+"action": "转人工"
+},
+{
+"term": "私密手术",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "私密整形",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "转人工"
+},
+{
+"term": "私密整形一般价格",
+"service": "私密整形",
+"intent": "价格咨询",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "私密整形医院",
+"service": "私密整形",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "转人工"
+},
+{
+"term": "私密整形多少钱",
+"service": "私密整形",
+"intent": "价格咨询",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "私密整形手术",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "转人工"
+},
+{
+"term": "私密紧致",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "私密缩阴针",
+"service": "私密整形",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "转人工"
+},
+{
+"term": "童颜针",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "童颜针填充一般多少钱",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "童颜针多少钱一针",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "童颜针艾维岚",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "第九人民整形医院双眼皮",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "筋膜面部提升术",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "纳米微针去黄褐斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "纳米无痕双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "纳米无痕双眼皮和埋线有什么区别",
+"service": "双眼皮",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "综合隆鼻一般价格多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "综合隆鼻整形医院价格",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "缩胸手术一般多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "缩胸手术疤痕",
+"service": "丰胸",
+"intent": "效果/风险/恢复",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "美体丰胸整形医院",
+"service": "丰胸",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "美容医院祛疤一般多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "美容除皱针",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "美容隆鼻医院",
+"service": "隆鼻",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "美白祛斑效果最好的排名第一",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "美白祛斑的最好方法",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "美眼整形",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "美眼整形医院",
+"service": "眼部其他",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "美眼整形美容医院",
+"service": "眼部其他",
+"intent": "找机构/口碑",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "美莱玻尿酸去泪沟纹",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "美莱酷塑冷冻吸脂价格",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "耳软骨隆鼻",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "耳部整形",
+"service": "耳部整形",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "耳部整形手术价格多少",
+"service": "耳部整形",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "肚子吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "肚子吸脂多少钱一次",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "肚子吸脂大概多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "肿眼泡割双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "背部减肥吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "胶原蛋白丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "胶原蛋白丰胸多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "胸部吸脂",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "脂肪丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "脂肪丰胸一般多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "脂肪丰胸手术一般多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "脱毛",
+"service": "脱毛",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "脱毛医院",
+"service": "脱毛",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "脸上祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "脸部吸脂整形美容手术",
+"service": "吸脂",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "脸部填充童颜针多少钱",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "脸颊吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "腰腹部吸脂一般价格多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "腰腹部吸脂一般多少钱",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "腹部吸脂价格费用",
+"service": "吸脂",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "膨体隆鼻",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "膨体隆鼻整形",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪丰胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪丰胸一般多少费用",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪丰胸一般费用",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪丰胸多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪丰胸安全可靠吗",
+"service": "丰胸",
+"intent": "效果/风险/恢复",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪丰胸适应人群",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪填充",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪填充隆胸",
+"service": "丰胸",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪填充面部哪个医院最好",
+"service": "填充",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪填充鼻子多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪填胸多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "自体脂肪隆胸多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "自身脂肪丰胸一般多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "自身脂肪丰胸多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "自身脂肪丰胸大概需要多少钱",
+"service": "丰胸",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "艺兴祛斑多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "艺星光子嫩肤多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "艺星光子嫩肤美白",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "艺星医院吸脂",
+"service": "吸脂",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "艺星祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "艺星飞顿光子嫩肤",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "艾维岚童颜针",
+"service": "填充",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "艾维岚童颜针多久打一次",
+"service": "填充",
+"intent": "效果/风险/恢复",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "艾维岚童颜针多少钱一针",
+"service": "填充",
+"intent": "价格咨询",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "蛋白除皱针多少钱一针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "袁家岗五州妇儿医院脱毛",
+"service": "脱毛",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "西安整形医院热玛吉",
+"service": "抗衰仪器",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "西安艺星双眼皮价格",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "调q激光祛斑多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "谢家湾五洲妇儿医院做祛痣大概多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "超声波吸脂",
+"service": "吸脂",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮10天效果图",
+"service": "抗衰仪器",
+"intent": "效果/风险/恢复",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮做一次全脸要多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮做一次脸多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮全脸一次多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮去眼袋",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮双下巴去除",
+"service": "抗衰仪器",
+"intent": "效果/风险/恢复",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮和超声刀的区别",
+"service": "抗衰仪器",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮抗衰全脸做一次多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮收费多少钱一次",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮祛黑眼圈吗",
+"service": "眼部其他",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮面部一次花多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "超声炮面部提升多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "超皮秒",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "超皮秒一次多少钱",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "超皮秒祛斑一般几次可以干净",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "进口除皱针多少钱一针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "郑州割双眼皮最好的正规医院",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "郑州哪家做双眼皮好",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "铜雀台美容医院双眼皮",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "需复核"
+},
+{
+"term": "附近的祛斑医院",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针一般多少钱",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针一针的费用",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针一针要多少钱",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针一针要花多少钱",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针去抬头纹一般多少钱",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针国产牌子",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针多久",
+"service": "除皱针",
+"intent": "效果/风险/恢复",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针多少钱",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针多少钱一针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针有哪几个牌子",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针注射价格一针",
+"service": "除皱针",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针的危害和副作用",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "除皱针除皱",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻一般要多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻价格",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻修复一般要多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻修复整容医院",
+"service": "隆鼻",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻假体可以永久的吗",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻加双眼皮多少钱",
+"service": "双眼皮",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻哪种好",
+"service": "隆鼻",
+"intent": "方案对比",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻大概一般需要多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻手术",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻手术一般多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻手术多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻打玻尿酸",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻能保持一辈子吗",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻能取出吗",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻费用需要多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "隆鼻隆鼻",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "青岛双眼皮医院整形",
+"service": "双眼皮",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "青岛隆鼻垫鼻梁",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "青海祛疤医院",
+"service": "皮肤/激光",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升一次多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升三件套",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升三件套多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升小拉皮多少钱一次",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升手术",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升手术一般多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升手术多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升整形",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升术",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升术一次大概多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "面部提升除皱",
+"service": "除皱针",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "面部轮廓整形",
+"service": "抗衰仪器",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "鞍山齐敏双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "韩式双眼皮",
+"service": "双眼皮",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "韩美美容医院吸脂",
+"service": "吸脂",
+"intent": "找机构/口碑",
+"tier": "B",
+"action": "需复核"
+},
+{
+"term": "骨胶原隆鼻一般多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "鹏爱祛斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "黄金微针",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "黄金微针收缩毛孔多少钱一次",
+"service": "皮肤/激光",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "黄金微针治疗黄褐斑",
+"service": "皮肤/激光",
+"intent": "项目名称(泛搜索)",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "黄金超声炮做一次全脸要多少钱",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "黄金超声炮全脸一次费用",
+"service": "抗衰仪器",
+"intent": "价格咨询",
+"tier": "A",
+"action": "可自动推荐"
+},
+{
+"term": "黑眼圈太重了太黑了怎么去掉",
+"service": "眼部其他",
+"intent": "效果/风险/恢复",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "黑眼圈怎么治疗",
+"service": "眼部其他",
+"intent": "效果/风险/恢复",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "黑眼圈手术要多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "黑眼圈激光永久大概需要多少钱",
+"service": "眼部其他",
+"intent": "价格咨询",
+"tier": "B",
+"action": "可自动推荐"
+},
+{
+"term": "鼻基底凹陷",
+"service": "隆鼻",
+"intent": "项目名称(泛搜索)",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "鼻基底凹陷用什么填充最好",
+"service": "隆鼻",
+"intent": "找机构/口碑",
+"tier": "C",
+"action": "可自动推荐"
+},
+{
+"term": "鼻子打一针玻尿酸大概多少钱",
+"service": "隆鼻",
+"intent": "价格咨询",
+"tier": "C",
+"action": "可自动推荐"
+}
+]

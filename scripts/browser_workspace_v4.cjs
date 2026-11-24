@@ -37,6 +37,16 @@ async function main(){
    check(name+'保持导航位置',Math.abs(await nav().evaluate(element=>element.getBoundingClientRect().top)-top)<1);
   }
   check('普通导航未启动业务任务',mutations.length===0);
+  await goto('overview');
+  await page.getByRole('button',{name:'医美咨询助手',exact:true}).click();
+  await page.getByRole('tab',{name:'公司看板',exact:true}).waitFor();
+  check('医美助手入口保留',page.url().includes('tab=assistant'));
+  await page.reload();
+  await page.getByRole('tab',{name:'测试助手',exact:true}).click();
+  await page.getByLabel('顾客搜索词',{exact:true}).waitFor();
+  check('医美助手旧链接刷新后可使用',await page.getByLabel('顾客搜索词',{exact:true}).isVisible());
+  await page.getByRole('button',{name:'经营总览',exact:true}).click();
+  check('医美助手可返回经营总览',await page.getByLabel('顾客搜索词',{exact:true}).count()===0);
   await goto('overview?agent=new&scene=live&campaign='+state.campaigns[0].id);
   await page.waitForURL('**/#/agent?**');
   await page.getByLabel('希望 Agent 完成的任务',{exact:true}).waitFor();

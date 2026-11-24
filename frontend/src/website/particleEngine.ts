@@ -1,5 +1,8 @@
 /** Original procedural artwork. Canvas projection, no remote video or paid template assets. */
 export type ParticleScene = 'orbit' | 'flow' | 'converge';
+/** The background changes shape on its own: it holds each shape briefly, then morphs into the next one. */
+const SCENES: ParticleScene[] = ['orbit', 'flow', 'converge'];
+const HOLD_SECONDS = 6;
 
 export function createParticleField(canvas: HTMLCanvasElement) {
   const ctx = canvas.getContext('2d', { alpha: true });
@@ -19,6 +22,8 @@ export function createParticleField(canvas: HTMLCanvasElement) {
   const stars = Array.from({ length: 180 }, () => ({ x: random(), y: random(), size: random() * 1.2 + .3, phase: random() * 6 }));
   let width = 0, height = 0, frame = 0, previous = 0, time = 0, paused = false, intersecting = true, disposed = false;
   let scene: ParticleScene = 'orbit';
+  let sceneIndex = 0, held = 0;
+  canvas.dataset.scene = scene;
   const weights = [1, 0, 0];
   const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
   const glow = document.createElement('canvas');
@@ -32,7 +37,7 @@ export function createParticleField(canvas: HTMLCanvasElement) {
     if (!width || !height || disposed) return;
     const mobile = width < 700;
     const target = scene === 'orbit' ? 0 : scene === 'flow' ? 1 : 2;
-    for (let i = 0; i < 3; i++) weights[i] += ((i === target ? 1 : 0) - weights[i]) * .065;
+    for (let i = 0; i < 3; i++) weights[i] += ((i === target ? 1 : 0) - weights[i]) * .05;
     pointer.x += (pointer.targetX - pointer.x) * .035;
     pointer.y += (pointer.targetY - pointer.y) * .035;
     context.clearRect(0, 0, width, height);
@@ -43,16 +48,19 @@ export function createParticleField(canvas: HTMLCanvasElement) {
       context.fillRect(star.x * width, star.y * height, star.size, star.size);
     }
     context.globalAlpha = 1;
-    const centerX = width * (mobile ? .54 : .64) + pointer.x * 14;
-    const centerY = height * (mobile ? .32 : .38) + pointer.y * 10;
-    const scale = Math.min(width * (mobile ? .39 : .245), height * .36);
+    // The hero can be taller than the screen, so the artwork is placed against the first screen, not the whole section.
+    const view = Math.min(height, window.innerHeight || height);
+    const compact = width < 960; // phones and tablets: the artwork sits behind the headline instead of beside it
+    const centerX = width * (compact ? .66 : .68) + pointer.x * 14;
+    const centerY = view * (compact ? .27 : .4) + pointer.y * 10;
+    const scale = Math.min(width * (mobile ? .34 : compact ? .3 : .21), view * (compact ? .26 : .31));
     const haze = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, scale * 1.5);
     haze.addColorStop(0, '#7941b708'); haze.addColorStop(.6, '#8b5cf610'); haze.addColorStop(1, '#8b5cf600');
     context.fillStyle = haze; context.fillRect(0, 0, width, height);
     context.globalCompositeOperation = 'screen';
 
     // Closely spaced curves form a translucent ribbon instead of a flat gradient blob.
-    const horizon = height * (mobile ? .47 : .58);
+    const horizon = view * (compact ? .5 : .74);
     for (let ribbon = 0; ribbon < 3; ribbon++) {
       for (let strand = 0; strand < 26; strand++) {
         const offset = strand / 25 - .5;
@@ -107,7 +115,15 @@ export function createParticleField(canvas: HTMLCanvasElement) {
     if (!canAnimate()) return;
     const delta = stamp - previous;
     if (delta >= 1000 / 30) {
-      time += Math.min(delta, 60) / 1000;
+      const step = Math.min(delta, 60) / 1000;
+      time += step;
+      held += step;
+      if (held >= HOLD_SECONDS) {
+        held = 0;
+        sceneIndex = (sceneIndex + 1) % SCENES.length;
+        scene = SCENES[sceneIndex];
+        canvas.dataset.scene = scene;
+      }
       previous = stamp;
       draw();
     }
@@ -145,7 +161,7 @@ export function createParticleField(canvas: HTMLCanvasElement) {
   resize(); reconcile();
   return {
     setScene(next: ParticleScene) {
-      scene = next;
+      scene = next; sceneIndex = SCENES.indexOf(next); held = 0; canvas.dataset.scene = next;
       if (paused || reducedMotion.matches) { weights.fill(0); weights[next === 'orbit' ? 0 : next === 'flow' ? 1 : 2] = 1; draw(); }
     },
     setPaused(next: boolean) { paused = next; reconcile(); },

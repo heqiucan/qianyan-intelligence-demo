@@ -32,19 +32,22 @@ async function main() {
     const response = await visit();
     record('独立官网返回 HTML，品牌名正确', response.status() === 200 && (await page.title()).includes('Qianyan Intelligence'));
     record('官网没有加载工作台样式', await page.locator('link[href*="workspace-"]').count() === 0);
-    record('首屏完整英文品牌', (await page.locator('h1').innerText()).replace(/\s/g, '') === 'QianyanIntelligence.');
+    record('首屏只有一个标题，并说明产品定位', await page.locator('h1').count() === 1 && (await page.locator('h1').innerText()).replace(/\s/g, '').includes('增长工作台'));
+    record('首屏直接展示八项功能', await page.locator('#home .qy-module').count() === 8);
+    record('已移除重复的理念区块与流程链路', await page.locator('#approach, .qy-connection-line').count() === 0);
+    record('品牌标志已显示', await page.locator('.qy-brand svg').first().isVisible());
+    record('没有粒子形态切换栏', await page.locator('.qy-scene-controls').count() === 0 && await page.getByRole('button', { name: /粒子形态/ }).count() === 0);
     await page.waitForTimeout(200);
     const firstFrame = await canvas();
     await page.waitForTimeout(250);
     record('粒子背景确实在绘制动画', firstFrame !== await canvas());
+    const firstScene = await page.locator('.qy-particle-field').getAttribute('data-scene');
+    await page.waitForFunction(first => document.querySelector('.qy-particle-field').dataset.scene !== first, firstScene, { timeout: 12000 });
+    record('背景形态无需任何操作，自动变化', true);
     await page.getByRole('button', { name: '暂停背景动效', exact: true }).click();
     const pausedFrame = await canvas();
     await page.waitForTimeout(260);
     record('暂停背景后画面保持静止', pausedFrame === await canvas());
-    await page.getByRole('button', { name: '流动粒子形态' }).click();
-    record('暂停时也能切换粒子形态', pausedFrame !== await canvas());
-    record('形态选择可被辅助技术识别', await page.getByRole('button', { name: '流动粒子形态' }).getAttribute('aria-pressed') === 'true');
-    await page.getByRole('button', { name: '轨道粒子形态' }).click();
     await page.getByRole('button', { name: '播放背景动效', exact: true }).click();
     await page.waitForTimeout(200);
     await page.screenshot({ path: path.join(out, 'desktop-hero.png') });
@@ -79,6 +82,30 @@ async function main() {
 
     const moduleLinks = await page.locator('.qy-module').evaluateAll(elements => elements.map(element => ({ href: element.getAttribute('href'), title: element.querySelector('h3').textContent })));
     record('官网包含原有八个功能入口', moduleLinks.length === 8);
+    record('已删除四处多余副标题', await page.evaluate(() => ['点击步骤，体验产品逻辑', '六个环节，一条连续的工作流', '每一步，都为下一步留下依据', '一个虚构保温杯案例，串起完整链路'].every(text => !document.body.innerText.includes(text))));
+    await page.locator('.qy-difference-intro').scrollIntoViewIfNeeded();
+    const starTransform = () => page.locator('.qy-proof-core > svg > path:first-child').evaluate(element => getComputedStyle(element).transform);
+    const starBefore = await starTransform();
+    await page.waitForTimeout(1500);
+    record('“有灵感，也有来路”中的星形持续转动', starBefore !== await starTransform());
+    const robot = page.getByRole('button', { name: '打开项目问答助手' });
+    record('右下角有机器人助手，默认收起', await robot.isVisible() && await page.locator('.qy-assistant-panel').count() === 0);
+    await robot.click();
+    record('点击机器人打开问答窗口并聚焦输入框', await page.getByRole('dialog', { name: /小千/ }).isVisible() && await page.getByLabel('输入你的问题').evaluate(element => element === document.activeElement));
+    const askRobot = async question => {
+      const before = await page.locator('.qy-msg-bot[data-topic]').count();
+      await page.getByLabel('输入你的问题').fill(question);
+      await page.getByLabel('输入你的问题').press('Enter');
+      await page.waitForFunction(count => document.querySelectorAll('.qy-msg-bot[data-topic]').length > count, before);
+      return page.locator('.qy-msg-bot[data-topic]').last().innerText();
+    };
+    record('助手能回答项目用途', (await askRobot('这个项目是做什么的？')).includes('AI 营销增长工作台'));
+    record('助手如实说明广告投放与付款都是模拟', (await askRobot('现在能真实投放广告吗？')).includes('模拟'));
+    record('助手用英文提问也能回答', (await askRobot('Which AI model do you use?')).includes('智谱'));
+    record('助手对没写到的问题直说答不准', (await askRobot('今天天气怎么样')).includes('答不准'));
+    await page.keyboard.press('Escape');
+    record('Escape 关闭问答窗口并把焦点还给机器人', await page.locator('.qy-assistant-panel').count() === 0 && await robot.evaluate(element => element === document.activeElement));
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
     const workspace = await browser.newPage();
     workspace.on('pageerror', error => errors.push(error.message));
     for (const item of moduleLinks) {
@@ -132,6 +159,7 @@ async function main() {
     record('减少动态效果时画面持续静止', reducedFrame === await canvas());
     record('静态模式控件解释系统设置', await page.getByRole('button', { name: '系统已启用减少动态效果' }).isDisabled());
     record('减少动态效果时内容无需等动画显示', await page.locator('[data-reveal]').first().evaluate(element => getComputedStyle(element).opacity === '1'));
+    record('减少动态效果时机器人和星形都保持静止', await page.evaluate(() => ['.qy-bot-float', '.qy-bot-eye', '.qy-proof-core > svg > path:first-child'].every(selector => getComputedStyle(document.querySelector(selector)).animationName === 'none')));
     await page.screenshot({ path: path.join(out, 'reduced-motion.png') });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.waitForTimeout(180);

@@ -3,9 +3,7 @@ import { LayoutDashboard, Package, Sparkles, Megaphone, ChartNoAxesCombined, Lis
 export const workspaceLink = (page = 'overview') => `./index.html#/${page}`;
 export const chapters = [
   { id: 'home', label: '起点', english: 'THE BEGINNING' },
-  { id: 'approach', label: '理念', english: 'THE CONNECTION' },
   { id: 'journey', label: '流程', english: 'THE JOURNEY' },
-  { id: 'capabilities', label: '能力', english: 'THE WORKSPACE' },
   { id: 'difference', label: '不同', english: 'THE DIFFERENCE' },
   { id: 'start', label: '开始', english: 'YOUR NEXT CHAPTER' },
 ];
@@ -18,8 +16,8 @@ export const stages = [
   { title: '优化复盘', icon: BrainCircuit, heading: '让这一轮的发现，\n成为下一轮的起点。', text: '基于已经计算的指标形成复盘，把建议变成新草稿。人工确认，再进入观察，留下完整的调整记录。', output: '优化草稿、观察记录与报告快照', link: 'optimize' },
 ];
 export const modules = [
-  { id: 'overview', title: '增长工作台', english: 'Growth overview', icon: LayoutDashboard, text: '目标、进度与下一步行动，在同一个视角下展开。' },
-  { id: 'product', title: '商品与品牌', english: 'Product foundation', icon: Package, text: '集中维护商品信息和资料来源，让创作有据可依。' },
+  { id: 'overview', title: '增长工作台', english: 'Growth overview', icon: LayoutDashboard, text: '目标、进度与下一步行动；也可把任务交给 AI Agent，生成待你确认的草稿。' },
+  { id: 'product', title: '商品与品牌', english: 'Product foundation', icon: Package, text: '集中维护商品资料与来源；知识库检索让生成只依据已核对的资料。' },
   { id: 'creative', title: '营销与创意', english: 'Creative studio', icon: Sparkles, text: '生成、修订、核对与确认，让每个创意留下版本。' },
   { id: 'ads', title: '广告投放', english: 'Campaign control', icon: Megaphone, text: '连接素材、预算与周期，演示计划执行和调整。' },
   { id: 'analytics', title: '效果与获客', english: 'Performance insights', icon: ChartNoAxesCombined, text: '查看成交与新客，追溯指标背后的记录与口径。' },

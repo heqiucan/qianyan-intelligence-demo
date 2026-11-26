@@ -24,10 +24,10 @@ interface Props {
 }
 export default function LiveWorkspace(props:Props){
  const list=props.sessions.filter(s=>s.campaign_id===props.campaign?.id);
- const session=list.find(s=>s.id===props.selectedId)||list.at(-1);
+ const session=list.find(s=>s.id===props.selectedId);
  const module=liveModules.find(m=>m.id===props.moduleId)||liveModules[0];
  const feature=module.features.find(f=>f.id===props.featureId)||module.features[0];
- const pane=['control','session','logs','account','speech'].includes(props.pane||'')?props.pane!:'control';
+ const pane=['control','session','logs','account','speech'].includes(props.pane||'')?props.pane!:props.moduleId||props.featureId?'control':'session';
  const tools=isLiveToolGroup(props.toolGroup)?props.toolGroup:'';
  const dirtyParts=useRef({runtime:false,editor:false,speech:false,interaction:false,mixer:false,media:false,drafts:false});
  const reportRuntimeDirty=useCallback((value:boolean)=>{dirtyParts.current.runtime=value;props.dirtyChanged(value||dirtyParts.current.editor||dirtyParts.current.speech||dirtyParts.current.interaction||dirtyParts.current.mixer||dirtyParts.current.media||dirtyParts.current.drafts,!dirtyParts.current.editor)},[props.dirtyChanged]);
@@ -62,13 +62,13 @@ export default function LiveWorkspace(props:Props){
  const settings=feature.id==='console'&&pane==='session'?<><div className="live-panel-title"><h3>场次与货盘</h3><Button onClick={()=>choose('ai','console')}>收起场次管理</Button></div><div className="row-actions"><Button onClick={()=>props.go('product?tab=catalog')}>管理商品与 SKU</Button><Button onClick={()=>props.go('product')}>查看最新商品资料</Button></div><LiveSessions {...props} dirtyChanged={reportEditorDirty} embedded go={navigate}/></>:!feature.available?<section className="live-feature-content" aria-label="直播子功能内容"><div className="live-panel-title"><h3>{feature.name}</h3><Badge tone="neutral">待开发</Badge></div><p>{feature.description}</p><p className="muted">该功能尚未开放，目前不执行生成、播放、发送或平台操作。</p><Button onClick={()=>choose('ai','console')}>返回直播控制台</Button></section>:null;
  const area=pane==='session'?'sessions':(['groups','variables','writing'].includes(feature.id)||tools==='scripts')?'scripts':(['slicing','conversion','subtitles'].includes(feature.id)||tools==='more')?'media':'control';
  const detailOpen=Boolean(tools||settings||['voices','hosts','blocked','rhythm','groups','variables','writing','voice-keywords','timed','welcome','service','control','text-keywords','playlist','ambience'].includes(feature.id)||pane==='speech'||pane==='account'||pane==='logs');
+ if(pane==='session')return <LiveSessions {...props} dirtyChanged={reportEditorDirty}/>;
+ if(!session)return <section className="workspace-detail"><h2>选择直播场次</h2><p className="muted">选择本次要操作的场次后，再进入控制台或管理素材。</p><div className="workspace-record-grid">{list.map(item=><article className="workspace-record" key={item.id}><h3>{item.title}</h3><p>{item.host} · {statusLabels[item.status]} · {item.items.length} 件商品</p><Button onClick={()=>props.go(route(module.id,feature.id,pane,item.id))}>选择本场</Button></article>)}</div><Button onClick={()=>props.go('live?pane=session')}>管理直播场次</Button></section>;
  return <div className="live-console" data-mobile-view={mobileView} data-workspace-area={area} data-detail-open={detailOpen}>
-  <WorkspaceTabs label="直播工作区" selected={area} items={[
-   {id:'control',label:'现场控制',route:route('ai','console')},
-   {id:'sessions',label:'场次与货盘',route:route('ai','console','session')},
-   {id:'scripts',label:'话术管理',route:route('scripts','groups')},
-   {id:'media',label:'素材处理',route:route('ai','conversion')},
-  ]} go={props.go}/>
+  {['scripts','media'].includes(area)&&<WorkspaceTabs label="本场素材类型" selected={area} items={[
+   {id:'scripts',label:'话术与播报',route:route('scripts','groups')},
+   {id:'media',label:'音视频处理',route:route('ai','conversion')},
+  ]} go={props.go}/>}
   <section className="panel live-workspace-header" aria-label="直播工作台顶部">
    <Badge tone="neutral">抖音 · 本地模拟</Badge>
    {list.length?<Field label="当前直播场次"><select value={session?.id||''} disabled={props.busy} onChange={e=>props.go(route(module.id,feature.id,pane,e.target.value))}>{list.map(s=><option key={s.id} value={s.id}>{s.title}</option>)}</select></Field>:<span className="muted">尚无直播场次</span>}

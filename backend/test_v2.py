@@ -109,7 +109,8 @@ def test_batch_preview_is_read_only_and_data_is_isolated(client):
     assert state(client)==original
     sample=batch(client,'followup_orders',request_id='batch-once')
     assert batch(client,'followup_orders',request_id='batch-once')==sample
-    assert sample['metrics']['revenue']==297
+    price=next(p for p in original['plans'] if p['id']=='plan-commute')['creative_snapshot']['product_snapshot']['price']
+    assert sample['metrics']['revenue']==3*price
     assert state(client)['orders']==[]
     assert client.get('/api/analytics?dataset=session').json()['metrics']['orders']==0
     assert client.get('/api/analytics?dataset=history').json()['metrics']['orders']==15
@@ -135,9 +136,10 @@ def test_analytics_scope_and_date_restrictions(client):
 
 
 def test_quantity_price_is_server_calculated_and_scoped(client):
+    price=next(p for p in state(client)['plans'] if p['id']=='plan-commute')['creative_snapshot']['product_snapshot']['price']
     body={'plan_id':'plan-commute','buyer_id':'new-001','quantity':3,'amount':1,'request_id':'qty'}
     order=post(client,'/orders',body)
-    assert order['amount']==297 and order['unit_price']==99 and order['quantity']==3 and order['plan_config_version']==1
+    assert order['amount']==3*price and order['unit_price']==price and order['quantity']==3 and order['plan_config_version']==1
     assert post(client,'/orders',body)==order
     assert client.post('/api/orders',json={**body,'quantity':2}).status_code==409
     assert client.post('/api/orders',json={**body,'quantity':1.5,'request_id':'fraction'}).status_code==422

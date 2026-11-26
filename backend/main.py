@@ -269,24 +269,26 @@ def next_version(db, parent):
 
 
 def seed(db):
-    product = {"id": "product-demo", "name": "青禾随行保温杯", "price": 99.0, "capacity": "500 ml", "color": "奶油白", "brand": "青禾生活", "description": "将喜欢的日常，轻轻握在手心。适合桌面展示与日常携带的演示商品。", "restrictions": "不得编造保温时长、检测报告、销量、用户评价；禁止全网第一、100%保证等表达。", "image_url": "/assets/product.svg", "video_url": "", "version": 1, "created_at": now(), "source": "虚构演示商品资料"}
+    from backend.demo_product import demo_creatives, demo_product
+
+    product = demo_product(now())
     put(db, "product", product)
-    campaign = put(db, "campaigns", {"id": "campaign-demo", "name": "青禾 · 把日常带在身边", "product_snapshot": product, "created_at": now()})
-    adapter = ModelAdapter()
-    adapter.mode = "replay"  # Initial fixtures never call a remote provider.
-    for index, fields in enumerate(adapter.creatives(product)):
+    campaign = put(db, "campaigns", {"id": "campaign-demo", "name": "青禾紫色羽绒服 · 日常穿搭样例", "audience": "虚构样例：关注日常穿搭的人群", "selling_point": "仅展示样例尺码、紫色外观与演示价格，不承诺保暖效果。", "goal": "演示服装创意核对与模拟成交流程，不代表真实投放效果。", "product_snapshot": product, "created_at": now()})
+    for index, fields in enumerate(demo_creatives(product)):
+        # Preserve fixture IDs used by existing links and simulation workflows.
         suffix = ("commute", "capacity")[index]
         creative = creative_record(campaign, fields)
-        creative.update(id=f"creative-{suffix}", status="approved", approved_at=now())
+        creative.update(id=f"creative-{suffix}", family_id=f"creative-{suffix}", status="approved", approved_at=now())
         put(db, "creatives", creative)
         put(db, "plans", {"id": f"plan-{suffix}", "campaign_id": campaign["id"], "creative_id": creative["id"], "creative_snapshot": creative, "name": f'现场演示 · {fields["direction"]}', "budget": 200.0 if index == 0 else 300.0, "start_date": datetime.now(timezone.utc).date().isoformat(), "end_date": (datetime.now(timezone.utc).date() + timedelta(days=7)).isoformat(), "status": "running", "created_at": now(), "account": "青禾演示账户", "objective": "商品成交", "simulation": True})
     history = {"id": "D0", "campaign_id": campaign["id"], "source": "固定虚构历史样例", "window": "D0 固定历史演示窗口（与现场互动独立）", "rows": [
-        {"name": "历史 A · 通勤携带", "creative_id": "creative-commute", "plan_id": "history-A", "impressions": 4000, "clicks": 120, "spend": 120.0, "orders": 9, "buyers": 9, "new_customers": 5, "unknown_buyers": 0, "revenue": 891.0},
-        {"name": "历史 B · 容量展示", "creative_id": "creative-capacity", "plan_id": "history-B", "impressions": 6000, "clicks": 180, "spend": 180.0, "orders": 6, "buyers": 6, "new_customers": 4, "unknown_buyers": 0, "revenue": 594.0},
+        {"name": "历史 A · 日常穿搭", "creative_id": "creative-commute", "plan_id": "history-A", "impressions": 4000, "clicks": 120, "spend": 120.0, "orders": 9, "buyers": 9, "new_customers": 5, "unknown_buyers": 0},
+        {"name": "历史 B · 尺码与颜色", "creative_id": "creative-capacity", "plan_id": "history-B", "impressions": 6000, "clicks": 180, "spend": 180.0, "orders": 6, "buyers": 6, "new_customers": 4, "unknown_buyers": 0},
     ], "orders": []}
     for row in history["rows"]:
+        row["revenue"] = money(Decimal(str(product["price"])) * row["orders"])
         for index in range(row["orders"]):
-            history["orders"].append({"id": f'D0-{row["plan_id"]}-{index+1}', "buyer_id": f'D0-buyer-{row["plan_id"]}-{index+1}', "buyer_type": "new" if index < row["new_customers"] else "returning", "amount": 99.0, "plan_id": row["plan_id"], "creative_id": row["creative_id"], "campaign_id": campaign["id"], "created_at": "D0 固定演示窗口", "simulation": True})
+            history["orders"].append({"id": f'D0-{row["plan_id"]}-{index+1}', "buyer_id": f'D0-buyer-{row["plan_id"]}-{index+1}', "buyer_type": "new" if index < row["new_customers"] else "returning", "amount": product["price"], "unit_price": product["price"], "quantity": 1, "plan_id": row["plan_id"], "creative_id": row["creative_id"], "campaign_id": campaign["id"], "created_at": "D0 固定演示窗口", "simulation": True})
     put(db, "datasets", history)
     log(db, "初始化演示", "已载入虚构商品、两组已确认素材与两个模拟运行计划；历史 D0 与现场互动分别统计。")
 

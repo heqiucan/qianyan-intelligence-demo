@@ -154,6 +154,7 @@ def test_core_import_does_not_load_the_application_or_business_initializers():
 
 def test_main_exports_the_same_primitives_and_keeps_business_initialization(tmp_path):
     from backend import main
+    from backend.demo_product import demo_product
 
     assert main.put is put
     assert main.get is get
@@ -165,7 +166,7 @@ def test_main_exports_the_same_primitives_and_keeps_business_initialization(tmp_
     instance.initialize()
     assert (instance.directory / "uploads").is_dir()
     with instance.read() as db:
-        assert get(db, "product", "product-demo")["price"] == 99
+        assert get(db, "product", "product-demo")["price"] == demo_product("test-seed")["price"]
         assert len(all_records(db, "plans")) == 2
         assert db.execute("SELECT version FROM schema_migrations").fetchone()[0] == 1
 

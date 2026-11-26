@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { ArrowUpRight, Check, Download, GitCompareArrows, Pencil, RefreshCw } from 'lucide-react';
+import { ArrowUpRight, Check, Download, GitCompareArrows, LayoutGrid, List, Pencil, RefreshCw } from 'lucide-react';
 import { generationSource, type Creative } from '../../api';
 import { Badge, Button, Empty, Field } from '../../components/ui';
 import { names } from '../../domain';
 import Poster from '../../Poster';
 import type { CreativeDialog } from './CreativeDialogs';
+import './library-layout.css';
 
 export function creativeFamilies(creatives: Creative[]) {
   const byId = new Map(creatives.map(creative => [creative.id, creative]));
@@ -33,6 +34,7 @@ interface Props {
 
 export default function CreativeLibrary({ scopeId, creatives, busy, edit, openDialog, regenerate, useCreative }: Props) {
   const storageKey = 'creative-list-filter:' + scopeId;
+  const [layout, setLayout] = useState<'list' | 'grid'>('list');
   const [filter, setFilter] = useState(() => {
     const saved = sessionStorage.getItem(storageKey) || '';
     return ['latest', 'all', 'draft', 'approved'].includes(saved) ? saved : 'latest';
@@ -52,12 +54,13 @@ export default function CreativeLibrary({ scopeId, creatives, busy, edit, openDi
   return <section className="studio-library-section" aria-label="活动素材列表">
     <div className="studio-library-toolbar">
       <span className="muted">{families.length} 组素材 · 显示 {displayed.length} 份</span>
+      <div className="studio-display-controls" role="group" aria-label="素材显示方式"><button type="button" title="列表视图" aria-label="列表视图" aria-pressed={layout === 'list'} onClick={() => setLayout('list')}><List size={17}/></button><button type="button" title="卡片视图" aria-label="卡片视图" aria-pressed={layout === 'grid'} onClick={() => setLayout('grid')}><LayoutGrid size={17}/></button></div>
       <Field label="素材筛选"><select value={filter} onChange={event => { setFilter(event.target.value); sessionStorage.setItem(storageKey, event.target.value); }}>
         <option value="latest">每组最新版本</option><option value="all">全部版本（含重复历史）</option><option value="draft">待确认草稿</option><option value="approved">已确认素材</option>
       </select></Field>
     </div>
     {candidates.length > displayed.length && <p className="studio-mode-note">已收起 {candidates.length - displayed.length} 份相同内容，可在“全部版本”查看。</p>}
-    <div className="creative-grid studio-library">{displayed.map(creative => <article className="creative-card" id={`creative-${creative.id}`} key={creative.id}>
+    <div className={'creative-grid studio-library studio-library-' + layout}>{displayed.map(creative => <article className="creative-card" id={`creative-${creative.id}`} key={creative.id}>
       <div className="creative-preview"><Poster creative={creative}/><div className="preview-badges"><Badge tone={creative.status === 'approved' ? 'green' : 'amber'}>{names[creative.status]}</Badge><Badge tone="neutral">V{creative.version}</Badge></div></div>
       <div className="creative-content">
         <div className="creative-meta"><span>{creative.direction}</span><span>资料 V{creative.product_snapshot.version} · {creative.template === 'minimal' ? '极简' : '经典'}模板</span></div>

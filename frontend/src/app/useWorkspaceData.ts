@@ -4,7 +4,7 @@ import type { Act } from '../domain';
 
 export function useWorkspaceData() {
   const [state, setState] = useState<State | null>(null);
-  const [campaignId, setCampaignId] = useState(localStorage.getItem('campaign') || '');
+  const [campaignId, setCampaignId] = useState(() => new URLSearchParams(location.hash.split('?')[1] || '').get('campaign') || localStorage.getItem('campaign') || '');
   const [dataset, setDatasetRaw] = useState(localStorage.getItem('v2-dataset') || 'session');
   const [batchId, setBatchIdRaw] = useState(localStorage.getItem('v2-batch') || '');
   const [planId, setPlanId] = useState(localStorage.getItem('v2-plan') || '');

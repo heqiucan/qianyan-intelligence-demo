@@ -26,31 +26,31 @@ async function main(){
   const state=await (await page.request.get(base+'/api/state')).json();
   assert.equal(state.model.mode,'replay');
   await goto('overview');
-  check('九个一级业务入口',JSON.stringify(await nav().getByRole('button').allTextContents())===JSON.stringify(['工作总览','Agent 任务','GEO 工作台','商品与知识','营销与创意','直播工作台','广告投放','效果与复盘','待办与审核']));
+  check('六个一级业务入口',JSON.stringify(await nav().locator('.nav-item').allTextContents())===JSON.stringify(['工作总览','GEO 工作台','直播工作台','营销工作台','商品与知识','Agent 中心']));
   check('首页不挂载任务编辑器',await page.getByLabel('希望 Agent 完成的任务').count()===0&&await page.getByLabel('当前活动路径').count()===0);
   check('首页长度受控',await page.evaluate(()=>document.documentElement.scrollHeight<1800));
   check('桌面侧栏固定',await nav().evaluate(element=>getComputedStyle(element.parentElement).position)==='fixed');
   await page.screenshot({path:path.join(out,'overview-desktop.png')});
   const top=await nav().evaluate(element=>element.getBoundingClientRect().top);
-  for(const name of ['Agent 任务','商品与知识','营销与创意','直播工作台','广告投放','效果与复盘','待办与审核']){
+  for(const name of ['Agent 中心','商品与知识','营销工作台','直播工作台','GEO 工作台']){
    await enter(name);
    check(name+'保持导航位置',Math.abs(await nav().evaluate(element=>element.getBoundingClientRect().top)-top)<1);
   }
   check('普通导航未启动业务任务',mutations.length===0);
-  await goto('overview');
-  await page.getByRole('button',{name:'医美咨询助手',exact:true}).click();
+  await enter('营销工作台');
+  await page.getByRole('button',{name:'咨询助手',exact:true}).click();
   await page.getByRole('tab',{name:'公司看板',exact:true}).waitFor();
   check('医美助手入口保留',page.url().includes('tab=assistant'));
   await page.reload();
   await page.getByRole('tab',{name:'测试助手',exact:true}).click();
   await page.getByLabel('顾客搜索词',{exact:true}).waitFor();
   check('医美助手旧链接刷新后可使用',await page.getByLabel('顾客搜索词',{exact:true}).isVisible());
-  await page.getByRole('button',{name:'经营总览',exact:true}).click();
+  await enter('工作总览');
   check('医美助手可返回经营总览',await page.getByLabel('顾客搜索词',{exact:true}).count()===0);
   await goto('overview?agent=new&scene=live&campaign='+state.campaigns[0].id);
   await page.waitForURL('**/#/agent?**');
   await page.getByLabel('希望 Agent 完成的任务',{exact:true}).waitFor();
-  check('旧Agent链接进入独立创建页',await nav().getByRole('button',{name:'Agent 任务',exact:true}).getAttribute('aria-current')==='page');
+  check('旧Agent链接进入独立创建页',await nav().getByRole('button',{name:'Agent 中心',exact:true}).getAttribute('aria-current')==='page');
   await goto('agent?status=attention');await page.getByLabel('任务状态',{exact:true}).waitFor();
   check('待处理入口应用聚合状态筛选',await page.getByLabel('任务状态',{exact:true}).inputValue()==='attention');
   await page.getByRole('searchbox',{name:'搜索任务',exact:true}).fill('筛选恢复验收');
@@ -61,7 +61,7 @@ async function main(){
   check('需求默认列表与创建表单分离',await page.getByLabel('任务名称',{exact:true}).count()===0);
   for(const name of ['02 素材与词库','03 筛选与确认','04 选题与内容','01 配置与任务']){
    await page.getByRole('button',{name,exact:true}).click();
-   check(name+'保持Agent归属',await nav().getByRole('button',{name:'Agent 任务',exact:true}).getAttribute('aria-current')==='page');
+   check(name+'归属营销工作台',await nav().getByRole('button',{name:'营销工作台',exact:true}).getAttribute('aria-current')==='page');
   }
   await page.getByRole('button',{name:'新建需求任务',exact:true}).click();
   await page.getByLabel('任务名称',{exact:true}).waitFor();
@@ -69,7 +69,7 @@ async function main(){
   await page.reload();await page.getByLabel('任务名称',{exact:true}).waitFor();
   check('刷新恢复需求创建入口');
   await goto('reports');await page.waitForURL('**/#/analytics?view=reports');
-  check('旧报告链接归入效果与复盘',await page.getByRole('heading',{name:'效果与复盘',level:1}).isVisible());
+  check('旧报告链接归入效果与复盘',await page.getByRole('heading',{name:'营销工作台',level:1}).isVisible());
   check('报告列表不直接展开创建表单',await page.getByLabel('报告标题',{exact:true}).count()===0);
   await goto('optimize');await page.waitForURL('**/#/analytics?view=optimize');
   check('旧复盘链接可用');
@@ -79,10 +79,10 @@ async function main(){
 
   await goto('overview');
   await enter('商品与知识');
-  await page.getByRole('button',{name:'品牌与商品资料',exact:true}).click();
+  await page.getByRole('button',{name:'查看与编辑商品',exact:true}).click();
   const productName=page.getByLabel('商品名称',{exact:true});await productName.waitFor();
   const original=await productName.inputValue();
-  await enter('营销与创意');
+  await enter('营销工作台');
   await page.goBack();await productName.waitFor();
   await productName.fill(original+' 未保存');
   page.once('dialog',dialog=>dialog.dismiss());
@@ -91,7 +91,7 @@ async function main(){
   check('取消后退保留草稿',await productName.inputValue()===original+' 未保存');
   page.once('dialog',dialog=>dialog.accept());
   await page.goForward();
-  await page.getByRole('heading',{name:'营销与创意',level:1,exact:true}).waitFor();
+  await page.getByRole('heading',{name:'营销工作台',level:1,exact:true}).waitFor();
   check('取消后退没有破坏前进分支');
   await goto('product');await productName.waitFor();await productName.fill(original+' 参数草稿');
   page.once('dialog',dialog=>dialog.accept());
@@ -104,7 +104,7 @@ async function main(){
   check('再次编辑仍有离开保护',await productName.isVisible()&&await productName.inputValue()===original+' 再次编辑');
   page.once('dialog',dialog=>dialog.accept());await enter('工作总览');
 
-  await enter('效果与复盘');
+  await goto('analytics');
   await page.locator('.workspace-scope summary').click();
   await page.getByLabel('数据来源',{exact:true}).selectOption('history');
   await page.getByRole('heading',{name:'计划排名',exact:true}).waitFor();
@@ -115,10 +115,10 @@ async function main(){
   await page.reload();await page.getByRole('tab',{name:'订单',exact:true}).waitFor();
   check('刷新保持明细标签',await page.getByRole('tab',{name:'订单',exact:true}).getAttribute('aria-selected')==='true');
   await page.setViewportSize({width:390,height:844});await page.emulateMedia({reducedMotion:'reduce'});
-  for(const name of ['工作总览','Agent 任务','商品与知识','营销与创意','直播工作台','广告投放','效果与复盘','待办与审核']){
+  for(const name of ['工作总览','Agent 中心','商品与知识','营销工作台','直播工作台','GEO 工作台']){
    await enter(name);
    check(name+'窄屏无页面横向溢出',await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
-   await page.screenshot({path:path.join(out,{'工作总览':'overview','Agent 任务':'agent','商品与知识':'product','营销与创意':'creative','直播工作台':'live','广告投放':'ads','效果与复盘':'analytics','待办与审核':'tasks'}[name]+'-mobile.png')});
+   await page.screenshot({path:path.join(out,{'工作总览':'overview','Agent 中心':'agent','商品与知识':'product','营销工作台':'marketing','GEO 工作台':'geo','直播工作台':'live','广告投放':'ads','效果与复盘':'analytics','待办与审核':'tasks'}[name]+'-mobile.png')});
   }
   check('减少动画设置生效',await page.evaluate(()=>matchMedia('(prefers-reduced-motion: reduce)').matches));
   check('浏览器没有未捕获异常',errors.length===0);

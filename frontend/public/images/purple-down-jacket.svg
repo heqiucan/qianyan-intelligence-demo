@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 800" role="img" aria-label="紫色羽绒服示意图，非实物照片">
+  <defs>
+    <linearGradient id="fabric" x1="0" x2="1"><stop stop-color="#684c8e"/><stop offset=".42" stop-color="#b29bd5"/><stop offset=".7" stop-color="#9c80c5"/><stop offset="1" stop-color="#76569d"/></linearGradient>
+    <linearGradient id="sleeve" x1="0" x2="1"><stop stop-color="#624485"/><stop offset=".5" stop-color="#a088c4"/><stop offset="1" stop-color="#8061a4"/></linearGradient>
+    <linearGradient id="hood" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#baa5d8"/><stop offset="1" stop-color="#79569b"/></linearGradient>
+  </defs>
+  <rect width="720" height="800" fill="#f3f3f6"/>
+  <ellipse cx="360" cy="711" rx="215" ry="18" fill="#dcdbe4"/>
+  <path d="M255 208 192 242Q169 251 156 291L91 564Q87 589 109 598L150 611Q171 617 180 590L245 409Z" fill="url(#sleeve)" stroke="#73538f" stroke-width="2"/>
+  <path d="M465 208 528 242Q551 251 564 291L629 564Q633 589 611 598L570 611Q549 617 540 590L475 409Z" fill="url(#sleeve)" stroke="#73538f" stroke-width="2"/>
+  <path d="M258 192Q291 172 360 171Q429 172 462 192L498 292 487 652Q485 683 455 688H265Q235 683 233 652L222 292Z" fill="url(#fabric)" stroke="#75588e" stroke-width="2"/>
+  <path d="M268 209Q249 163 270 119Q292 82 360 84Q428 82 450 119Q471 163 452 209L412 232H308Z" fill="url(#hood)" stroke="#82639f" stroke-width="2"/>
+  <path d="M292 180Q284 131 307 118Q360 99 413 118Q436 131 428 180L392 220H328Z" fill="#5c426f"/>
+  <path d="M292 180 335 219H385L428 180 410 244H310Z" fill="#b8a3d3"/>
+  <g fill="none" stroke="#73558f" stroke-width="3" opacity=".65">
+    <path d="M229 301Q290 324 352 308M368 308Q430 324 491 301"/>
+    <path d="M230 364Q292 387 352 371M368 371Q428 387 490 364"/>
+    <path d="M231 429Q292 451 352 437M368 437Q428 451 489 429"/>
+    <path d="M232 494Q292 515 352 503M368 503Q428 515 488 494"/>
+    <path d="M234 558Q294 580 352 566M368 566Q426 580 486 558"/>
+    <path d="M235 623Q294 644 352 632M368 632Q426 644 485 623"/>
+    <path d="M148 334 221 353M134 392 206 414M120 450 192 473M105 509 177 532"/>
+    <path d="M572 334 499 353M586 392 514 414M600 450 528 473M615 509 543 532"/>
+  </g>
+  <g fill="none" stroke="#d2c1e6" stroke-width="3" opacity=".6"><path d="M245 286Q295 299 343 289M377 289Q425 299 475 286"/><path d="M246 348Q295 361 343 352M377 352Q425 361 474 348"/><path d="M247 414Q295 426 343 418M377 418Q425 426 473 414"/></g>
+  <path d="M360 231V682" stroke="#4d3a60" stroke-width="9"/>
+  <path d="M360 231V682" stroke="#d4c9df" stroke-width="2" stroke-dasharray="2 4"/>
+  <rect x="353" y="252" width="14" height="25" rx="3" fill="#ded7e6" stroke="#6f5d80"/>
+  <path d="m279 486-9 80m171-80 9 80" stroke="#5a416f" stroke-width="6"/>
+  <path d="m282 486-9 80m165-80 9 80" stroke="#ccb8df" stroke-width="2"/>
+  <path d="m97 571 66 22m394 0 66-22" stroke="#664b82" stroke-width="15"/>
+  <path d="M252 674Q360 688 468 674" fill="none" stroke="#70538c" stroke-width="10"/>
+  <g fill="#544760" font-family="Arial,sans-serif" text-anchor="middle"><text x="360" y="752" font-size="17">QINGHE / PURPLE DOWN JACKET</text><text x="360" y="778" font-size="12">ILLUSTRATION · SAMPLE PRODUCT</text></g>
+</svg>

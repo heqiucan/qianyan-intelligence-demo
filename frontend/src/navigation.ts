@@ -42,8 +42,11 @@ export function sameLiveSession(from: string, to: string, sessionIds: string[]):
   const resolve = (route: string) => {
     const [page, query = ''] = normalizeRoute(route).split('?');
     if (page !== 'live') return null;
-    const selected = new URLSearchParams(query).get('live');
-    return selected && sessionIds.includes(selected) ? selected : sessionIds.at(-1) || '';
+    const params = new URLSearchParams(query);
+    // Session preparation unmounts the control host and must not silently stop media.
+    if (params.get('pane') === 'session') return null;
+    const selected = params.get('live');
+    return selected && sessionIds.includes(selected) ? selected : null;
   };
   const previous = resolve(from);
   return previous !== null && previous === resolve(to);

@@ -7,10 +7,11 @@ from fastapi.testclient import TestClient
 
 from backend.main import create_app
 from backend.test_agents import create, wait, command
+from backend.test_claims import cup_seed
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def client(tmp_path, monkeypatch, cup_seed):
     monkeypatch.setenv("MODEL_PROVIDER", "replay")
     monkeypatch.delenv("DEMO_ACCESS_TOKEN", raising=False)
     with TestClient(create_app(tmp_path)) as c:

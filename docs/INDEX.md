@@ -1,6 +1,6 @@
 # 项目索引
 
-核对日期：2026-11-23。代码基线：`8b09a7a`，并检查当前工作区。未提交的 Codex 看板为独立任务，提交前重新查看 Git 状态。
+核对日期：2026-11-26。六板块分级、GEO 原型与紫色羽绒服样例以当前工作区为准，提交前重新查看 Git 状态。Codex 看板属于独立任务。
 
 ## 最短阅读路线
 
@@ -14,12 +14,12 @@
 
 | 任务关键词 | 功能 ID | 最小入口（路径相对项目根目录） |
 | --- | --- | --- |
-| 导航、页面层级、返回、未保存保护 | SHELL | `frontend/src/app/pages.ts`、`frontend/src/navigation.ts`、`frontend/src/app/useWorkspaceNavigation.ts` |
+| 导航、页面层级、返回、未保存保护 | SHELL | `docs/六板块页面分级.md`、`frontend/src/app/workspaceNavigation.ts`、`frontend/src/navigation.ts`、`frontend/src/app/useWorkspaceNavigation.ts` |
 | 浅色、深色、系统外观、官网入口 | THEME / SITE | `frontend/src/app/ThemeControls.tsx`、`frontend/src/app/theme.ts`、`frontend/src/app/AppShell.tsx` |
 | 首页指标、当前任务 | HOME | `frontend/src/features/Overview.tsx`、`frontend/src/app/useWorkspaceData.ts` |
 | 医美咨询助手、公司看板、词表推荐 | RECOMMEND | `frontend/src/features/medical/MedicalAssistantPanel.tsx`、`backend/recommend.py`；入口 `#/overview?tab=assistant` |
 | GEO 项目、问题监测、内容审核、效果报告 | GEO | `frontend/src/features/geo/GeoWorkspace.tsx`、`frontend/src/features/geo/model.ts`；入口 `#/geo`；当前为前端样例，未接外部平台 |
-| 商品、品牌、SKU、活动策略 | PRODUCT / CAMPAIGN | `frontend/src/features/ProductPage.tsx`、`frontend/src/features/live/LiveCatalog.tsx`、`frontend/src/components/CampaignModal.tsx` |
+| 商品、品牌、SKU、活动策略 | PRODUCT / CAMPAIGN | `frontend/src/features/ProductPage.tsx`、`frontend/src/features/product/ProductEvidenceEditor.tsx`、`frontend/src/features/live/LiveCatalog.tsx`、`frontend/src/components/CampaignModal.tsx` |
 | 知识库、Obsidian、资料、检索 | KNOWLEDGE | `frontend/src/features/knowledge/KnowledgeWorkspace.tsx`、`backend/knowledge.py` |
 | Agent 创建、执行、审阅、重试 | AGENT | `frontend/src/features/agent/AgentWorkspace.tsx`、`backend/agents/routes.py` |
 | 需求素材、词库、筛选、选题 | DEMAND | `frontend/src/features/demand/DemandWorkspace.tsx`、`backend/demand_tasks.py` |
@@ -32,7 +32,8 @@
 | 话术、音色、播报、混音、录音 | SPEECH / AUDIO | `frontend/src/features/live/speech/LiveSpeech.tsx`、`frontend/src/features/live/AudioMixer.tsx` |
 | 音频转换、切片、字幕、草稿 | MEDIA / SCRIPTS | `frontend/src/features/live/MediaTools.tsx`、`frontend/src/features/live/ScriptDrafts.tsx` |
 | 数据库、并发、模型、启动、分享 | STORAGE / MODEL / OPS | `backend/core/storage.py`、`backend/model_adapter.py`、`scripts/start_demo.py` |
-| GEO 桌面预览启动 | GEO / OPS | `scripts/start_geo.ps1`；构建当前工作树、复用或启动 8010 回放服务，打开 `/#/geo` |
+| 六板块桌面启动、原资料恢复 | SHELL / GEO / OPS | `scripts/start_geo.ps1`；读取 Git 忽略的 `tmp/workspace-launcher.json` 中原数据库/环境文件，8011 打开现有资料，配置缺失则停止 |
+| 紫色羽绒服演示商品 | PRODUCT | `backend/demo_product.py`、`backend/main.py:seed`；只用于新数据库，不覆盖已保存资料 |
 
 ## 文档分工与事实来源
 
@@ -50,7 +51,7 @@
 | 启动、依赖安装和部署说明 | [README](../README.md)（按标注区分当前指引与历史里程碑） |
 | DeepSeek 默认模型配置、版本映射和验证边界 | [DeepSeek接入说明](DeepSeek接入说明.md) |
 
-目标看已确认产品要求；当前行为看代码、实际服务及有日期/版本的验证记录。二者不符是待处理差异，不互相覆盖。本轮仅校验文档，没有重跑旧验收，也没有修改业务源码。
+目标看已确认产品要求；当前行为看代码、实际服务及有日期/版本的验证记录。二者不符是待处理差异，不互相覆盖。当前分级与验证入口见 [六板块页面分级](六板块页面分级.md)。
 
 ## 文档更新与检索成本
 

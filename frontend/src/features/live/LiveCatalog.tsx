@@ -1,21 +1,46 @@
 import { useEffect, useState } from 'react';
-import { Plus } from 'lucide-react';
+import { ArrowRight, Plus, Search } from 'lucide-react';
 import { api, money, requestId } from '../../api';
 import { Badge, Button, Field, Modal, Submit } from '../../components/ui';
 import type { Act } from '../../domain';
 import type { CatalogProduct, SKU } from './types';
+import '../product/product.css';
 
-const blankSku=():SKU=>({id:'',label:'',capacity:'',color:'',price:99,price_source:'',stock:null,stock_source:''});
-export default function LiveCatalog({act,busy,dirtyChanged,legacy}:{act:Act;busy:boolean;dirtyChanged:(b:boolean)=>void;legacy:()=>void}){
- const [products,setProducts]=useState<CatalogProduct[]>([]),[error,setError]=useState('');
- const [editing,setEditing]=useState<CatalogProduct|null|undefined>(undefined);
- const refresh=()=>api<CatalogProduct[]>('/live/catalog').then(setProducts).catch(e=>setError(e.message));
- useEffect(()=>{void refresh()},[]);
- return <section className="live-workspace"><div className="panel live-intro"><div><Badge>直播筹备 · 单店商品目录</Badge><h2>商品与规格，先准备清楚。</h2><p>每个 SKU 保存价格与资料来源。加入货盘时保存快照，后续改价不会改写历史场次。</p></div><Button kind="primary" onClick={()=>setEditing(null)}><Plus size={16}/>新增直播商品</Button></div>
- {error&&<p role="alert">{error}<Button onClick={()=>void refresh()}>重试</Button></p>}
- <div className="live-catalog-grid">{products.map(p=><article className="panel" key={p.id}><div className="panel-header"><h3>{p.name}</h3><Badge tone="neutral">V{p.version}</Badge></div><p>{p.brand} · {p.skus.length} 个 SKU{p.legacy?' · 原演示商品':''}</p>{p.skus.map(s=><div className="live-sku-summary" key={s.id}><strong>{s.label}</strong><span>{money(s.price)}</span><small>价格来源：{s.price_source}</small><small>参考库存：{s.stock??'未提供'}{s.stock!==null?' · '+s.stock_source:''}</small></div>)}<Button onClick={()=>p.legacy?legacy():setEditing(p)}>{p.legacy?'编辑原商品资料':'编辑商品与 SKU'}</Button></article>)}</div>
- {editing!==undefined&&<CatalogEditor key={editing?.id||'new'} product={editing} close={()=>{setEditing(undefined);dirtyChanged(false)}} busy={busy} dirtyChanged={dirtyChanged} save={async body=>{const ok=await act(async()=>{await api('/live/catalog'+(editing?'/'+editing.id:''),editing?'PUT':'POST',body);await refresh()},'商品与 SKU 已保存，下一步加入场次货盘');if(ok){setEditing(undefined);dirtyChanged(false)}return ok}}/>}
- </section>
+const blankSku = (): SKU => ({ id: '', label: '', capacity: '', color: '', price: 99, price_source: '', stock: null, stock_source: '' });
+
+interface CatalogProps {
+  act: Act;
+  busy: boolean;
+  dirtyChanged: (dirty: boolean) => void;
+  legacy: () => void;
+  openMaterials?: (product: CatalogProduct) => void;
+}
+
+export default function LiveCatalog({ act, busy, dirtyChanged, legacy, openMaterials }: CatalogProps) {
+  const [products, setProducts] = useState<CatalogProduct[]>([]);
+  const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+  const [editing, setEditing] = useState<CatalogProduct | null | undefined>(undefined);
+  const refresh = () => api<CatalogProduct[]>('/live/catalog').then(setProducts).catch(error => setError(error.message));
+  useEffect(() => { void refresh(); }, []);
+  const visible = products.filter(product => `${product.name} ${product.brand}`.toLowerCase().includes(query.trim().toLowerCase()));
+
+  return <section className="product-catalog">
+    <header className="catalog-toolbar"><h2>商品目录 <small className="muted">{products.length} 件商品</small></h2><div className="row-actions"><label className="geo-search"><Search size={16}/><input aria-label="搜索商品" placeholder="搜索商品或品牌" value={query} onChange={event => setQuery(event.target.value)}/></label><Button kind="primary" onClick={() => setEditing(null)}><Plus size={16}/>新增商品</Button></div></header>
+    {error && <p role="alert">{error}<Button onClick={() => void refresh()}>重试</Button></p>}
+    <div className="catalog-list">{visible.map(product => <article className="catalog-row" key={product.id}>
+      <img src={product.image_url} alt={product.name}/>
+      <div><h3>{product.name}</h3><p>{product.brand} · {product.skus.length} 个规格</p><p>{product.skus.map(sku => sku.label).join(' / ')}</p><Badge tone="neutral">资料 V{product.version}</Badge></div>
+      <div className="catalog-price">{money(product.skus[0]?.price ?? product.price)}<small>{product.image_url.startsWith('/uploads/') ? '已上传商品图片' : '初始样例'}</small></div>
+      <div className="row-actions"><Button onClick={() => product.legacy ? legacy() : setEditing(product)}>查看与编辑商品<ArrowRight size={14}/></Button>{openMaterials && <Button kind="ghost" onClick={() => openMaterials(product)}>关联素材</Button>}</div>
+    </article>)}</div>
+    {!visible.length && <p className="empty-state">{products.length ? '没有匹配的商品。' : '还没有商品资料。'}</p>}
+    {editing !== undefined && <CatalogEditor key={editing?.id || 'new'} product={editing} close={() => { setEditing(undefined); dirtyChanged(false); }} busy={busy} dirtyChanged={dirtyChanged} save={async body => {
+      const ok = await act(async () => { await api('/live/catalog' + (editing ? '/' + editing.id : ''), editing ? 'PUT' : 'POST', body); await refresh(); }, '商品与 SKU 已保存');
+      if (ok) { setEditing(undefined); dirtyChanged(false); }
+      return ok;
+    }}/>}
+  </section>;
 }
 function CatalogEditor({product,close,save,busy,dirtyChanged}:{product:CatalogProduct|null;close:()=>void;save:(b:unknown)=>Promise<boolean>;busy:boolean;dirtyChanged:(v:boolean)=>void}){
  const [skus,setSkus]=useState<SKU[]>(product?.skus||[blankSku()]),[error,setError]=useState(''),[changed,setChanged]=useState(false);

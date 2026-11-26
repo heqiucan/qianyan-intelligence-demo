@@ -217,7 +217,7 @@ const sessions = Object.freeze(['s-old', 's-latest']);
 
 test('sameLiveSession: same session retains across tools, panels and legacy live aliases', async () => {
   const { sameLiveSession } = await navigation;
-  const routes = ['live?live=s-old&pane=session', 'live?module=ai&live=s-old&feature=console', 'live?live=s-old&tools=voice', 'creative?tab=live&live=s-old', 'overview?tab=live&live=s-old'];
+  const routes = ['live?live=s-old&pane=control', 'live?module=ai&live=s-old&feature=console', 'live?live=s-old&tools=voice', 'overview?tab=live&live=s-old'];
   for (const from of routes) for (const to of routes) assert.equal(sameLiveSession(from, to, sessions), true, `${from} -> ${to}`);
 });
 
@@ -227,13 +227,13 @@ test('sameLiveSession: different known sessions cannot retain each other', async
   assert.equal(sameLiveSession('live?live=s-latest', 'creative?tab=live&live=s-old', sessions), false);
 });
 
-test('sameLiveSession: omitted, empty and stale IDs resolve to the actual last available session', async () => {
+test('sameLiveSession: omitted, empty and stale IDs require explicit session selection', async () => {
   const { sameLiveSession } = await navigation;
   for (const route of ['live', 'live?live=', 'live?live=deleted', 'creative?tab=live']) {
-    assert.equal(sameLiveSession(route, 'live?live=s-latest', sessions), true, route);
+    assert.equal(sameLiveSession(route, 'live?live=s-latest', sessions), false, route);
     assert.equal(sameLiveSession(route, 'live?live=s-old', sessions), false, route);
   }
-  assert.equal(sameLiveSession('live', 'live?live=s-old', ['s-latest', 's-old']), true);
+  assert.equal(sameLiveSession('live', 'live?live=s-old', ['s-latest', 's-old']), false);
   assert.deepEqual(sessions, ['s-old', 's-latest']);
 });
 
@@ -242,7 +242,7 @@ test('sameLiveSession: encoded session IDs compare decoded identities, not raw U
   const ids = ['场次 A+B&x=y?#/%', 'fallback'];
   const encoded = 'live?' + new URLSearchParams({ live: ids[0], tools: 'scripts' });
   const legacy = 'creative?tab=live&live=' + encodeURIComponent(ids[0]);
-  assert.equal(sameLiveSession(encoded, legacy, ids), true);
+  assert.equal(sameLiveSession(encoded, legacy, ids), false, 'session preparation must pass the leave guard');
   assert.equal(sameLiveSession(encoded, 'live?live=fallback', ids), false);
   assert.equal(sameLiveSession('live?live=A+B', 'live?live=A%2BB', ['A B', 'A+B']), false);
 });

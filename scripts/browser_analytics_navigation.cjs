@@ -20,7 +20,7 @@ async function main() {
   const check = (name, condition) => { assert.ok(condition, name); checks.push(name); console.log('PASS ' + name); };
   const geometry = () => page.locator('.analytics-toolbar').evaluate(toolbar => {
     const rect = toolbar.getBoundingClientRect();
-    const header = document.querySelector('.topbar').getBoundingClientRect();
+    const header = document.querySelector('.module-navigation').getBoundingClientRect();
     const style = getComputedStyle(toolbar);
     return { top: rect.top, bottom: rect.bottom, headerBottom: header.bottom,
       background: style.backgroundColor, position: style.position,
@@ -46,7 +46,7 @@ async function main() {
         });
         await page.waitForFunction(() => {
           const toolbar = document.querySelector('.analytics-toolbar').getBoundingClientRect();
-          return Math.abs(toolbar.top - document.querySelector('.topbar').getBoundingClientRect().bottom) <= 1;
+          return Math.abs(toolbar.top - document.querySelector('.module-navigation').getBoundingClientRect().bottom) <= 1;
         });
         const box = await geometry();
         check(label + ' toolbar below header', box.position === 'sticky' && Math.abs(box.top - box.headerBottom) <= 1);

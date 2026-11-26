@@ -5,12 +5,35 @@ from datetime import date, timedelta
 import pytest
 from fastapi.testclient import TestClient
 
+from backend import demo_product as demo_fixtures
 from backend.main import create_app
 from backend.claims import inspect_claims
+from backend.model_adapter import ModelAdapter
 
 
 @pytest.fixture
-def client(tmp_path, monkeypatch):
+def cup_seed(monkeypatch):
+    # Capacity conversion and cup evidence tests need an explicit cup fixture.
+    original_product = demo_fixtures.demo_product
+
+    def product(created_at):
+        return {**original_product(created_at), "name": "青禾随行保温杯", "price": 99.0,
+                "capacity": "500 ml", "color": "奶油白", "image_url": "/assets/product.svg",
+                "description": "独立保温杯测试夹具，所有商品参数均为虚构设定。",
+                "evidence": "虚构杯子测试资料：500 ml、奶油白、99 元。",
+                "restrictions": "不得编造保温时长、检测报告、销量和评价。"}
+
+    def creatives(product):
+        adapter = ModelAdapter()
+        adapter.mode = "replay"
+        return [{**item, "tone": "自然", "angle": "场景"} for item in adapter.creatives(product)]
+
+    monkeypatch.setattr(demo_fixtures, "demo_product", product)
+    monkeypatch.setattr(demo_fixtures, "demo_creatives", creatives)
+
+
+@pytest.fixture
+def client(tmp_path, monkeypatch, cup_seed):
     monkeypatch.setenv("MODEL_PROVIDER", "replay")
     monkeypatch.delenv("DEMO_ACCESS_TOKEN", raising=False)
     with TestClient(create_app(tmp_path)) as session:

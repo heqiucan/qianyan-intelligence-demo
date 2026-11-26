@@ -323,6 +323,12 @@ class ModelAdapter:
             return copies
         name, capacity, color = product["name"], product["capacity"], product["color"]
         price = f'{product["price"]:g}'
+        if "杯" not in name:
+            facts = f"{name}，{capacity}，{color}。演示售价 ¥{price}。"
+            return [
+                {"direction": "外观与场景", "title": f"认识{name}的日常使用场景", "body": facts + "先看外观与已知规格，再判断是否适合自己的使用场景。", "cta": "查看商品资料", "script": f"0-3 秒：展示{color}的{name}。\n3-8 秒：展示{capacity}规格，示意日常使用场景。\n8-15 秒：展示演示售价 ¥{price}，引导核对商品资料。"},
+                {"direction": "规格说明", "title": f"{name}，先核对规格与颜色", "body": facts + "选择前请核对规格；未提供的性能与优惠不作承诺。", "cta": "查看商品规格", "script": f"0-3 秒：商品名称与{capacity}规格同框。\n3-8 秒：展示{color}外观，逐项核对已知资料。\n8-15 秒：展示演示售价 ¥{price}，提示核对后再选择。"},
+            ]
         return [
             {"direction": "通勤携带", "title": "把日常，装进随行的风景", "body": f"{name}，{capacity}，{color}。从桌面到通勤，带上自己的日常。演示售价 ¥{price}。", "cta": "看看我的随行搭子", "script": f"0–3 秒：通勤桌面，展示{color}杯身。\n3–8 秒：手持{capacity}商品，展示外观和携带场景。\n8–15 秒：商品正面特写，展示演示售价 ¥{price}，引导查看规格。"},
             {"direction": "容量展示", "title": "刚刚好的容量，轻松融入日常", "body": f"认识你的{capacity}日常搭子。{name} · {color}，演示售价 ¥{price}。先看看规格，再选适合自己的那一杯。", "cta": "查看商品规格", "script": f"0–3 秒：商品正面与{capacity}文字同框。\n3–8 秒：旋转展示{color}外观、杯盖和杯身。\n8–15 秒：展示 ¥{price} 演示价格，提示查看商品详情。"},
@@ -356,11 +362,14 @@ class ModelAdapter:
             return {"facts": facts, **self.provenance, **{k: response[k] for k in ("hypotheses", "missing", "recommendation")}}
         history = analytics["dataset"] == "history" and metrics["orders"] > 0
         has_spend = metrics["spend"] is not None
-        return {"facts": facts, "hypotheses": ["通勤场景可能比单独展示容量更有助于理解使用情境，需要在相同条件下继续测试。" if history else "可以测试更清晰的规格与使用场景表达；当前样本不足以判断哪一版更有效。"], "missing": ["没有随机分组，不能把相关性当作广告造成的增量。", "缺少退款、毛利和其他获客成本；支付 ROI 不代表利润。", "本次互动没有对应的广告曝光和消耗数据，不能计算投产比或获客成本。" if not has_spend else "样本与场景有限，尚未控制人群与投放时段差异。"], "recommendation": "创建一份 V2 素材草稿：保留商品事实和价格，在开头明确容量与日常使用场景；人工确认后再建立新计划，等待后续数据。"}
+        return {"facts": facts, "hypotheses": ["使用场景与规格说明可能影响对商品的理解；当前历史样例不足以判断哪一种表达更有效，需要在相同条件下继续测试。" if history else "可以测试更清晰的规格与使用场景表达；当前样本不足以判断哪一版更有效。"], "missing": ["没有随机分组，不能把相关性当作广告造成的增量。", "缺少退款、毛利和其他获客成本；支付 ROI 不代表利润。", "本次互动没有对应的广告曝光和消耗数据，不能计算投产比或获客成本。" if not has_spend else "样本与场景有限，尚未控制人群与投放时段差异。"], "recommendation": "创建一份 V2 素材草稿：保留商品事实和价格，在开头明确规格与日常使用场景；人工确认后再建立新计划，等待后续数据。"}
 
     def optimize(self, product, parent, insight):
         fields = {key: parent[key] for key in COPY_LIMITS}
         if self.mode == "replay":
+            if "杯" not in product["name"]:
+                fields.update(title=f'{product["capacity"]}，先认识商品规格', body=f'{product["name"]} · {product["color"]} · {product["capacity"]}。演示售价 ¥{product["price"]:g}。先核对资料，再判断是否适合自己的使用场景。', script=f'0-3 秒：商品名称与{product["capacity"]}规格同时出现。\n3-8 秒：展示{product["color"]}商品外观。\n8-15 秒：展示演示售价 ¥{product["price"]:g}，引导核对商品详情。')
+                return fields
             fields.update(title=f'{product["capacity"]}，让日常随你而行', body=f'{product["name"]} · {product["color"]} · {product["capacity"]}。从桌面到通勤，用清晰的规格认识你的随行搭子。演示售价 ¥{product["price"]:g}。', script=f'0–3 秒：{product["capacity"]}规格与通勤场景同时出现。\n3–8 秒：展示{product["color"]}商品外观。\n8–15 秒：展示演示售价 ¥{product["price"]:g}，引导查看商品详情。')
             return fields
         response = self._complete('根据已保存的复盘建议修改原素材，保持商品事实，返回 {"creative":' + COPY_SCHEMA + '}。' + COPY_RULES,

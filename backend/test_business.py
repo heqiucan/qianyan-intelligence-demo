@@ -26,15 +26,20 @@ def buy(client, key, buyer="new-001", plan="plan-commute"):
     return post(client, "/api/orders", {"plan_id": plan, "buyer_id": buyer, "request_id": key})
 
 
-def revise(client, title="把日常，装进随行的风景", body="演示售价 ¥99，500 ml 奶油白。"):
+def revise(client, title="把日常，装进随行的风景", body=None):
+    if body is None:
+        creative = next(c for c in client.get("/api/state").json()["creatives"] if c["id"] == "creative-commute")
+        product = creative["product_snapshot"]
+        body = f'演示售价 ¥{product["price"]:g}，{product["capacity"]}，{product["color"]}。'
     return post(client, "/api/creatives/creative-commute/revise", {"title": title, "body": body, "cta": "查看商品", "script": "展示外观与已知规格。"})
 
 
 def test_history_is_fixed_and_session_has_no_spend(client):
+    price = client.get("/api/state").json()["product"]["price"]
     original = client.get("/api/analytics?dataset=history").json()
     metrics = original["metrics"]
     assert (metrics["impressions"], metrics["clicks"], metrics["orders"], metrics["new_customers"]) == (10000, 300, 15, 9)
-    assert metrics["roi"] == 4.95
+    assert metrics["roi"] == pytest.approx(15 * price / 300, abs=1e-6)
     assert metrics["ctr"] == .03
     assert metrics["cac"] == pytest.approx(300 / 9, abs=1e-6)
     empty = client.get("/api/analytics?dataset=session").json()["metrics"]
@@ -43,7 +48,7 @@ def test_history_is_fixed_and_session_has_no_spend(client):
     buy(client, "one")
     assert client.get("/api/analytics?dataset=history").json() == original
     current = client.get("/api/analytics?dataset=session").json()["metrics"]
-    assert current["revenue"] == 99 and current["orders"] == 1
+    assert current["revenue"] == price and current["orders"] == 1
     assert current["roi"] is None and current["spend"] is None
 
 
@@ -88,8 +93,8 @@ def test_product_and_creative_snapshots_survive_edits(client):
     assert v2["version"] == 2 and v2["status"] == "draft"
     after = client.get("/api/state").json()
     assert after["plans"][0]["creative_snapshot"] == before["plans"][0]["creative_snapshot"]
-    assert after["campaigns"][0]["product_snapshot"]["price"] == 99
-    assert buy(client, "snapshot-order")["amount"] == 99
+    assert after["campaigns"][0]["product_snapshot"]["price"] == product["price"]
+    assert buy(client, "snapshot-order")["amount"] == product["price"]
     campaign = post(client, "/api/campaigns", {"name": "新价格活动"})
     assert campaign["product_snapshot"]["price"] == 129
     payload = {"request_id": "generate-once"}

@@ -1,8 +1,9 @@
-import { Bot, ChartNoAxesCombined, LayoutDashboard, ListChecks, Megaphone, Package, Radio, Sparkles } from 'lucide-react';
+import { Bot, ChartNoAxesCombined, Globe2, LayoutDashboard, ListChecks, Megaphone, Package, Radio, Sparkles } from 'lucide-react';
 
 export const pages = [
   { id: 'overview', label: '工作总览', icon: LayoutDashboard, route: 'overview' },
   { id: 'agent', label: 'Agent 任务', icon: Bot, route: 'agent' },
+  { id: 'geo', label: 'GEO 工作台', icon: Globe2, route: 'geo' },
   { id: 'product', label: '商品与知识', icon: Package, route: 'product?tab=catalog' },
   { id: 'creative', label: '营销与创意', icon: Sparkles, route: 'creative' },
   { id: 'live', label: '直播工作台', icon: Radio, route: 'live' },
@@ -20,6 +21,7 @@ export function pageFor(route: string) {
 export function detailLabel(route: string): string {
   const [page, query = ''] = route.split('?');
   const params = new URLSearchParams(query);
+  if (page === 'geo') return ({ overview: '项目总览', knowledge: '品牌知识', monitor: '问题监测', optimize: '诊断与 Agent', content: '内容发布', reports: '效果报告' } as Record<string, string>)[params.get('view') || 'overview'] || '项目总览';
   if (page === 'agent') {
     if (params.get('tab') === 'demand') return params.get('task') ? '需求任务详情' : '需求分析';
     return params.get('agent') === 'new' ? '新建内容任务' : params.has('agent') ? '内容任务详情' : '内容任务';

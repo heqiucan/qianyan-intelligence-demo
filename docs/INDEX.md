@@ -18,6 +18,7 @@
 | 浅色、深色、系统外观、官网入口 | THEME / SITE | `frontend/src/app/ThemeControls.tsx`、`frontend/src/app/theme.ts`、`frontend/src/app/AppShell.tsx` |
 | 首页指标、当前任务 | HOME | `frontend/src/features/Overview.tsx`、`frontend/src/app/useWorkspaceData.ts` |
 | 医美咨询助手、公司看板、词表推荐 | RECOMMEND | `frontend/src/features/medical/MedicalAssistantPanel.tsx`、`backend/recommend.py`；入口 `#/overview?tab=assistant` |
+| GEO 项目、问题监测、内容审核、效果报告 | GEO | `frontend/src/features/geo/GeoWorkspace.tsx`、`frontend/src/features/geo/model.ts`；入口 `#/geo`；当前为前端样例，未接外部平台 |
 | 商品、品牌、SKU、活动策略 | PRODUCT / CAMPAIGN | `frontend/src/features/ProductPage.tsx`、`frontend/src/features/live/LiveCatalog.tsx`、`frontend/src/components/CampaignModal.tsx` |
 | 知识库、Obsidian、资料、检索 | KNOWLEDGE | `frontend/src/features/knowledge/KnowledgeWorkspace.tsx`、`backend/knowledge.py` |
 | Agent 创建、执行、审阅、重试 | AGENT | `frontend/src/features/agent/AgentWorkspace.tsx`、`backend/agents/routes.py` |
@@ -31,6 +32,7 @@
 | 话术、音色、播报、混音、录音 | SPEECH / AUDIO | `frontend/src/features/live/speech/LiveSpeech.tsx`、`frontend/src/features/live/AudioMixer.tsx` |
 | 音频转换、切片、字幕、草稿 | MEDIA / SCRIPTS | `frontend/src/features/live/MediaTools.tsx`、`frontend/src/features/live/ScriptDrafts.tsx` |
 | 数据库、并发、模型、启动、分享 | STORAGE / MODEL / OPS | `backend/core/storage.py`、`backend/model_adapter.py`、`scripts/start_demo.py` |
+| GEO 桌面预览启动 | GEO / OPS | `scripts/start_geo.ps1`；构建当前工作树、复用或启动 8010 回放服务，打开 `/#/geo` |
 
 ## 文档分工与事实来源
 

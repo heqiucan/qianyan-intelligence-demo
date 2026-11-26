@@ -23,6 +23,7 @@ import AdsPage from './features/AdsPage';
 import AnalyticsPage from './features/AnalyticsPage';
 import MetricsSummary from './features/MetricsSummary';
 import MedicalAssistantPanel from './features/medical/MedicalAssistantPanel';
+import GeoWorkspace from './features/geo/GeoWorkspace';
 import Consumer from './features/Consumer';
 import FeedbackPages from './Feedback';
 import LiveCatalog from './features/live/LiveCatalog';
@@ -87,10 +88,11 @@ export default function App() {
 
   return <>
     <AppShell key={navigation.editorEpoch} route={route} go={go} pending={pending} openDialog={setDialog} actions={<>
-      {!['agent', 'product', 'codex'].includes(page.id) && <select aria-label="选择营销活动" value={campaignId} onChange={event => switchCampaign(event.target.value)}>{state.campaigns.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select>}
+      {!['agent', 'geo', 'product', 'codex'].includes(page.id) && <select aria-label="选择营销活动" value={campaignId} onChange={event => switchCampaign(event.target.value)}>{state.campaigns.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select>}
       {page.id === 'overview' && <Button kind="primary" onClick={() => go('agent?agent=new')}><Plus size={15}/>新建任务</Button>}
     </>}>
       {error && <div className="error-banner" role="alert"><span>{error}</span><button className="button ghost" aria-label="关闭错误提示" onClick={() => data.setError('')}><X size={16}/></button></div>}
+      {page.id === 'geo' && <GeoWorkspace route={route} go={go} dirtyChanged={markDirty}/>}
       {page.id === 'overview' && <>
         <WorkspaceTabs label="工作总览视图" selected={params.get('tab') === 'assistant' ? 'assistant' : 'overview'} items={[{ id: 'overview', label: '经营总览', route: 'overview' }, { id: 'assistant', label: '医美咨询助手', route: 'overview?tab=assistant' }]} go={go}/>
         {params.get('tab') === 'assistant' ? <MedicalAssistantPanel/> : <>{scope}<Overview state={state} campaign={campaign} campaignId={campaignId} analytics={analytics} go={go} inspect={inspect} setDialog={setDialog}/></>}

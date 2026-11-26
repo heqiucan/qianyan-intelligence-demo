@@ -26,7 +26,7 @@ async function main(){
   const state=await (await page.request.get(base+'/api/state')).json();
   assert.equal(state.model.mode,'replay');
   await goto('overview');
-  check('八个一级业务入口',JSON.stringify(await nav().getByRole('button').allTextContents())===JSON.stringify(['工作总览','Agent 任务','商品与知识','营销与创意','直播工作台','广告投放','效果与复盘','待办与审核']));
+  check('九个一级业务入口',JSON.stringify(await nav().getByRole('button').allTextContents())===JSON.stringify(['工作总览','Agent 任务','GEO 工作台','商品与知识','营销与创意','直播工作台','广告投放','效果与复盘','待办与审核']));
   check('首页不挂载任务编辑器',await page.getByLabel('希望 Agent 完成的任务').count()===0&&await page.getByLabel('当前活动路径').count()===0);
   check('首页长度受控',await page.evaluate(()=>document.documentElement.scrollHeight<1800));
   check('桌面侧栏固定',await nav().evaluate(element=>getComputedStyle(element.parentElement).position)==='fixed');

@@ -37,6 +37,9 @@ async function main() {
         await page.getByRole('tab', { name: '概览图表', exact: true }).waitFor();
         await page.evaluate(value => { document.documentElement.dataset.theme = value; }, theme);
         await page.emulateMedia({ reducedMotion: 'reduce' });
+        // A wheel event finishes the shell's initial scroll restoration before measuring sticky position.
+        await page.mouse.move(width - 40, 700);
+        await page.mouse.wheel(0, 40);
         // Scroll beyond the toolbar's normal flow position without hitting its parent's end.
         await page.locator('.analytics-toolbar').evaluate(element => {
           window.scrollTo(0, element.getBoundingClientRect().top + scrollY + 80);

@@ -126,7 +126,7 @@ export default function RobotAssistant() {
         <input ref={input} value={draft} onChange={event => setDraft(event.target.value)} maxLength={200} placeholder="问问这个项目…" aria-label="输入你的问题" autoComplete="off" />
         <button type="submit" aria-label="发送问题" disabled={!draft.trim() || thinking}><Send size={16} /></button>
       </form>
-      <p className="qy-assistant-note">基于官网与项目文档的自动问答，未调用大模型；演示数据均为虚构。</p>
+      <p className="qy-assistant-note">基于官网与项目文档的自动问答，未调用大模型。</p>
     </section>}
     <div className="qy-assistant-dock">
       {hint && !open && <span className="qy-assistant-hint" aria-hidden="true" onClick={toggle}>有问题？问问小千</span>}

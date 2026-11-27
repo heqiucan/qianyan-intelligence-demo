@@ -56,10 +56,10 @@ export default function Website() {
             <p className="qy-hero-benefit">AI 写的文案，发布前自动核对价格和卖点。</p>
             <p className="qy-hero-lead">Qianyan Intelligence 面向电商商家与品牌运营团队，把商品资料、AI 创意、内容核对、广告投流、成交追踪与优化复盘，连成一条可以回看的完整链路。<span className="qy-nowrap">人来决定，AI 来协同。</span></p>
             <div className="qy-hero-actions"><a className="qy-primary-button" href="#journey">探索产品流程<ArrowDown size={16} /></a><a className="qy-text-link" href={workspaceLink()}>直接进入工作台<ArrowUpRight size={15} /></a></div>
-            <p className="qy-hero-note"><span className="qy-demo-badge"><span className="qy-live-dot" />演示环境</span>业务 Demo · 广告投放与付款均为模拟</p>
+            
           </div>
           <div id="capabilities" className="qy-hero-features">
-            <div className="qy-features-head"><span>WHAT WE HAVE</span><span>八种能力，协同向前 · 点击进入工作台对应模块</span></div>
+            <div className="qy-features-head"><span>WHAT WE HAVE</span><span>六大工作台，协同向前 · 点击进入对应模块</span></div>
             <div className="qy-module-grid">{modules.map((item, index) => <a key={item.id} href={workspaceLink(item.id)} className="qy-module"><div className="qy-module-top"><item.icon size={22} strokeWidth={1.4} /><span>0{index + 1}</span></div><h3>{item.title}</h3><span className="qy-module-en">{item.english}</span><p>{item.text}</p><span className="qy-module-step">{item.step}</span><ArrowUpRight className="qy-module-arrow" size={19} /></a>)}</div>
           </div>
         </div>
@@ -92,11 +92,11 @@ export default function Website() {
 
       <section id="faq" className="qy-section qy-faq" aria-labelledby="qy-faq-title"><div data-reveal><span className="qy-kicker">A LITTLE MORE CONTEXT</span><h2 id="qy-faq-title">开始之前，<br />你可能想了解。</h2><p>把能力与边界，一起说清楚。</p></div><div className="qy-faq-list">{questions.map(item => <details key={item.q}><summary>{item.q}<ChevronDown size={18} /></summary><p>{item.a}</p></details>)}</div></section>
 
-      <section id="start" data-chapter className="qy-start" aria-labelledby="qy-start-title"><div className="qy-start-orbit" aria-hidden="true" /><div className="qy-start-content" data-reveal><span className="qy-kicker">03 / YOUR NEXT CHAPTER</span><h2 id="qy-start-title">下一步增长，<br />从这里<span>开始。</span></h2><p>带着一个商品、一份灵感，<br className="qy-mobile-break" />走进完整的营销工作流。</p><a className="qy-primary-button" href={workspaceLink()}>进入工作台，亲自体验<ArrowUpRight size={18} /></a><span className="qy-start-note">业务 Demo · 广告投放与付款均为模拟</span></div></section>
+      <section id="start" data-chapter className="qy-start" aria-labelledby="qy-start-title"><div className="qy-start-orbit" aria-hidden="true" /><div className="qy-start-content" data-reveal><span className="qy-kicker">03 / YOUR NEXT CHAPTER</span><h2 id="qy-start-title">下一步增长，<br />从这里<span>开始。</span></h2><p>带着一个商品、一份灵感，<br className="qy-mobile-break" />走进完整的营销工作流。</p><a className="qy-primary-button" href={workspaceLink()}>进入工作台，亲自体验<ArrowUpRight size={18} /></a></div></section>
     </main>
 
-    <footer className="qy-footer"><div className="qy-footer-main"><Brand footer /><p>让增长，有迹可循。<span>Marketing connected. Decisions informed.</span></p><a className="qy-back-top" href="#home" aria-label="返回页面顶部"><ArrowUp size={19} /></a></div><div className="qy-footer-bottom"><span>© {new Date().getFullYear()} Qianyan Intelligence</span><span>面向电商商家与品牌运营的营销增长 Demo</span><a href={workspaceLink()}>进入工作台<ArrowUpRight size={13} /></a></div></footer>
+    <footer className="qy-footer"><div className="qy-footer-main"><Brand footer /><p>让增长，有迹可循。<span>Marketing connected. Decisions informed.</span></p><a className="qy-back-top" href="#home" aria-label="返回页面顶部"><ArrowUp size={19} /></a></div><div className="qy-footer-bottom"><span>© {new Date().getFullYear()} Qianyan Intelligence</span><span>面向电商商家与品牌运营的营销增长工作台</span><a href={workspaceLink()}>进入工作台<ArrowUpRight size={13} /></a></div></footer>
     <RobotAssistant />
-    <noscript>请启用 JavaScript 浏览交互式产品介绍。业务演示入口：/index.html。</noscript>
+    <noscript>请启用 JavaScript 浏览交互式产品介绍。工作台入口：/index.html。</noscript>
   </div>;
 }

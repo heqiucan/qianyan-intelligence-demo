@@ -1164,7 +1164,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex="0"]:focus-
 
 .qy-module-grid {
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-columns:repeat(3,minmax(0,1fr));
   border-top:1px solid var(--qy-line);
   border-left:1px solid var(--qy-line);
 }

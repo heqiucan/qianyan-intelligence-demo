@@ -9,7 +9,7 @@ function readPreference(): ThemePreference {
     const value = localStorage.getItem(key);
     if (value === 'light' || value === 'dark' || value === 'system') return value;
   } catch { /* Keep switching functional even without persistent storage. */ }
-  return 'light';
+  return document.documentElement.dataset.defaultTheme === 'dark' ? 'dark' : 'light';
 }
 let preference = readPreference();
 let snapshot = { preference, resolved: resolve(preference) };

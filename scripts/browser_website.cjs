@@ -84,10 +84,18 @@ async function main() {
     record('官网包含原有八个功能入口', moduleLinks.length === 8);
     record('已删除四处多余副标题', await page.evaluate(() => ['点击步骤，体验产品逻辑', '六个环节，一条连续的工作流', '每一步，都为下一步留下依据', '一个虚构保温杯案例，串起完整链路'].every(text => !document.body.innerText.includes(text))));
     await page.locator('.qy-difference-intro').scrollIntoViewIfNeeded();
-    const starTransform = () => page.locator('.qy-proof-core > svg > path:first-child').evaluate(element => getComputedStyle(element).transform);
-    const starBefore = await starTransform();
+    const orbitState = () => page.evaluate(() => {
+      const box = document.querySelector('.qy-proof-orbit').getBoundingClientRect();
+      const cx = box.left + box.width / 2, cy = box.top + box.height / 2;
+      const m = new DOMMatrix(getComputedStyle(document.querySelector('.qy-proof-ring-one')).transform);
+      return { ring: Math.atan2(m.b, m.a), words: [...document.querySelectorAll('.qy-proof-tag')].map(el => { const b = el.getBoundingClientRect(); return Math.atan2(b.top + b.height / 2 - cy, b.left + b.width / 2 - cx); }) };
+    });
+    const orbitBefore = await orbitState();
     await page.waitForTimeout(1500);
-    record('“有灵感，也有来路”中的星形持续转动', starBefore !== await starTransform());
+    const orbitAfter = await orbitState();
+    record('“有灵感，也有来路”的圆环在转动', orbitBefore.ring !== orbitAfter.ring);
+    record('三个词（事实依据、来源追踪、人工确认）绕着中间的星形转动', orbitBefore.words.length === 3 && orbitBefore.words.every((angle, k) => angle !== orbitAfter.words[k]));
+    record('中间的星形保持静止', await page.evaluate(() => ['.qy-proof-core', '.qy-proof-core > svg'].every(selector => getComputedStyle(document.querySelector(selector)).animationName === 'none')));
     const robot = page.getByRole('button', { name: '打开项目问答助手' });
     record('右下角有机器人助手，默认收起', await robot.isVisible() && await page.locator('.qy-assistant-panel').count() === 0);
     await robot.click();
@@ -159,7 +167,7 @@ async function main() {
     record('减少动态效果时画面持续静止', reducedFrame === await canvas());
     record('静态模式控件解释系统设置', await page.getByRole('button', { name: '系统已启用减少动态效果' }).isDisabled());
     record('减少动态效果时内容无需等动画显示', await page.locator('[data-reveal]').first().evaluate(element => getComputedStyle(element).opacity === '1'));
-    record('减少动态效果时机器人和星形都保持静止', await page.evaluate(() => ['.qy-bot-float', '.qy-bot-eye', '.qy-proof-core > svg > path:first-child'].every(selector => getComputedStyle(document.querySelector(selector)).animationName === 'none')));
+    record('减少动态效果时机器人、圆环和三个词都保持静止', await page.evaluate(() => ['.qy-bot-float', '.qy-bot-eye', '.qy-proof-ring-one', '.qy-proof-ring-two', '.qy-proof-carousel', '.qy-proof-slot .qy-proof-tag'].every(selector => getComputedStyle(document.querySelector(selector)).animationName === 'none')));
     await page.screenshot({ path: path.join(out, 'reduced-motion.png') });
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.waitForTimeout(180);

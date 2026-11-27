@@ -1,6 +1,6 @@
 // Run before the app and its styles load to avoid flashing the wrong theme.
 (() => {
-  let preference = 'light';
+  let preference = document.documentElement.dataset.defaultTheme === 'dark' ? 'dark' : 'light';
   try {
     const saved = localStorage.getItem('workspace-theme');
     if (['light', 'dark', 'system'].includes(saved)) preference = saved;

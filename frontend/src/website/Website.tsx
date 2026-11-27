@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowDown, ArrowUp, ArrowUpRight, Check, ChevronDown, Menu, Pause, Play, Sparkles, X } from 'lucide-react';
+import { ArrowDown, ArrowRight, ArrowUp, ArrowUpRight, Check, ChevronDown, Menu, Pause, Play, Sparkles, X } from 'lucide-react';
 import ParticleField from './ParticleField';
 import JourneyPreview from './JourneyPreview';
 import RobotAssistant from './RobotAssistant';
-import { chapters, differences, modules, questions, workspaceLink } from './content';
+import ThemeToggle from './ThemeToggle';
+import { audiences, chapters, compareCase, differences, modules, questions, workspaceLink } from './content';
 
 function Brand({ footer = false }: { footer?: boolean }) {
   return <a className={`qy-brand${footer ? ' qy-brand-footer' : ''}`} href="#home" aria-label="Qianyan Intelligence，返回官网首页"><svg viewBox="0 0 44 44" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="12.5" stroke="currentColor" strokeWidth="5" /><path d="M22.5 22.5 38 38" stroke="#8b5cf6" strokeWidth="5" /></svg><span>Qianyan<small>Intelligence</small></span></a>;
@@ -38,7 +39,7 @@ export default function Website() {
     <header className={`qy-header${chapter !== 'home' ? ' qy-header-scrolled' : ''}`}>
       <Brand />
       <nav className="qy-desktop-nav" aria-label="官网主导航">{sectionLink('capabilities', '核心能力')}{sectionLink('journey', '工作流程')}{sectionLink('difference', '我们的不同')}{sectionLink('faq', '常见问题')}</nav>
-      <div className="qy-header-actions"><a className="qy-header-cta" href={workspaceLink()}>进入工作台<ArrowUpRight size={16} /></a><button className="qy-menu-button" ref={menuButton} aria-expanded={menuOpen} aria-controls="qy-mobile-menu" aria-label={menuOpen ? '收起导航' : '展开导航'} onClick={() => setMenuOpen(value => !value)}>{menuOpen ? <X size={22} /> : <Menu size={22} />}</button></div>
+      <div className="qy-header-actions"><ThemeToggle /><a className="qy-header-cta" href={workspaceLink()}>进入工作台<ArrowUpRight size={16} /></a><button className="qy-menu-button" ref={menuButton} aria-expanded={menuOpen} aria-controls="qy-mobile-menu" aria-label={menuOpen ? '收起导航' : '展开导航'} onClick={() => setMenuOpen(value => !value)}>{menuOpen ? <X size={22} /> : <Menu size={22} />}</button></div>
       <nav id="qy-mobile-menu" className="qy-mobile-menu" aria-label="移动端官网导航" hidden={!menuOpen}>{sectionLink('capabilities', '核心能力')}{sectionLink('journey', '工作流程')}{sectionLink('difference', '我们的不同')}{sectionLink('faq', '常见问题')}{sectionLink('start', '开始体验')}</nav>
     </header>
 
@@ -52,13 +53,14 @@ export default function Website() {
           <div className="qy-hero-intro">
             <p className="qy-kicker">让增长，有迹可循。</p>
             <h1 id="qy-title">一个让营销每一步<br />都<span className="qy-nowrap">有依据</span>的 AI 增长工作台。</h1>
+            <p className="qy-hero-benefit">AI 写的文案，发布前自动核对价格和卖点。</p>
             <p className="qy-hero-lead">Qianyan Intelligence 面向电商商家与品牌运营团队，把商品资料、AI 创意、内容核对、广告投流、成交追踪与优化复盘，连成一条可以回看的完整链路。<span className="qy-nowrap">人来决定，AI 来协同。</span></p>
             <div className="qy-hero-actions"><a className="qy-primary-button" href="#journey">探索产品流程<ArrowDown size={16} /></a><a className="qy-text-link" href={workspaceLink()}>直接进入工作台<ArrowUpRight size={15} /></a></div>
-            <p className="qy-hero-note"><span className="qy-live-dot" />业务 Demo · 广告投放与付款均为模拟</p>
+            <p className="qy-hero-note"><span className="qy-demo-badge"><span className="qy-live-dot" />演示环境</span>业务 Demo · 广告投放与付款均为模拟</p>
           </div>
           <div id="capabilities" className="qy-hero-features">
             <div className="qy-features-head"><span>WHAT WE HAVE</span><span>八种能力，协同向前 · 点击进入工作台对应模块</span></div>
-            <div className="qy-module-grid">{modules.map((item, index) => <a key={item.id} href={workspaceLink(item.id)} className="qy-module"><div className="qy-module-top"><item.icon size={22} strokeWidth={1.4} /><span>0{index + 1}</span></div><h3>{item.title}</h3><span className="qy-module-en">{item.english}</span><p>{item.text}</p><ArrowUpRight className="qy-module-arrow" size={19} /></a>)}</div>
+            <div className="qy-module-grid">{modules.map((item, index) => <a key={item.id} href={workspaceLink(item.id)} className="qy-module"><div className="qy-module-top"><item.icon size={22} strokeWidth={1.4} /><span>0{index + 1}</span></div><h3>{item.title}</h3><span className="qy-module-en">{item.english}</span><p>{item.text}</p><span className="qy-module-step">{item.step}</span><ArrowUpRight className="qy-module-arrow" size={19} /></a>)}</div>
           </div>
         </div>
         <div className="qy-hero-footer"><a className="qy-scroll-cue" href="#journey"><span className="qy-scroll-line" />SCROLL TO EXPLORE</a><button className="qy-motion-button" onClick={() => setPaused(value => !value)} disabled={reduced} aria-label={reduced ? '系统已启用减少动态效果' : paused ? '播放背景动效' : '暂停背景动效'}>{paused || reduced ? <Play size={12} /> : <Pause size={12} />}<span>{reduced ? '静态模式' : paused ? '播放动效' : '暂停动效'}</span></button></div>
@@ -70,9 +72,21 @@ export default function Website() {
         <JourneyPreview />
       </section>
 
+      <section id="audience" className="qy-section qy-audience" aria-labelledby="qy-audience-title">
+        <div className="qy-section-eyebrow" data-reveal><span>WHO IT'S FOR</span><span>适合谁使用</span></div>
+        <div className="qy-section-heading" data-reveal><h2 id="qy-audience-title">为每天都在<span>做决定</span>的人。</h2></div>
+        <div className="qy-audience-grid">{audiences.map(item => <article key={item.title} data-reveal><item.icon size={22} strokeWidth={1.4} /><h3>{item.title}</h3><p>{item.text}</p></article>)}</div>
+      </section>
+
       <section id="difference" data-chapter className="qy-section qy-difference">
         <div className="qy-section-eyebrow" data-reveal><span>02 / THE DIFFERENCE</span><span>让智能，经得起回看</span></div>
-        <div className="qy-difference-intro" data-reveal><h2>有灵感。<br />也有<span>来路。</span></h2><div className="qy-proof-orbit" aria-hidden="true"><div className="qy-proof-ring qy-proof-ring-one" /><div className="qy-proof-ring qy-proof-ring-two" /><div className="qy-proof-core"><Sparkles size={30} strokeWidth={1.2} /><span>Intelligence<br /><strong>with context.</strong></span></div><span className="qy-proof-tag qy-proof-tag-one"><Check size={12} />事实依据</span><span className="qy-proof-tag qy-proof-tag-two"><Check size={12} />人工确认</span><span className="qy-proof-tag qy-proof-tag-three"><Check size={12} />来源追踪</span></div><p>我们关心 AI 能给出什么，<br />也关心它依据什么、如何使用、怎样验证。</p></div>
+        <div className="qy-difference-intro" data-reveal><h2>有灵感。<br />也有<span>来路。</span></h2><div className="qy-proof-orbit" aria-hidden="true"><div className="qy-proof-ring qy-proof-ring-one" /><div className="qy-proof-ring qy-proof-ring-two" /><div className="qy-proof-core"><Sparkles size={30} strokeWidth={1.2} /><span>Intelligence<br /><strong>with context.</strong></span></div><div className="qy-proof-carousel">{['事实依据', '来源追踪', '人工确认'].map(label => <span key={label} className="qy-proof-slot"><span className="qy-proof-tag"><Check size={12} />{label}</span></span>)}</div></div><p>我们关心 AI 能给出什么，<br />也关心它依据什么、如何使用、怎样验证。</p></div>
+
+        <div className="qy-compare" data-reveal aria-label="普通 AI 文案与核对后文案对比">
+          <div className="qy-compare-card qy-compare-before"><span className="qy-tiny-label">{compareCase.before.label}</span><p>{compareCase.before.text.map((part, i) => i % 2 === 1 ? <mark key={i}>{part}</mark> : part)}</p><ul>{compareCase.before.issues.map(issue => <li key={issue}><X size={13} />{issue}</li>)}</ul></div>
+          <div className="qy-compare-arrow" aria-hidden="true"><ArrowRight size={20} /></div>
+          <div className="qy-compare-card qy-compare-after"><span className="qy-tiny-label">{compareCase.after.label}</span><p>{compareCase.after.text.map((part, i) => i % 2 === 1 ? <em key={i}>{part}</em> : part)}</p><ul>{compareCase.after.checks.map(check => <li key={check}><Check size={13} />{check}</li>)}</ul></div>
+        </div>
         <div className="qy-principle-grid">{differences.map((item, index) => <article key={item.title} data-reveal><div className="qy-principle-meta"><item.icon size={20} strokeWidth={1.5} /><span>0{index + 1}</span></div><h3>{item.title}</h3><p>{item.text}</p><span className="qy-tiny-label">{item.label}</span></article>)}</div>
       </section>
 

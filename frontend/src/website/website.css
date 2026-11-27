@@ -1251,6 +1251,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex="0"]:focus-
 }
 
 .qy-proof-orbit {
+  --orbit-r:118px;
   height:240px;
   position:relative;
   display:flex;
@@ -1263,7 +1264,7 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex="0"]:focus-
   position:absolute;
   width:260px;
   height:120px;
-  border:1px solid #bb90e64d;
+  border:1px solid #bb90e66b;
   border-radius:50%;
   background:radial-gradient(ellipse,#8b5cf605,transparent);
   z-index:0;
@@ -1301,6 +1302,10 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex="0"]:focus-
 
 .qy-proof-tag {
   position:absolute;
+  left:0;
+  top:0;
+  translate:-50% -50%;
+  white-space:nowrap;
   border:1px solid #c19be430;
   background:#191121;
   color:#c8afd9;
@@ -1313,114 +1318,95 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex="0"]:focus-
   z-index:2;
 }
 
-.qy-proof-tag-one {
-  top:28px;
-  left:5px;
+/* "有灵感。也有来路。": the two rings turn in opposite directions and the three words circle the star.
+   The star in the middle stays still. Each word sits on a slot of a turning carousel and is turned back
+   by the same angle, so the text always stays upright. */
+.qy-proof-carousel {
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:0;
+  height:0;
+  z-index:2;
+  animation:qy-orbit-spin 22s linear infinite;
 }
 
-.qy-proof-tag-two {
-  top:75px;
-  right:-5px;
+.qy-proof-slot {
+  position:absolute;
+  left:0;
+  top:0;
+  width:0;
+  height:0;
+  transform:rotate(calc(var(--i) * 120deg)) translateX(var(--orbit-r));
 }
 
-.qy-proof-tag-three {
-  bottom:24px;
-  left:40%;
+.qy-proof-slot:nth-child(1) {
+  --i:0;
 }
 
-/* The star in "有灵感。也有来路。": the big star turns and breathes, the small marks twinkle */
-.qy-proof-core>svg {
-  overflow:visible;
-  animation:qy-star-glow 3.4s ease-in-out infinite alternate;
+.qy-proof-slot:nth-child(2) {
+  --i:1;
 }
 
-.qy-proof-core>svg>path:first-child {
-  transform-box:fill-box;
-  transform-origin:center;
-  animation:qy-star-turn 9s ease-in-out infinite;
+.qy-proof-slot:nth-child(3) {
+  --i:2;
 }
 
-.qy-proof-core>svg>path:nth-child(n+2) {
-  animation:qy-star-twinkle 2.6s ease-in-out infinite;
+.qy-proof-slot .qy-proof-tag {
+  transform:rotate(calc(var(--i) * -120deg));
+  animation:qy-orbit-unspin 22s linear infinite;
 }
 
-.qy-proof-core>svg>path:nth-child(3) {
-  animation-delay:.5s;
-}
-
-.qy-proof-core>svg>path:nth-child(4) {
-  animation-delay:1.1s;
-}
-
-.qy-proof-core>svg>path:nth-child(5) {
-  animation-delay:1.6s;
-}
-
-.qy-proof-ring {
-  animation:qy-ring-breathe 7s ease-in-out infinite;
+.qy-proof-ring-one {
+  animation:qy-ring-one 28s linear infinite,qy-ring-breathe 7s ease-in-out infinite;
 }
 
 .qy-proof-ring-two {
-  animation-delay:-3.5s;
+  animation:qy-ring-two 36s linear infinite,qy-ring-breathe 7s ease-in-out -3.5s infinite;
 }
 
-.qy-proof-tag {
-  animation:qy-tag-float 5s ease-in-out infinite;
-}
-
-.qy-proof-tag-two {
-  animation-delay:-1.7s;
-}
-
-.qy-proof-tag-three {
-  animation-delay:-3.3s;
-}
-
-@keyframes qy-star-turn {
-  0% {
-    transform:rotate(0) scale(1);
-  }
-  50% {
-    transform:rotate(180deg) scale(1.22);
-  }
-  100% {
-    transform:rotate(360deg) scale(1);
-  }
-}
-
-@keyframes qy-star-glow {
+@keyframes qy-orbit-spin {
   from {
-    filter:drop-shadow(0 0 2px #b895e044);
+    transform:rotate(0deg);
   }
   to {
-    filter:drop-shadow(0 0 11px #d2b4ffcc);
+    transform:rotate(360deg);
   }
 }
 
-@keyframes qy-star-twinkle {
-  0%,100% {
-    opacity:.25;
+@keyframes qy-orbit-unspin {
+  from {
+    transform:rotate(calc(var(--i) * -120deg));
   }
-  50% {
-    opacity:1;
+  to {
+    transform:rotate(calc(var(--i) * -120deg - 360deg));
+  }
+}
+
+@keyframes qy-ring-one {
+  from {
+    transform:rotate(-35deg);
+  }
+  to {
+    transform:rotate(325deg);
+  }
+}
+
+@keyframes qy-ring-two {
+  from {
+    transform:rotate(35deg);
+  }
+  to {
+    transform:rotate(-325deg);
   }
 }
 
 @keyframes qy-ring-breathe {
   0%,100% {
-    opacity:.55;
+    opacity:.6;
   }
   50% {
     opacity:1;
-  }
-}
-
-@keyframes qy-tag-float {
-  0%,100% {
-    transform:translateY(0);
-  }
-  50% {
-    transform:translateY(-5px);
   }
 }
 
@@ -1768,6 +1754,9 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex="0"]:focus-
   .qy-proof-ring {
     width:220px;
   }
+  .qy-proof-orbit {
+    --orbit-r:100px;
+  }
   .qy-difference-intro {
     gap:20px;
   }
@@ -2102,47 +2091,19 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex="0"]:focus-
   }
   .qy-difference-intro {
     gap:18px;
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:1fr;
     margin-bottom:35px;
   }
   .qy-difference-intro>h2 {
     font-size:33px;
   }
   .qy-proof-orbit {
-    height:180px;
+    --orbit-r:92px;
+    height:230px;
   }
   .qy-proof-ring {
-    width:160px;
-    height:80px;
-  }
-  .qy-proof-core span {
-    font-size:9px;
-  }
-  .qy-proof-core strong {
-    font-size:10px;
-  }
-  .qy-proof-core>svg {
-    width:24px;
-  }
-  .qy-proof-tag {
-    font-size:6px;
-    gap:3px;
-    padding:3px 5px;
-  }
-  .qy-proof-tag svg {
-    width:9px;
-  }
-  .qy-proof-tag-one {
-    top:17px;
-    left:-9px;
-  }
-  .qy-proof-tag-two {
-    top:63px;
-    right:-9px;
-  }
-  .qy-proof-tag-three {
-    bottom:11px;
-    left:20%;
+    width:220px;
+    height:100px;
   }
   .qy-difference-intro>p {
     font-size:11px;
@@ -2310,12 +2271,6 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex="0"]:focus-
   .qy-check-rows strong {
     font-size:8px;
   }
-  .qy-proof-ring {
-    width:140px;
-  }
-  .qy-proof-tag-two {
-    right:-6px;
-  }
   .qy-principle-grid {
     gap:25px 18px;
   }
@@ -2449,5 +2404,245 @@ button:focus-visible,a:focus-visible,summary:focus-visible,[tabindex="0"]:focus-
   }
   .qy-hero-content {
     padding-bottom:35px;
+  }
+}
+
+/* Theme toggle */
+.qy-theme-toggle {
+  display:flex;
+  align-items:center;
+  gap:2px;
+  padding:3px;
+  border:1px solid #ffffff24;
+  border-radius:30px;
+  background:#ffffff07;
+}
+
+.qy-theme-toggle button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:30px;
+  height:30px;
+  padding:0;
+  border-radius:50%;
+  color:#a19baa;
+  transition:background-color .2s ease-out,color .2s ease-out,transform .15s ease-out;
+}
+
+.qy-theme-toggle button[aria-pressed="true"] {
+  background:#8b5cf633;
+  color:#e3d3ff;
+}
+
+.qy-theme-toggle button:active {
+  transform:scale(.94);
+}
+
+.qy-theme-toggle button:focus-visible {
+  outline-offset:2px;
+}
+
+@media (hover:hover) and (pointer:fine) {
+  .qy-theme-toggle button:not([aria-pressed="true"]):hover {
+    color:#f1eef7;
+  }
+}
+
+@media (max-width:700px) {
+  .qy-theme-toggle button {
+    width:26px;
+    height:26px;
+  }
+}
+
+/* Smooth theme change (skipped for reduced motion) */
+@media (prefers-reduced-motion:no-preference) {
+  .qy-site,.qy-header,.qy-hero,.qy-section,.qy-start,.qy-footer,.qy-module,.qy-demo-window {
+    transition:background-color .35s ease,color .35s ease,border-color .35s ease;
+  }
+}
+
+/* Journey: where the step lives in the workbench */
+.qy-stage-path {
+  display:inline-flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:2px 4px;
+  margin-top:14px;
+  padding:6px 14px;
+  border:1px solid #8b5cf633;
+  border-radius:30px;
+  background:#8b5cf612;
+  color:#bdb2cc;
+  font-size:11px;
+  letter-spacing:.03em;
+  width:fit-content;
+  max-width:100%;
+}
+
+.qy-stage-path-part {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  color:#e3d8f5;
+}
+
+/* Hero benefit line and demo badge */
+.qy-hero-benefit {
+  margin-top:18px;
+  font-size:clamp(15px,1.35vw,19px);
+  line-height:1.7;
+  color:#d9c8f7;
+  font-weight:500;
+}
+
+.qy-demo-badge {
+  display:inline-flex;
+  align-items:center;
+  gap:7px;
+  padding:4px 12px 4px 10px;
+  border:1px solid #8b5cf650;
+  border-radius:30px;
+  background:#8b5cf61a;
+  color:#e3d3ff;
+  font-size:10px;
+  letter-spacing:.06em;
+}
+
+.qy-hero-note {
+  flex-wrap:wrap;
+}
+
+/* Feature card: which journey step it serves */
+.qy-module-step {
+  display:inline-block;
+  margin-top:14px;
+  padding:3px 9px;
+  border:1px solid #8b5cf633;
+  border-radius:20px;
+  font-size:9px;
+  letter-spacing:.05em;
+  color:#bda3e6;
+}
+
+/* Who it's for */
+.qy-audience-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:24px;
+}
+
+.qy-audience-grid>article {
+  padding:28px 26px 32px;
+  border:1px solid var(--qy-line);
+  border-radius:14px;
+  background:#ffffff05;
+}
+
+.qy-audience-grid svg {
+  color:var(--qy-light);
+}
+
+.qy-audience-grid h3 {
+  margin-top:18px;
+  font-size:18px;
+  font-weight:500;
+}
+
+.qy-audience-grid p {
+  margin-top:12px;
+  font-size:13px;
+  line-height:1.95;
+  color:var(--qy-muted);
+}
+
+/* Before / after */
+.qy-compare {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+  align-items:stretch;
+  gap:20px;
+  margin:12px 0 64px;
+}
+
+.qy-compare-card {
+  padding:26px 28px 28px;
+  border:1px solid var(--qy-line);
+  border-radius:14px;
+  background:#ffffff06;
+}
+
+.qy-compare-card p {
+  margin-top:14px;
+  font-size:17px;
+  line-height:1.9;
+}
+
+.qy-compare-card ul {
+  list-style:none;
+  margin:18px 0 0;
+  padding:16px 0 0;
+  border-top:1px solid var(--qy-line);
+  display:flex;
+  flex-direction:column;
+  gap:9px;
+  font-size:12px;
+  line-height:1.6;
+}
+
+.qy-compare-card li {
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+}
+
+.qy-compare-card li svg {
+  margin-top:3px;
+}
+
+.qy-compare-before mark {
+  background:#ff6b8a22;
+  color:#ffb3c4;
+  border-bottom:1px dashed #ff8aa5;
+  padding:0 3px;
+}
+
+.qy-compare-before li {
+  color:#ffb3c4;
+}
+
+.qy-compare-after {
+  border-color:#8b5cf64d;
+  background:#8b5cf60f;
+}
+
+.qy-compare-after em {
+  font-style:normal;
+  color:#e3d3ff;
+  border-bottom:1px solid #bd9bff80;
+  padding:0 3px;
+}
+
+.qy-compare-after li {
+  color:#c9f0df;
+}
+
+.qy-compare-arrow {
+  display:flex;
+  align-items:center;
+  color:var(--qy-light);
+}
+
+@media (max-width:900px) {
+  .qy-audience-grid {
+    grid-template-columns:1fr;
+  }
+  .qy-compare {
+    grid-template-columns:1fr;
+  }
+  .qy-compare-arrow {
+    justify-content:center;
+    transform:rotate(90deg);
   }
 }

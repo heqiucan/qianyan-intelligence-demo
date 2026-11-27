@@ -26,12 +26,35 @@ export function createParticleField(canvas: HTMLCanvasElement) {
   canvas.dataset.scene = scene;
   const weights = [1, 0, 0];
   const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
+  const PALETTES = {
+    dark: {
+      star: '#c8afea', blend: 'screen' as GlobalCompositeOperation, hazeA: '#7941b708', hazeB: '#8b5cf610', hazeC: '#8b5cf600',
+      dot: ['#eedbff', '#bd9bff', '#8b5cf6'], glow: ['#f5eaff', '#c9a9ffb0', '#9a65ed28', '#8b5cf600'], glowAlpha: .4,
+    },
+    light: {
+      star: '#6b4bb0', blend: 'source-over' as GlobalCompositeOperation, hazeA: '#8b5cf61c', hazeB: '#a58bea16', hazeC: '#a58bea00',
+      dot: ['#4c2a9c', '#6c43d0', '#8761e0'], glow: ['#6c43d0', '#7a55da70', '#8b6be320', '#8b6be300'], glowAlpha: .3,
+    },
+  };
+  const currentTheme = () => (document.documentElement.dataset.theme === 'light' ? 'light' : 'dark') as keyof typeof PALETTES;
+  let theme = currentTheme();
+  let palette = PALETTES[theme];
   const glow = document.createElement('canvas');
   glow.width = glow.height = 48;
   const glowCtx = glow.getContext('2d')!;
-  const gradient = glowCtx.createRadialGradient(24, 24, 0, 24, 24, 24);
-  gradient.addColorStop(0, '#f5eaff'); gradient.addColorStop(.14, '#c9a9ffb0'); gradient.addColorStop(.42, '#9a65ed28'); gradient.addColorStop(1, '#8b5cf600');
-  glowCtx.fillStyle = gradient; glowCtx.fillRect(0, 0, 48, 48);
+  function paintGlow() {
+    glowCtx.clearRect(0, 0, 48, 48);
+    const gradient = glowCtx.createRadialGradient(24, 24, 0, 24, 24, 24);
+    gradient.addColorStop(0, palette.glow[0]); gradient.addColorStop(.14, palette.glow[1]); gradient.addColorStop(.42, palette.glow[2]); gradient.addColorStop(1, palette.glow[3]);
+    glowCtx.fillStyle = gradient; glowCtx.fillRect(0, 0, 48, 48);
+  }
+  paintGlow();
+  const themeObserver = new MutationObserver(() => {
+    const next = currentTheme();
+    if (next === theme) return;
+    theme = next; palette = PALETTES[next]; paintGlow(); draw();
+  });
+  themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 
   function draw() {
     if (!width || !height || disposed) return;
@@ -44,7 +67,7 @@ export function createParticleField(canvas: HTMLCanvasElement) {
     context.globalCompositeOperation = 'source-over';
     for (const star of stars) {
       context.globalAlpha = .12 + (Math.sin(time * .35 + star.phase) + 1) * .11;
-      context.fillStyle = '#c8afea';
+      context.fillStyle = palette.star;
       context.fillRect(star.x * width, star.y * height, star.size, star.size);
     }
     context.globalAlpha = 1;
@@ -55,9 +78,9 @@ export function createParticleField(canvas: HTMLCanvasElement) {
     const centerY = view * (compact ? .27 : .4) + pointer.y * 10;
     const scale = Math.min(width * (mobile ? .34 : compact ? .3 : .21), view * (compact ? .26 : .31));
     const haze = context.createRadialGradient(centerX, centerY, 0, centerX, centerY, scale * 1.5);
-    haze.addColorStop(0, '#7941b708'); haze.addColorStop(.6, '#8b5cf610'); haze.addColorStop(1, '#8b5cf600');
+    haze.addColorStop(0, palette.hazeA); haze.addColorStop(.6, palette.hazeB); haze.addColorStop(1, palette.hazeC);
     context.fillStyle = haze; context.fillRect(0, 0, width, height);
-    context.globalCompositeOperation = 'screen';
+    context.globalCompositeOperation = palette.blend;
 
     // Closely spaced curves form a translucent ribbon instead of a flat gradient blob.
     const horizon = view * (compact ? .5 : .74);
@@ -101,9 +124,9 @@ export function createParticleField(canvas: HTMLCanvasElement) {
       const py = centerY + projectedY * scale * perspective;
       const size = p.size * perspective * (mobile ? .8 : 1);
       context.globalAlpha = (.19 + p.brightness * .65) * (.78 + depth * .14);
-      context.fillStyle = p.brightness > .8 ? '#eedbff' : p.brightness > .4 ? '#bd9bff' : '#8b5cf6';
+      context.fillStyle = p.brightness > .8 ? palette.dot[0] : p.brightness > .4 ? palette.dot[1] : palette.dot[2];
       context.fillRect(px, py, size, size);
-      if (p.brightness > .982) { context.globalAlpha = .4; context.drawImage(glow, px - 8, py - 8, 16, 16); }
+      if (p.brightness > .982) { context.globalAlpha = palette.glowAlpha; context.drawImage(glow, px - 8, py - 8, 16, 16); }
     }
     context.globalAlpha = 1;
     context.globalCompositeOperation = 'source-over';
@@ -166,7 +189,7 @@ export function createParticleField(canvas: HTMLCanvasElement) {
     },
     setPaused(next: boolean) { paused = next; reconcile(); },
     dispose() {
-      disposed = true; cancelAnimationFrame(frame); resizeObserver.disconnect(); visibility.disconnect();
+      disposed = true; cancelAnimationFrame(frame); themeObserver.disconnect(); resizeObserver.disconnect(); visibility.disconnect();
       surface.removeEventListener('pointermove', move); surface.removeEventListener('pointerleave', leave);
       document.removeEventListener('visibilitychange', reconcile);
       reducedMotion.removeEventListener('change', reconcile);
